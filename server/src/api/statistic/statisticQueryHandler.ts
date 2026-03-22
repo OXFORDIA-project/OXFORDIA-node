@@ -13,7 +13,7 @@ import type { AnyStatisticPlugin, StatisticQuery } from "./StatisticPlugin";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const STATISTIC_ACCESS_RULE_TYPE =
-  "https://fedresda.setmeld.org/statistic-access-rule#StatisticAccessRule";
+  "https://fedresda.setmeld.com/statistic-access-rule#StatisticAccessRule";
 
 function getStatisticAccessRuleUri(resourceUri: string): string {
   if (resourceUri.endsWith(".statistic-access-rule.ttl")) {

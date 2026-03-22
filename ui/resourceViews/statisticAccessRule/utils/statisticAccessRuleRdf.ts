@@ -23,8 +23,8 @@ import {
   type SchemaFieldDefinition,
 } from "./statisticAccessRuleSchemaForm";
 
-const SAR = "https://fedresda.setmeld.org/statistic-access-rule#";
-const STATP = "https://fedresda.setmeld.org/statistics#";
+const SAR = "https://fedresda.setmeld.com/statistic-access-rule#";
+const STATP = "https://fedresda.setmeld.com/statistics#";
 const DATA_SCHEMA_PREDICATE = `${SAR}dataSchema`;
 const HAS_STATISTIC_POLICY_PREDICATE = `${SAR}hasStatisticPolicy`;
 const STATISTIC_NAME_PREDICATE = `${SAR}statisticName`;

@@ -1,4 +1,4 @@
-PREFIX statp: <https://fedresda.setmeld.org/statistics#>
+PREFIX statp: <https://fedresda.setmeld.com/statistics#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 # A statistic access rule that defines whats allowed for mean statistics

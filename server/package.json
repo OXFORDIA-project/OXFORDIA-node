@@ -1,7 +1,7 @@
 {
   "name": "@fedresda/server",
   "version": "0.0.1-alpha.4",
-  "description": "SetMeld Pod: Community Solid Server + Git over SSH (git-shell)",
+  "description": "FedResDa Pod: Community Solid Server for Federated Research Data",
   "main": "./dist/index.js",
   "engines": {
     "node": ">=18.0.0"

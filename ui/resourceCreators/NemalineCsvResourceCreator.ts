@@ -305,7 +305,7 @@ export const NemalineCsvResourceCreator: ResourceCreatorConfig = {
       createUtils.loadingMessage(`Initializing ${statisticAccessRuleSlug}…`);
       const statisticAccessRuleResource = container.child(statisticAccessRuleSlug);
       const initialStatisticAccessRuleContent = [
-        '@prefix sar: <https://fedresda.setmeld.org/statistic-access-rule#> .',
+        '@prefix sar: <https://fedresda.setmeld.com/statistic-access-rule#> .',
         '',
         '<#policy> a sar:StatisticAccessRule ;',
         '  sar:dataSchema "nemaline" .',

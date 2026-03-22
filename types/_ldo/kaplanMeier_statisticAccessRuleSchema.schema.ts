@@ -9,7 +9,7 @@ export const kaplanMeier_statisticAccessRuleSchemaSchema: Schema = {
   type: "Schema",
   shapes: [
     {
-      id: "https://fedresda.setmeld.org/statistics#KaplanMeierStatisticAccessRuleShape",
+      id: "https://fedresda.setmeld.com/statistics#KaplanMeierStatisticAccessRuleShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -18,7 +18,7 @@ export const kaplanMeier_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#cohortPath",
+              predicate: "https://fedresda.setmeld.com/statistics#cohortPath",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -28,7 +28,7 @@ export const kaplanMeier_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#eventPath",
+              predicate: "https://fedresda.setmeld.com/statistics#eventPath",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -38,7 +38,7 @@ export const kaplanMeier_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#timePath",
+              predicate: "https://fedresda.setmeld.com/statistics#timePath",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",

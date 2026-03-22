@@ -9,21 +9,21 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
   type: "Schema",
   shapes: [
     {
-      id: "https://fedresda.setmeld.org/statistics#MeanStatisticAccessRuleShape",
+      id: "https://fedresda.setmeld.com/statistics#MeanStatisticAccessRuleShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
         expression: {
           type: "TripleConstraint",
-          predicate: "https://fedresda.setmeld.org/statistics#allowedPath",
-          valueExpr: "https://fedresda.setmeld.org/statistics#AllowedPathShape",
+          predicate: "https://fedresda.setmeld.com/statistics#allowedPath",
+          valueExpr: "https://fedresda.setmeld.com/statistics#AllowedPathShape",
           min: 1,
           max: -1,
         },
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#AllowedPathShape",
+      id: "https://fedresda.setmeld.com/statistics#AllowedPathShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -32,13 +32,13 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#graphPath",
+              predicate: "https://fedresda.setmeld.com/statistics#graphPath",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphPathShape",
+                "https://fedresda.setmeld.com/statistics#GraphPathShape",
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#minValues",
+              predicate: "https://fedresda.setmeld.com/statistics#minValues",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#integer",
@@ -49,7 +49,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#GraphPathShape",
+      id: "https://fedresda.setmeld.com/statistics#GraphPathShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -58,23 +58,23 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#start",
+              predicate: "https://fedresda.setmeld.com/statistics#start",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphNodeFilterShape",
+                "https://fedresda.setmeld.com/statistics#GraphNodeFilterShape",
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#steps",
+              predicate: "https://fedresda.setmeld.com/statistics#steps",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphTraversalStepShape",
+                "https://fedresda.setmeld.com/statistics#GraphTraversalStepShape",
               min: 0,
               max: -1,
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#target",
+              predicate: "https://fedresda.setmeld.com/statistics#target",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphValueSelectorShape",
+                "https://fedresda.setmeld.com/statistics#GraphValueSelectorShape",
               min: 0,
               max: 1,
             },
@@ -83,7 +83,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#GraphNodeFilterShape",
+      id: "https://fedresda.setmeld.com/statistics#GraphNodeFilterShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -92,7 +92,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#rdfType",
+              predicate: "https://fedresda.setmeld.com/statistics#rdfType",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -102,7 +102,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#iri",
+              predicate: "https://fedresda.setmeld.com/statistics#iri",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -112,7 +112,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#categories",
+              predicate: "https://fedresda.setmeld.com/statistics#categories",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -122,9 +122,9 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#predicates",
+              predicate: "https://fedresda.setmeld.com/statistics#predicates",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphPredicateFilterShape",
+                "https://fedresda.setmeld.com/statistics#GraphPredicateFilterShape",
               min: 0,
               max: -1,
             },
@@ -133,7 +133,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#GraphPredicateFilterShape",
+      id: "https://fedresda.setmeld.com/statistics#GraphPredicateFilterShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -142,7 +142,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#predicate",
+              predicate: "https://fedresda.setmeld.com/statistics#predicate",
               valueExpr: {
                 type: "NodeConstraint",
                 nodeKind: "iri",
@@ -150,7 +150,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#inverse",
+              predicate: "https://fedresda.setmeld.com/statistics#inverse",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#boolean",
@@ -160,25 +160,25 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#some",
+              predicate: "https://fedresda.setmeld.com/statistics#some",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphValueSelectorShape",
+                "https://fedresda.setmeld.com/statistics#GraphValueSelectorShape",
               min: 0,
               max: 1,
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#every",
+              predicate: "https://fedresda.setmeld.com/statistics#every",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphValueSelectorShape",
+                "https://fedresda.setmeld.com/statistics#GraphValueSelectorShape",
               min: 0,
               max: 1,
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#none",
+              predicate: "https://fedresda.setmeld.com/statistics#none",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphValueSelectorShape",
+                "https://fedresda.setmeld.com/statistics#GraphValueSelectorShape",
               min: 0,
               max: 1,
             },
@@ -187,7 +187,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#GraphTraversalStepShape",
+      id: "https://fedresda.setmeld.com/statistics#GraphTraversalStepShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -196,7 +196,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#via",
+              predicate: "https://fedresda.setmeld.com/statistics#via",
               valueExpr: {
                 type: "NodeConstraint",
                 nodeKind: "iri",
@@ -204,7 +204,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#inverse",
+              predicate: "https://fedresda.setmeld.com/statistics#inverse",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#boolean",
@@ -214,9 +214,9 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#where",
+              predicate: "https://fedresda.setmeld.com/statistics#where",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphNodeFilterShape",
+                "https://fedresda.setmeld.com/statistics#GraphNodeFilterShape",
               min: 0,
               max: 1,
             },
@@ -225,7 +225,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#GraphValueSelectorShape",
+      id: "https://fedresda.setmeld.com/statistics#GraphValueSelectorShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -234,22 +234,22 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#node",
+              predicate: "https://fedresda.setmeld.com/statistics#node",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphNodeFilterShape",
+                "https://fedresda.setmeld.com/statistics#GraphNodeFilterShape",
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#literal",
+              predicate: "https://fedresda.setmeld.com/statistics#literal",
               valueExpr:
-                "https://fedresda.setmeld.org/statistics#GraphLiteralFilterShape",
+                "https://fedresda.setmeld.com/statistics#GraphLiteralFilterShape",
             },
           ],
         },
       },
     },
     {
-      id: "https://fedresda.setmeld.org/statistics#GraphLiteralFilterShape",
+      id: "https://fedresda.setmeld.com/statistics#GraphLiteralFilterShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -258,7 +258,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#datatype",
+              predicate: "https://fedresda.setmeld.com/statistics#datatype",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -268,7 +268,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#lang",
+              predicate: "https://fedresda.setmeld.com/statistics#lang",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -278,19 +278,19 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#equals",
+              predicate: "https://fedresda.setmeld.com/statistics#equals",
               min: 0,
               max: 1,
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#oneOf",
+              predicate: "https://fedresda.setmeld.com/statistics#oneOf",
               min: 0,
               max: -1,
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#min",
+              predicate: "https://fedresda.setmeld.com/statistics#min",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#decimal",
@@ -300,7 +300,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://fedresda.setmeld.org/statistics#max",
+              predicate: "https://fedresda.setmeld.com/statistics#max",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#decimal",
