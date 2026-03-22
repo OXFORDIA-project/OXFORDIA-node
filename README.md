@@ -106,7 +106,7 @@ Notes:
 
 ### Access the App
 
-- Open your pod URL (or `http://localhost:3000/.integration/` in local dev).
+- Open your pod URL (or `http://localhost:3000/` in local dev).
 - Sign up and create your pod/account.
 - Set an SSH key in the UI if you need Git-based integration workflows.
 

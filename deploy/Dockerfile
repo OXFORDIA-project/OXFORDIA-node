@@ -11,6 +11,11 @@ COPY ui/ ./ui/
 COPY templates/ ./templates/
 COPY node_modules/ ./node_modules/
 
+# Server config references ../ui/... paths.
+# In this image, process cwd is /app, so ../ui resolves to /ui.
+# Provide /ui -> /app/ui to keep config paths valid.
+RUN ln -s /app/ui /ui
+
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
