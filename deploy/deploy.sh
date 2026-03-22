@@ -27,6 +27,32 @@ ensure_config() {
   fi
 }
 
+sync_config_defaults() {
+  example="./config.env.example"
+  [ -f "$example" ] || return
+  [ -f "$CONFIG_FILE" ] || return
+
+  added=0
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ""|\#*) continue ;;
+    esac
+    key="${line%%=*}"
+    if ! grep -q "^${key}=" "$CONFIG_FILE"; then
+      if [ "$added" -eq 0 ]; then
+        printf '\n# Added during upgrade from config.env.example\n' >> "$CONFIG_FILE"
+      fi
+      printf '%s\n' "$line" >> "$CONFIG_FILE"
+      added=1
+    fi
+  done < "$example"
+
+  if [ "$added" -eq 1 ]; then
+    echo "Updated $CONFIG_FILE with missing defaults from config.env.example"
+    echo "Review newly added keys in $CONFIG_FILE."
+  fi
+}
+
 init_config() {
   if [ -f "./config.env" ]; then
     echo "config.env already exists; no changes made."
@@ -289,6 +315,7 @@ prepare_nginx() {
 
 load_config() {
   ensure_config
+  sync_config_defaults
   # shellcheck disable=SC1090
   . "$CONFIG_FILE"
   validate_common

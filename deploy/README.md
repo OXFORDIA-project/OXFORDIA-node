@@ -55,10 +55,25 @@ All options live in `config.env`. Key switches:
 
 ## Upgrade Flow
 
-1. Back up your existing `config.env`.
-2. Extract the new tarball.
-3. Copy your `config.env` into the new folder and review diffs vs `config.env.example`.
-4. Run `./deploy.sh up`.
+Upgrade in place so your `config.env` stays in the same directory:
+
+```bash
+cd fedresda-node-deploy
+cp config.env config.env.backup
+
+cd ..
+wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
+tar -xzf fedresda-node-deploy-latest.tar.gz --strip-components=1 -C fedresda-node-deploy
+
+cd fedresda-node-deploy
+./deploy.sh up
+```
+
+Notes:
+
+- `./deploy.sh up` auto-adds newly introduced config keys from `config.env.example`.
+- Keep `HOST_DATA_DIR` unchanged to preserve existing pod data.
+- If needed, restore your backup with `cp config.env.backup config.env`, extract a previous release tarball, and run `./deploy.sh up`.
 
 ## Architecture
 

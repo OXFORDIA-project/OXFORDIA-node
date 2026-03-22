@@ -1,138 +1,175 @@
-# SetMeld Pod
+# FedResDa Pod
 
-SetMeld Pod: A Solid Pod with tools for deploying data integrations.
+FedResDa Pod is a Solid Pod deployment for querying FEDerated RESearch DAta.
 
-## Prerequisites
+## For Deployers
 
-### Development
+### What You Need
 
-- Node.js ≥ 18
-- Git
-- OpenSSH (dev: `/us/sbin/sshd` available on macOS & Linux)
+- Docker with Compose plugin (`docker compose`)
+- A hostname and DNS record pointing to the server (for public deployments)
+- Host storage path for persistent data (`HOST_DATA_DIR`)
 
-## Development
+### Production Deploy (Docker Compose Package)
 
-### Monorepo Structure
-
-This repository is now an Nx-powered monorepo with three workspace packages:
-
-- `server` (`@fedresda/server`) - Community Solid Server integration and API layer
-- `ui` (`@fedresda/ui`) - Expo/React UI application
-- `types` (`@fedresda/types`) - Shared LDO/generated schema package consumed by both `server` and `ui`
-
-Top-level tooling (`nx`, workspace install, orchestrated build/dev scripts) lives at the repo root.
-
-### Quick Start
+Download and start from a release artifact:
 
 ```bash
-npm i
+wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
+tar -xzf fedresda-node-deploy-latest.tar.gz
+cd fedresda-node-deploy
+./deploy.sh init
+# edit config.env
+./deploy.sh up
+```
+
+Or build the package from source:
+
+```bash
+npm install
+npm run build
+npm run deploy:package
+```
+
+This creates `build/fedresda-node-deploy-<version>.tar.gz`.
+
+### Required Configuration (`config.env`)
+
+Required keys validated by `deploy.sh`:
+
+- `BASE_URL` (public app URL, for example `https://pod.example.org`)
+- `HOST_DATA_DIR` (persistent host directory)
+- `NODE_HOST_PORT`
+- `TRUST_PROXY`
+- `TRIPLESTORE_MODE` (`bundled` or `external`)
+- `PROXY_MODE` (`nginx`, `external`, or `none`)
+- `TLS_MODE` (`none`, `custom`, or `letsencrypt`)
+
+Mode-specific keys:
+
+- `TRIPLESTORE_MODE=external` -> set `EXTERNAL_TRIPLESTORE_URL`
+- `TLS_MODE=custom` -> set `CUSTOM_CERT_FULLCHAIN` and `CUSTOM_CERT_PRIVKEY`
+- `TLS_MODE=letsencrypt` -> set `SSL_EMAIL`
+
+### Reverse Proxy and `TRUST_PROXY`
+
+Set `TRUST_PROXY` to match your network path so Express correctly uses forwarded headers:
+
+- unset/empty: default behavior (do not trust forwarded headers)
+- `true` or `1`: trust proxy
+- `false` or `0`: explicitly do not trust
+- numeric value: trust that many proxy hops
+
+When proxying (Nginx/F5/etc.), ensure these headers are passed:
+
+- `X-Forwarded-For`
+- `X-Forwarded-Proto`
+
+If `PROXY_MODE=external`, disable bundled Nginx and configure your own proxy similarly.
+
+### Day-2 Operations
+
+```bash
+./deploy.sh status
+./deploy.sh logs
+./deploy.sh restart
+./deploy.sh down
+./deploy.sh renew-certs
+```
+
+`renew-certs` is only valid with `PROXY_MODE=nginx` and `TLS_MODE=letsencrypt`.
+
+### Upgrade an Already-Running Server
+
+Upgrade in place so `config.env` stays where it is:
+
+```bash
+# from the server, while in the existing deploy directory
+cd fedresda-node-deploy
+cp config.env config.env.backup
+
+cd ..
+wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
+tar -xzf fedresda-node-deploy-latest.tar.gz --strip-components=1 -C fedresda-node-deploy
+
+cd fedresda-node-deploy
+./deploy.sh up
+```
+
+Notes:
+
+- `deploy.sh up` now auto-adds any missing config keys from `config.env.example` during upgrades.
+- Keep `HOST_DATA_DIR` unchanged so existing pod data remains available.
+- If needed, restore your backup with `cp config.env.backup config.env`, extract a previous release tarball, and run `./deploy.sh up`.
+
+## For Users
+
+### Access the App
+
+- Open your pod URL (or `http://localhost:3000/.integration/` in local dev).
+- Sign up and create your pod/account.
+- Set an SSH key in the UI if you need Git-based integration workflows.
+
+### Dev Data Locations
+
+In local development, data is stored under `data/`, including:
+
+- `data/.internal/integration-git`
+- `data/.internal/integration-code`
+- `data/.internal/integration-meta`
+- `data/.internal/authorized_keys`
+
+Example push target in dev:
+
+```bash
+git remote add origin ssh://git@localhost:2229/my_repo_name.git
+git push -u origin main
+```
+
+## For Maintainers
+
+### Monorepo Layout
+
+- `server` (`@fedresda/server`): Community Solid Server integration and API layer
+- `ui` (`@fedresda/ui`): React/Expo UI app
+- `types` (`@fedresda/types`): shared generated/schema types
+
+### Local Development
+
+```bash
+npm install
 npm run dev
 ```
 
-### Development Usage
+### Common Scripts
 
-After running `npm run dev`, you can:
+- `npm run dev` / `npm run dev:server` / `npm run dev:ui`
+- `npm run build` / `npm run build:types` / `npm run build:server` / `npm run build:ui`
+- `npm run graph`
+- `npm run deploy:package`
+- `npm run version:get`
+- `npm run version:set <version>`
+- `npm run version:bump <major|minor|patch|prerelease>`
 
-- Navigate to http://localhost:3000/.integration/
-- Click "Sign Up" and create an account with the "Pod Name" "admin"
-- Click "Set SSH Key" and paste your ssh key for your personal computer into the modal. (this will allow you to commit to the git repo)
-- For dev, all data is stored in the `./data` folder. Look in the `./data/.internal` for integration data. Specifically:
-  - `./data/.internal/integration-git`: The root file where git repos are committed.
-  - `./data/.internal/integration-code`: The folder integration code is cloned to and run from.
-  - `./data/.internal/integration-meta`: Metadata about each integration
-  - `./data/.internal/authorized_keys`: Lists the ssh key that is allowed to commit to the integration repo.
+### Release Artifacts
 
-3. **Push to the repository**:
-   ```bash
-   git remote add origin ssh://git@localhost:2229/my_repo_name.git
-   git push -u origin main
-   ```
+Pushes to `main` run `.github/workflows/release-deploy-package.yml` and publish:
 
-### Development Scripts
+- `fedresda-node-deploy-latest.tar.gz`
+- `fedresda-node-deploy-<version>.tar.gz`
 
-- `npm run dev` - Start `server` and `ui` via Nx
-- `npm run dev:server` - Run only `@fedresda/server`
-- `npm run dev:ui` - Run only `@fedresda/ui`
-- `npm run build` - Build `types`, `server`, and `ui` via Nx
-- `npm run build:types` - Build only `@fedresda/types`
-- `npm run build:server` - Build only `@fedresda/server`
-- `npm run build:ui` - Build only `@fedresda/ui`
-- `npm run graph` - Open the Nx project graph
-- `npm run deploy:package` — Build and create the Docker Compose deployment tarball (`build/fedresda-node-deploy-*.tar.gz`)
+For a specific release:
 
-### Version Management
+```bash
+wget https://github.com/SetMeld/fedresda-node/releases/download/<tag>/fedresda-node-deploy-<version>.tar.gz
+```
 
-The version is defined in `version.json` and synchronized to `package.json` and config dependency URLs.
+### Deployment Services
 
-- `npm run version:get` — Get current version
-- `npm run version:set <version>` — Set version (e.g. `1.0.0`, `0.2.0-beta.1`)
-- `npm run version:bump <type>` — Bump version (major | minor | patch | prerelease)
-
-## Production Deployment (Docker Compose)
-
-SetMeld Pod is shipped as a **Docker Compose deployment package**: a single `.tar.gz` file that contains the app, compose file, and configuration. No Ansible or system packages required.
-
-1. **Build the package** (from this repo):
-
-   ```bash
-   npm run deploy:package
-   ```
-
-   This produces `build/fedresda-node-deploy-<version>.tar.gz`.
-
-2. **On the target server**: copy the tarball (e.g. via `wget` or SCP), then:
-   ```bash
-   wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
-   tar -xzf fedresda-node-deploy-latest.tar.gz
-   cd fedresda-node-deploy
-   ./deploy.sh init
-   # Edit config.env (triplestore/proxy/tls modes and related options)
-   ./deploy.sh up
-   ```
-
-3. **Automated release on `main`**:
-
-   Pushes to `main` run `.github/workflows/release-deploy-package.yml`, which builds `npm run deploy:package` and publishes release assets:
-
-   - `fedresda-node-deploy-latest.tar.gz` (stable URL for docs/scripts)
-   - `fedresda-node-deploy-<version>.tar.gz` (versioned artifact)
-
-   You can also download a specific version from:
-
-   ```bash
-   wget https://github.com/SetMeld/fedresda-node/releases/download/<tag>/fedresda-node-deploy-<version>.tar.gz
-   ```
-
-Full details, SSL options, and proxy examples are in **[deploy/README.md](./deploy/README.md)**.
-
-## Configuration
-
-### CSS Parameters
-
-The Node app (Community Solid Server) supports:
-
-- **TRUST_PROXY** — Set to `true` when behind a reverse proxy (Nginx, F5) so `X-Forwarded-For` and `X-Forwarded-Proto` are trusted.
-- **TRIPLESTORE_URL** — SPARQL endpoint. Leave unset in the deploy package to use the bundled Blazegraph; set to your own URL to use an existing triplestore.
-- **BASE_URL** — Public base URL of the app (e.g. `https://pod.mycompany.internal`).
-
-All deployment configuration is driven by `config.env` in the deploy package (see `deploy/config.env.example`).
-
-## Architecture
-
-### Services (Docker deployment)
-
-- **node-app** — Community Solid Server (Node.js), port 3000
-- **triplestore** — Optional Blazegraph (profile `bundled-triplestore`)
-- **nginx** — Optional reverse proxy (can be disabled to use your own)
-
-### Development vs Production
-
-| Aspect   | Development | Production (Docker)     |
-| -------- | ----------- | ----------------------- |
-| CSS Port | 3000        | 3000 (in container)     |
-| Git Port | 2229        | Configurable            |
-| Data Dir | `./data`    | `HOST_DATA_DIR` in .env |
-| Proxy    | None        | Nginx or your own       |
+- `node-app` (Community Solid Server)
+- optional `triplestore` (bundled Blazegraph)
+- optional `nginx`
+- `certbot` (invoked by script for Let's Encrypt issue/renew)
 
 ## License
 
