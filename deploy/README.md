@@ -35,6 +35,7 @@ All options live in `config.env`. Key switches:
 - `nginx`: deploy bundled Nginx.
 - `external`: do not run Nginx; use your own reverse proxy.
 - `none`: no proxy; app is exposed directly on `NODE_HOST_PORT`.
+- Upload limit for bundled Nginx is controlled by `NGINX_CLIENT_MAX_BODY_SIZE` (default `1g`).
 
 ### TLS
 

@@ -50,6 +50,7 @@ Mode-specific keys:
 - `TRIPLESTORE_MODE=external` -> set `EXTERNAL_TRIPLESTORE_URL`
 - `TLS_MODE=custom` -> set `CUSTOM_CERT_FULLCHAIN` and `CUSTOM_CERT_PRIVKEY`
 - `TLS_MODE=letsencrypt` -> set `SSL_EMAIL`
+- `PROXY_MODE=nginx` -> optional `NGINX_CLIENT_MAX_BODY_SIZE` (default `1g`, e.g. `2g`)
 
 ### Reverse Proxy and `TRUST_PROXY`
 

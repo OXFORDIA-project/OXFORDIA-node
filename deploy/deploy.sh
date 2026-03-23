@@ -113,6 +113,7 @@ configure_triplestore() {
 configure_proxy() {
   NGINX_PROFILE=""
   NODE_HOST_BIND="0.0.0.0"
+  NGINX_CLIENT_MAX_BODY_SIZE="${NGINX_CLIENT_MAX_BODY_SIZE:-1g}"
   if [ "$PROXY_MODE" = "nginx" ]; then
     NGINX_PROFILE="--profile bundled-nginx"
     NODE_HOST_BIND="127.0.0.1"
@@ -146,6 +147,7 @@ server {
     listen [::]:80 default_server;
     server_name $NGINX_SERVER_NAME;
     server_tokens off;
+    client_max_body_size $NGINX_CLIENT_MAX_BODY_SIZE;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -171,6 +173,7 @@ server {
     listen [::]:80 default_server;
     server_name $NGINX_SERVER_NAME;
     server_tokens off;
+    client_max_body_size $NGINX_CLIENT_MAX_BODY_SIZE;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -186,6 +189,7 @@ server {
     listen [::]:443 ssl default_server;
     server_name $NGINX_SERVER_NAME;
     server_tokens off;
+    client_max_body_size $NGINX_CLIENT_MAX_BODY_SIZE;
 
     ssl_certificate /etc/nginx/runtime-certs/fullchain.pem;
     ssl_certificate_key /etc/nginx/runtime-certs/privkey.pem;
@@ -214,6 +218,7 @@ server {
     listen [::]:80 default_server;
     server_name $NGINX_SERVER_NAME;
     server_tokens off;
+    client_max_body_size $NGINX_CLIENT_MAX_BODY_SIZE;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -229,6 +234,7 @@ server {
     listen [::]:443 ssl default_server;
     server_name $NGINX_SERVER_NAME;
     server_tokens off;
+    client_max_body_size $NGINX_CLIENT_MAX_BODY_SIZE;
 
     ssl_certificate $cert_path;
     ssl_certificate_key $key_path;

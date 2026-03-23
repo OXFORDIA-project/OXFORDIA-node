@@ -1,4 +1,4 @@
-# SetMeld Pod — Compose runtime for deploy.sh
+# FedResDa Pod — Compose runtime for deploy.sh
 # Do not edit manually for normal use; edit config.env and run ./deploy.sh up.
 
 services:
