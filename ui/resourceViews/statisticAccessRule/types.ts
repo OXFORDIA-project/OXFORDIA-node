@@ -1,6 +1,6 @@
 import type { Schema } from "shexj";
 import { set } from "@ldo/ldo";
-import type { GraphPath, GraphTraversalStep } from "@fedresda/types";
+import type { GraphPath, GraphTraversalStep } from "@oxfordia/types";
 
 // Data schema: describes the RDF structure used by a data document.
 export type DataSchemaJsonTripleConstraint = {

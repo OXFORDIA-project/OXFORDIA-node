@@ -16,6 +16,6 @@ export const KaplanMeierStatisticAccessRuleShapeType: ShapeType<KaplanMeierStati
   {
     schema: kaplanMeier_statisticAccessRuleSchemaSchema,
     shape:
-      "https://fedresda.setmeld.com/statistics#KaplanMeierStatisticAccessRuleShape",
+      "https://oxfordia.setmeld.com/statistics#KaplanMeierStatisticAccessRuleShape",
     context: kaplanMeier_statisticAccessRuleSchemaContext,
   };

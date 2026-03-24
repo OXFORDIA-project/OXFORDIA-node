@@ -1,5 +1,5 @@
 import type { IntegrationPodGlobals } from "../../../../globals";
-import type { GraphPath } from "@fedresda/types";
+import type { GraphPath } from "@oxfordia/types";
 import {
   buildGraphPathWhereClause,
   toIriToken,

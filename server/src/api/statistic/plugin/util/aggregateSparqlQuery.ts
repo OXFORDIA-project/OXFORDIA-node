@@ -1,4 +1,4 @@
-import type { GraphPath } from "@fedresda/types";
+import type { GraphPath } from "@oxfordia/types";
 import { parseNumericBindingValue } from "./sparqlBindingParsers";
 import type { IntegrationPodGlobals } from "../../../../globals";
 import { executeStatisticSparqlQuery } from "./statisticSparqlQuery";

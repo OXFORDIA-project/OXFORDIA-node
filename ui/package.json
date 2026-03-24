@@ -1,5 +1,5 @@
 {
-  "name": "@fedresda/ui",
+  "name": "@oxfordia/ui",
   "main": "index.js",
   "version": "0.0.0",
   "engines": {
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.5",
-    "@fedresda/types": "*",
+    "@oxfordia/types": "*",
     "@ldo/ldo": "^1.0.0-alpha.38",
     "@ldo/solid-react": "^1.0.0-alpha.38",
     "expo": "^53.0.9",

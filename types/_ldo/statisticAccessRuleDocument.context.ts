@@ -12,36 +12,36 @@ export const statisticAccessRuleDocumentContext: LdoJsonldContext = {
   },
   StatisticAccessRule: {
     "@id":
-      "https://fedresda.setmeld.com/statistic-access-rule#StatisticAccessRule",
+      "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule",
     "@context": {
       type: {
         "@id": "@type",
         "@isCollection": true,
       },
       dataSchema: {
-        "@id": "https://fedresda.setmeld.com/statistic-access-rule#dataSchema",
+        "@id": "https://oxfordia.setmeld.com/statistic-access-rule#dataSchema",
         "@type": "http://www.w3.org/2001/XMLSchema#string",
       },
       hasStatisticPolicy: {
         "@id":
-          "https://fedresda.setmeld.com/statistic-access-rule#hasStatisticPolicy",
+          "https://oxfordia.setmeld.com/statistic-access-rule#hasStatisticPolicy",
         "@type": "@id",
         "@isCollection": true,
       },
     },
   },
   dataSchema: {
-    "@id": "https://fedresda.setmeld.com/statistic-access-rule#dataSchema",
+    "@id": "https://oxfordia.setmeld.com/statistic-access-rule#dataSchema",
     "@type": "http://www.w3.org/2001/XMLSchema#string",
   },
   hasStatisticPolicy: {
     "@id":
-      "https://fedresda.setmeld.com/statistic-access-rule#hasStatisticPolicy",
+      "https://oxfordia.setmeld.com/statistic-access-rule#hasStatisticPolicy",
     "@type": "@id",
     "@isCollection": true,
   },
   statisticName: {
-    "@id": "https://fedresda.setmeld.com/statistic-access-rule#statisticName",
+    "@id": "https://oxfordia.setmeld.com/statistic-access-rule#statisticName",
     "@type": "http://www.w3.org/2001/XMLSchema#string",
   },
 };

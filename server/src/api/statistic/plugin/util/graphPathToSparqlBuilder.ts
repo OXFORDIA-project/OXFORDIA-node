@@ -4,7 +4,7 @@ import type {
   GraphPath,
   GraphPredicateFilter,
   GraphValueSelector,
-} from "@fedresda/types";
+} from "@oxfordia/types";
 
 type WherePatternAppender<T> = {
   WHERE(strings: TemplateStringsArray, ...values: unknown[]): T;

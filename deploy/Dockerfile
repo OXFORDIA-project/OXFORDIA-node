@@ -1,4 +1,4 @@
-# FedResDa Pod — Node app image. Dependencies are copied in; no npm install at runtime.
+# OXFORDIA Pod — Node app image. Dependencies are copied in; no npm install at runtime.
 FROM node:20-alpine
 
 WORKDIR /app

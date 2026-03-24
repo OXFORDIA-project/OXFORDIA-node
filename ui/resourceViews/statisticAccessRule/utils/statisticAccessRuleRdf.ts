@@ -7,7 +7,7 @@ import type {
   GraphPredicateFilter,
   GraphTraversalStep,
   GraphValueSelector,
-} from "@fedresda/types";
+} from "@oxfordia/types";
 import type {
   StatisticPolicy,
   StatisticAccessRuleLoadResult,
@@ -23,8 +23,8 @@ import {
   type SchemaFieldDefinition,
 } from "./statisticAccessRuleSchemaForm";
 
-const SAR = "https://fedresda.setmeld.com/statistic-access-rule#";
-const STATP = "https://fedresda.setmeld.com/statistics#";
+const SAR = "https://oxfordia.setmeld.com/statistic-access-rule#";
+const STATP = "https://oxfordia.setmeld.com/statistics#";
 const DATA_SCHEMA_PREDICATE = `${SAR}dataSchema`;
 const HAS_STATISTIC_POLICY_PREDICATE = `${SAR}hasStatisticPolicy`;
 const STATISTIC_NAME_PREDICATE = `${SAR}statisticName`;

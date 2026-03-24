@@ -1,6 +1,6 @@
 import { jsonld2graphobject } from "jsonld2graphobject";
 import type { ContextDefinition, JsonLdDocument, NodeObject } from "jsonld";
-import type { GraphNodeFilter, GraphPath } from "@fedresda/types";
+import type { GraphNodeFilter, GraphPath } from "@oxfordia/types";
 import type { DataSchemaJsonView } from "../types";
 
 type TripleConstraint = {

@@ -15,8 +15,8 @@ import { useResource, useMatchSubject, useSolidAuth } from '@ldo/solid-react';
 import { getDataset } from '@ldo/ldo';
 import { namedNode } from '@ldo/rdf-utils';
 import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-react-native';
-import { PersonShapeType } from '@fedresda/types';
-import type { Person } from '@fedresda/types';
+import { PersonShapeType } from '@oxfordia/types';
+import type { Person } from '@oxfordia/types';
 import { MeanQueryTester } from './MeanQueryTester';
 
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';

@@ -7,17 +7,17 @@ import { LdoJsonldContext } from "@ldo/ldo";
  */
 export const kaplanMeier_statisticAccessRuleSchemaContext: LdoJsonldContext = {
   cohortPath: {
-    "@id": "https://fedresda.setmeld.com/statistics#cohortPath",
+    "@id": "https://oxfordia.setmeld.com/statistics#cohortPath",
     "@type": "http://www.w3.org/2001/XMLSchema#string",
     "@isCollection": true,
   },
   eventPath: {
-    "@id": "https://fedresda.setmeld.com/statistics#eventPath",
+    "@id": "https://oxfordia.setmeld.com/statistics#eventPath",
     "@type": "http://www.w3.org/2001/XMLSchema#string",
     "@isCollection": true,
   },
   timePath: {
-    "@id": "https://fedresda.setmeld.com/statistics#timePath",
+    "@id": "https://oxfordia.setmeld.com/statistics#timePath",
     "@type": "http://www.w3.org/2001/XMLSchema#string",
     "@isCollection": true,
   },

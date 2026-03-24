@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Version management script for FedResDa Pod
+# Version management script for OXFORDIA Pod
 # Usage: ./scripts/version.sh [get|set <version>|bump <type>]
 
 VERSION_FILE="version.json"
@@ -27,7 +27,7 @@ set_version() {
         cat > "$VERSION_FILE" << EOF
 {
   "version": "$new_version",
-  "description": "FedResDa Pod version configuration"
+  "description": "OXFORDIA Pod version configuration"
 }
 EOF
     fi

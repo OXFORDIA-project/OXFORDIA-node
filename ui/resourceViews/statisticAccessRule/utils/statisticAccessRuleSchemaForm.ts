@@ -1,5 +1,5 @@
 import type { Schema } from "shexj";
-import type { GraphPath } from "@fedresda/types";
+import type { GraphPath } from "@oxfordia/types";
 import {
   createEmptyGraphPath,
   makeId,

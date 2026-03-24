@@ -1,6 +1,6 @@
-# FedResDa Pod
+# OXFORDIA Pod
 
-FedResDa Pod is a Solid Pod deployment for querying FEDerated RESearch DAta.
+OXFORDIA Pod is a Solid Pod deployment for federated research data.
 
 ## For Deployers
 
@@ -15,9 +15,9 @@ FedResDa Pod is a Solid Pod deployment for querying FEDerated RESearch DAta.
 Download and start from a release artifact:
 
 ```bash
-wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
-tar -xzf fedresda-node-deploy-latest.tar.gz
-cd fedresda-node-deploy
+wget https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-node-deploy-latest.tar.gz
+tar -xzf oxfordia-node-deploy-latest.tar.gz
+cd oxfordia-node-deploy
 ./deploy.sh init
 # edit config.env
 ./deploy.sh up
@@ -31,7 +31,7 @@ npm run build
 npm run deploy:package
 ```
 
-This creates `build/fedresda-node-deploy-<version>.tar.gz`.
+This creates `build/oxfordia-node-deploy-<version>.tar.gz`.
 
 ### Required Configuration (`config.env`)
 
@@ -86,14 +86,14 @@ Upgrade in place so `config.env` stays where it is:
 
 ```bash
 # from the server, while in the existing deploy directory
-cd fedresda-node-deploy
+cd oxfordia-node-deploy
 cp config.env config.env.backup
 
 cd ..
-wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
-tar -xzf fedresda-node-deploy-latest.tar.gz --strip-components=1 -C fedresda-node-deploy
+wget https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-node-deploy-latest.tar.gz
+tar -xzf oxfordia-node-deploy-latest.tar.gz --strip-components=1 -C oxfordia-node-deploy
 
-cd fedresda-node-deploy
+cd oxfordia-node-deploy
 ./deploy.sh up
 ```
 
@@ -131,9 +131,9 @@ git push -u origin main
 
 ### Monorepo Layout
 
-- `server` (`@fedresda/server`): Community Solid Server integration and API layer
-- `ui` (`@fedresda/ui`): React/Expo UI app
-- `types` (`@fedresda/types`): shared generated/schema types
+- `server` (`@oxfordia/server`): Community Solid Server integration and API layer
+- `ui` (`@oxfordia/ui`): React/Expo UI app
+- `types` (`@oxfordia/types`): shared generated/schema types
 
 ### Local Development
 
@@ -156,13 +156,13 @@ npm run dev
 
 Pushes to `main` run `.github/workflows/release-deploy-package.yml` and publish:
 
-- `fedresda-node-deploy-latest.tar.gz`
-- `fedresda-node-deploy-<version>.tar.gz`
+- `oxfordia-node-deploy-latest.tar.gz`
+- `oxfordia-node-deploy-<version>.tar.gz`
 
 For a specific release:
 
 ```bash
-wget https://github.com/SetMeld/fedresda-node/releases/download/<tag>/fedresda-node-deploy-<version>.tar.gz
+wget https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-node-deploy-<version>.tar.gz
 ```
 
 ### Deployment Services

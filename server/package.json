@@ -1,7 +1,7 @@
 {
-  "name": "@fedresda/server",
+  "name": "@oxfordia/server",
   "version": "0.0.1-alpha.4",
-  "description": "FedResDa Pod: Community Solid Server for Federated Research Data",
+  "description": "OXFORDIA Pod: Community Solid Server for Federated Research Data",
   "main": "./dist/index.js",
   "engines": {
     "node": ">=18.0.0"
@@ -16,15 +16,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SetMeld/fedresda-node.git"
+    "url": "git+https://github.com/OXFORDIA-project/OXFORDIA-node.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SetMeld/fedresda-node/issues"
+    "url": "https://github.com/OXFORDIA-project/OXFORDIA-node/issues"
   },
-  "homepage": "https://github.com/SetMeld/fedresda-node#readme",
+  "homepage": "https://github.com/OXFORDIA-project/OXFORDIA-node#readme",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.4",
     "@types/express": "^5.0.1",
@@ -42,7 +42,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@fedresda/types": "*",
+    "@oxfordia/types": "*",
     "@ldo/connected-solid": "^1.0.0-alpha.28",
     "@solid/access-token-verifier": "^2.1.0",
     "@solid/community-server": "^8.0.0-alpha.0",
@@ -61,11 +61,11 @@
   "lsd:module": "https://linkedsoftwaredependencies.org/bundles/npm/",
   "lsd:components": "dist/components/components.jsonld",
   "lsd:contexts": {
-    "https://linkedsoftwaredependencies.org/bundles/npm/@fedresda/server/^0.0.0/components/context.jsonld": "dist/components/context.jsonld"
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/server/^0.0.0/components/context.jsonld": "dist/components/context.jsonld"
   },
   "lsd:importPaths": {
-    "https://linkedsoftwaredependencies.org/bundles/npm/@fedresda/server/^0.0.0/components/": "dist/components/",
-    "https://linkedsoftwaredependencies.org/bundles/npm/@fedresda/server/^0.0.0/config/": "config/",
-    "https://linkedsoftwaredependencies.org/bundles/npm/@fedresda/server/^0.0.0/dist/": "dist/"
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/server/^0.0.0/components/": "dist/components/",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/server/^0.0.0/config/": "config/",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/server/^0.0.0/dist/": "dist/"
   }
 }

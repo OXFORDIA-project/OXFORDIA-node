@@ -2,7 +2,7 @@ import type { Schema } from "shexj";
 import {
   mean_statisticAccessRuleSchemaSchema,
   kaplanMeier_statisticAccessRuleSchemaSchema,
-} from "@fedresda/types";
+} from "@oxfordia/types";
 
 export type StatisticPluginDefinition = {
   name: string;

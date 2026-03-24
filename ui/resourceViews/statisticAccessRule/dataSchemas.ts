@@ -1,5 +1,5 @@
 import type { Schema } from "shexj";
-import { nemaline_dataSchemaSchema } from "@fedresda/types";
+import { nemaline_dataSchemaSchema } from "@oxfordia/types";
 import type {
   DataSchemaJsonTripleConstraint,
   DataSchemaJsonShape,

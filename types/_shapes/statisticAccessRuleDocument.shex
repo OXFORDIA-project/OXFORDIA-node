@@ -1,4 +1,4 @@
-PREFIX sar: <https://fedresda.setmeld.com/statistic-access-rule#>
+PREFIX sar: <https://oxfordia.setmeld.com/statistic-access-rule#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 # Represents the statistic access rule document as initialized by

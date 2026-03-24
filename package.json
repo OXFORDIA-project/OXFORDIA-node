@@ -1,7 +1,7 @@
 {
-  "name": "fedresda-monorepo",
+  "name": "oxfordia-monorepo",
   "version": "0.0.1-alpha.4",
-  "description": "Fedresda Nx monorepo",
+  "description": "OXFORDIA Nx monorepo",
   "private": true,
   "engines": {
     "node": ">=18.0.0"
@@ -30,15 +30,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SetMeld/fedresda-node.git"
+    "url": "git+https://github.com/OXFORDIA-project/OXFORDIA-node.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SetMeld/fedresda-node/issues"
+    "url": "https://github.com/OXFORDIA-project/OXFORDIA-node/issues"
   },
-  "homepage": "https://github.com/SetMeld/fedresda-node#readme",
+  "homepage": "https://github.com/OXFORDIA-project/OXFORDIA-node#readme",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.4",
     "@types/express": "^5.0.1",
@@ -58,7 +58,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@fedresda/types": "*",
+    "@oxfordia/types": "*",
     "@ldo/ldo": "^1.0.0-alpha.46",
     "@ldo/connected-solid": "^1.0.0-alpha.46",
     "@solid/access-token-verifier": "^2.1.0",

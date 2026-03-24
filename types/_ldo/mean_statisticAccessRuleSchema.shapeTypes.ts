@@ -25,7 +25,7 @@ export const MeanStatisticAccessRuleShapeType: ShapeType<MeanStatisticAccessRule
   {
     schema: mean_statisticAccessRuleSchemaSchema,
     shape:
-      "https://fedresda.setmeld.com/statistics#MeanStatisticAccessRuleShape",
+      "https://oxfordia.setmeld.com/statistics#MeanStatisticAccessRuleShape",
     context: mean_statisticAccessRuleSchemaContext,
   };
 
@@ -34,7 +34,7 @@ export const MeanStatisticAccessRuleShapeType: ShapeType<MeanStatisticAccessRule
  */
 export const AllowedPathShapeType: ShapeType<AllowedPath> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#AllowedPathShape",
+  shape: "https://oxfordia.setmeld.com/statistics#AllowedPathShape",
   context: mean_statisticAccessRuleSchemaContext,
 };
 
@@ -43,7 +43,7 @@ export const AllowedPathShapeType: ShapeType<AllowedPath> = {
  */
 export const GraphPathShapeType: ShapeType<GraphPath> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#GraphPathShape",
+  shape: "https://oxfordia.setmeld.com/statistics#GraphPathShape",
   context: mean_statisticAccessRuleSchemaContext,
 };
 
@@ -52,7 +52,7 @@ export const GraphPathShapeType: ShapeType<GraphPath> = {
  */
 export const GraphNodeFilterShapeType: ShapeType<GraphNodeFilter> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#GraphNodeFilterShape",
+  shape: "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",
   context: mean_statisticAccessRuleSchemaContext,
 };
 
@@ -61,7 +61,7 @@ export const GraphNodeFilterShapeType: ShapeType<GraphNodeFilter> = {
  */
 export const GraphPredicateFilterShapeType: ShapeType<GraphPredicateFilter> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#GraphPredicateFilterShape",
+  shape: "https://oxfordia.setmeld.com/statistics#GraphPredicateFilterShape",
   context: mean_statisticAccessRuleSchemaContext,
 };
 
@@ -70,7 +70,7 @@ export const GraphPredicateFilterShapeType: ShapeType<GraphPredicateFilter> = {
  */
 export const GraphTraversalStepShapeType: ShapeType<GraphTraversalStep> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#GraphTraversalStepShape",
+  shape: "https://oxfordia.setmeld.com/statistics#GraphTraversalStepShape",
   context: mean_statisticAccessRuleSchemaContext,
 };
 
@@ -79,7 +79,7 @@ export const GraphTraversalStepShapeType: ShapeType<GraphTraversalStep> = {
  */
 export const GraphValueSelectorShapeType: ShapeType<GraphValueSelector> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#GraphValueSelectorShape",
+  shape: "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
   context: mean_statisticAccessRuleSchemaContext,
 };
 
@@ -88,6 +88,6 @@ export const GraphValueSelectorShapeType: ShapeType<GraphValueSelector> = {
  */
 export const GraphLiteralFilterShapeType: ShapeType<GraphLiteralFilter> = {
   schema: mean_statisticAccessRuleSchemaSchema,
-  shape: "https://fedresda.setmeld.com/statistics#GraphLiteralFilterShape",
+  shape: "https://oxfordia.setmeld.com/statistics#GraphLiteralFilterShape",
   context: mean_statisticAccessRuleSchemaContext,
 };

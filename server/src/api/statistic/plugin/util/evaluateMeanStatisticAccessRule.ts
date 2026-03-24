@@ -6,7 +6,7 @@ import type {
   GraphTraversalStep,
   GraphValueSelector,
   MeanStatisticAccessRule,
-} from "@fedresda/types";
+} from "@oxfordia/types";
 
 type IriObject = { "@id": string };
 type ScalarLiteral = string | number | boolean;
@@ -51,7 +51,7 @@ type ComparableLiteralFilter = {
   max?: number;
 };
 
-const STATP_PREFIX = "https://fedresda.setmeld.com/statistics#";
+const STATP_PREFIX = "https://oxfordia.setmeld.com/statistics#";
 const STATP_START_KEY = `${STATP_PREFIX}start`;
 const STATP_STEPS_KEY = `${STATP_PREFIX}steps`;
 const STATP_TARGET_KEY = `${STATP_PREFIX}target`;
@@ -66,8 +66,8 @@ const STATP_NONE_KEY = `${STATP_PREFIX}none`;
 const STATP_VIA_KEY = `${STATP_PREFIX}via`;
 const STATP_WHERE_KEY = `${STATP_PREFIX}where`;
 const STATP_INVERSE_KEY = `${STATP_PREFIX}inverse`;
-const STATP_NODE_KEY = "https://fedresda.setmeld.com/statistics#node";
-const STATP_LITERAL_KEY = "https://fedresda.setmeld.com/statistics#literal";
+const STATP_NODE_KEY = "https://oxfordia.setmeld.com/statistics#node";
+const STATP_LITERAL_KEY = "https://oxfordia.setmeld.com/statistics#literal";
 const STATP_DATATYPE_KEY = `${STATP_PREFIX}datatype`;
 const STATP_LANG_KEY = `${STATP_PREFIX}lang`;
 const STATP_EQUALS_KEY = `${STATP_PREFIX}equals`;

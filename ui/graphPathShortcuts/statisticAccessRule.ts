@@ -1,5 +1,5 @@
 import { getGraphPathShortcutsForDataSchema } from "./registry";
-import type { GraphNodeFilter, GraphPath } from "@fedresda/types";
+import type { GraphNodeFilter, GraphPath } from "@oxfordia/types";
 import type { GraphPathShortcut } from "./types";
 
 type IriObject = { "@id": string };

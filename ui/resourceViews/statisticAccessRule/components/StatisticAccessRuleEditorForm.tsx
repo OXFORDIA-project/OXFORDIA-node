@@ -10,7 +10,7 @@ import {
   Text,
 } from "linked-data-browser";
 import { Trash2 } from "lucide-react-native";
-import type { GraphPath } from "@fedresda/types";
+import type { GraphPath } from "@oxfordia/types";
 import type {
   StatisticPolicy,
   StatisticAccessRuleObjectValue,

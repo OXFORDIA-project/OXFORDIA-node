@@ -24,7 +24,7 @@ export const HomeView: FunctionComponent = () => {
       <View style={styles.content}>
         {/* Large Title */}
         <Text style={styles.title}>
-          FedResDa
+          OXFORDIA
         </Text>
         <Text>
           Federated Research Data

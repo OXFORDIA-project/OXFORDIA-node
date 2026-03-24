@@ -1,4 +1,4 @@
-import type { GraphPath } from "@fedresda/types";
+import type { GraphPath } from "@oxfordia/types";
 
 export type GraphPathShortcutMap = Record<string, GraphPath>;
 

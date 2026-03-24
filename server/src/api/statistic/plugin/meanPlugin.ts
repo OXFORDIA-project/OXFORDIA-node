@@ -3,9 +3,9 @@ import {
   MeanStatisticAccessRule,
   MeanStatisticAccessRuleShapeType,
   mean_statisticAccessRuleSchemaSchema,
-} from "@fedresda/types";
-import type { GraphPath } from "@fedresda/types";
-import { graphPathSchema } from "@fedresda/types/graphPath";
+} from "@oxfordia/types";
+import type { GraphPath } from "@oxfordia/types";
+import { graphPathSchema } from "@oxfordia/types/graphPath";
 import { executeNumericAggregateQuery } from "./util/aggregateSparqlQuery";
 import { evaluateMeanStatisticAccessRule } from "./util/evaluateMeanStatisticAccessRule";
 import type { JSONSchema4 } from "json-schema";

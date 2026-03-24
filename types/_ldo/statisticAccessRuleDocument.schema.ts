@@ -9,7 +9,7 @@ export const statisticAccessRuleDocumentSchema: Schema = {
   type: "Schema",
   shapes: [
     {
-      id: "https://fedresda.setmeld.com/statistic-access-rule#StatisticAccessRuleDocumentShape",
+      id: "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRuleDocumentShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
@@ -22,14 +22,14 @@ export const statisticAccessRuleDocumentSchema: Schema = {
               valueExpr: {
                 type: "NodeConstraint",
                 values: [
-                  "https://fedresda.setmeld.com/statistic-access-rule#StatisticAccessRule",
+                  "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule",
                 ],
               },
             },
             {
               type: "TripleConstraint",
               predicate:
-                "https://fedresda.setmeld.com/statistic-access-rule#dataSchema",
+                "https://oxfordia.setmeld.com/statistic-access-rule#dataSchema",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
@@ -38,9 +38,9 @@ export const statisticAccessRuleDocumentSchema: Schema = {
             {
               type: "TripleConstraint",
               predicate:
-                "https://fedresda.setmeld.com/statistic-access-rule#hasStatisticPolicy",
+                "https://oxfordia.setmeld.com/statistic-access-rule#hasStatisticPolicy",
               valueExpr:
-                "https://fedresda.setmeld.com/statistic-access-rule#StatisticPolicyShape",
+                "https://oxfordia.setmeld.com/statistic-access-rule#StatisticPolicyShape",
               min: 0,
               max: -1,
             },
@@ -49,14 +49,14 @@ export const statisticAccessRuleDocumentSchema: Schema = {
       },
     },
     {
-      id: "https://fedresda.setmeld.com/statistic-access-rule#StatisticPolicyShape",
+      id: "https://oxfordia.setmeld.com/statistic-access-rule#StatisticPolicyShape",
       type: "ShapeDecl",
       shapeExpr: {
         type: "Shape",
         expression: {
           type: "TripleConstraint",
           predicate:
-            "https://fedresda.setmeld.com/statistic-access-rule#statisticName",
+            "https://oxfordia.setmeld.com/statistic-access-rule#statisticName",
           valueExpr: {
             type: "NodeConstraint",
             datatype: "http://www.w3.org/2001/XMLSchema#string",

@@ -1,10 +1,10 @@
 # Scripts Directory
 
-Scripts used by the SetMeld Pod project.
+Scripts used by the OXFORDIA Pod project.
 
 ## Scripts
 
-- **`create-deploy-package.js`** — Builds the Docker Compose deployment tarball. Run `npm run deploy:package` (which runs `npm run build` then this script). Produces `build/fedresda-node-deploy-<version>.tar.gz`.
+- **`create-deploy-package.js`** — Builds the Docker Compose deployment tarball. Run `npm run deploy:package` (which runs `npm run build` then this script). Produces `build/oxfordia-node-deploy-<version>.tar.gz`.
 - **`version.sh`** — Version management: get/set/bump version in `version.json` and `package.json`, and sync dependency URLs in config.
 
 ## Usage

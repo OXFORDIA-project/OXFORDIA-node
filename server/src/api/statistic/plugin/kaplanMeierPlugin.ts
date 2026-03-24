@@ -4,8 +4,8 @@ import {
   KaplanMeierStatisticAccessRule,
   KaplanMeierStatisticAccessRuleShapeType,
   kaplanMeier_statisticAccessRuleSchemaSchema,
-} from "@fedresda/types";
-import { graphPathSchema } from "@fedresda/types/graphPath";
+} from "@oxfordia/types";
+import { graphPathSchema } from "@oxfordia/types/graphPath";
 import { executeStatisticSparqlQuery } from "./util/statisticSparqlQuery";
 import { parseNumericBindingValue } from "./util/sparqlBindingParsers";
 import type { JSONSchema4 } from "json-schema";

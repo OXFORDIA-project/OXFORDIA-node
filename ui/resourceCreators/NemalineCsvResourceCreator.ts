@@ -7,7 +7,7 @@ import type {
 } from '@ldo/connected';
 import { Stethoscope } from 'lucide-react-native';
 import { ResourceCreatorConfig } from 'linked-data-browser';
-import { PersonShapeType } from '@fedresda/types';
+import { PersonShapeType } from '@oxfordia/types';
 import type {
   Person,
   MFMAssessmentEvent,
@@ -21,7 +21,7 @@ import type {
   TotalMFMMagnitude,
   TimeFromBaselineMagnitude,
   MFMScoreMagnitude,
-} from '@fedresda/types';
+} from '@oxfordia/types';
 
 /** Container with context exposed so we can get the dataset for createData/commitToRemote. */
 type ContainerWithContext = SolidContainer & {
@@ -305,7 +305,7 @@ export const NemalineCsvResourceCreator: ResourceCreatorConfig = {
       createUtils.loadingMessage(`Initializing ${statisticAccessRuleSlug}…`);
       const statisticAccessRuleResource = container.child(statisticAccessRuleSlug);
       const initialStatisticAccessRuleContent = [
-        '@prefix sar: <https://fedresda.setmeld.com/statistic-access-rule#> .',
+        '@prefix sar: <https://oxfordia.setmeld.com/statistic-access-rule#> .',
         '',
         '<#policy> a sar:StatisticAccessRule ;',
         '  sar:dataSchema "nemaline" .',

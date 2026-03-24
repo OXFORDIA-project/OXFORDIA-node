@@ -9,7 +9,7 @@ import {
   Text,
 } from 'linked-data-browser';
 import { useSolidAuth } from '@ldo/solid-react';
-import type { GraphPath } from '@fedresda/types';
+import type { GraphPath } from '@oxfordia/types';
 import {
   findGraphPathShortcutByName,
   getGraphPathShortcutsForDataSchema,

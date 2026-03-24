@@ -32,10 +32,10 @@ jobs:
         id: assets
         run: |
           set -euo pipefail
-          asset_path="$(ls -1 build/fedresda-node-deploy-*.tar.gz | head -n 1)"
-          cp "$asset_path" build/fedresda-node-deploy-latest.tar.gz
+          asset_path="$(ls -1 build/oxfordia-node-deploy-*.tar.gz | head -n 1)"
+          cp "$asset_path" build/oxfordia-node-deploy-latest.tar.gz
           echo "versioned_asset=$asset_path" >> "$GITHUB_OUTPUT"
-          echo "latest_asset=build/fedresda-node-deploy-latest.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "latest_asset=build/oxfordia-node-deploy-latest.tar.gz" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2

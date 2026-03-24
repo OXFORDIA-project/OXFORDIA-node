@@ -3,7 +3,7 @@
  * Creates the Docker Compose deployment package (tar.gz) from the built project.
  * Run from repo root after `npm run build`. No network calls.
  *
- * Output: build/fedresda-node-deploy-<version>.tar.gz
+ * Output: build/oxfordia-node-deploy-<version>.tar.gz
  */
 
 const fs = require("fs");
@@ -24,9 +24,9 @@ const version =
       return "0.0.0";
     }
   })();
-const outName = `fedresda-node-deploy-${version}.tar.gz`;
+const outName = `oxfordia-node-deploy-${version}.tar.gz`;
 const outPath = path.join(repoRoot, "build", outName);
-const tarTopDir = "fedresda-node-deploy";
+const tarTopDir = "oxfordia-node-deploy";
 
 const entries = [
   {

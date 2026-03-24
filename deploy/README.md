@@ -1,4 +1,4 @@
-# FedResDa Pod Deployment
+# OXFORDIA Pod Deployment
 
 This deployment package is designed for a simple workflow:
 
@@ -10,8 +10,8 @@ No manual Docker profile selection, no chmod steps, and no in-container Nginx te
 ## Quick Start
 
 ```bash
-tar -xzf fedresda-node-deploy-*.tar.gz
-cd fedresda-node-deploy
+tar -xzf oxfordia-node-deploy-*.tar.gz
+cd oxfordia-node-deploy
 ./deploy.sh init
 # edit config.env
 ./deploy.sh up
@@ -59,14 +59,14 @@ All options live in `config.env`. Key switches:
 Upgrade in place so your `config.env` stays in the same directory:
 
 ```bash
-cd fedresda-node-deploy
+cd oxfordia-node-deploy
 cp config.env config.env.backup
 
 cd ..
-wget https://github.com/SetMeld/fedresda-node/releases/latest/download/fedresda-node-deploy-latest.tar.gz
-tar -xzf fedresda-node-deploy-latest.tar.gz --strip-components=1 -C fedresda-node-deploy
+wget https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-node-deploy-latest.tar.gz
+tar -xzf oxfordia-node-deploy-latest.tar.gz --strip-components=1 -C oxfordia-node-deploy
 
-cd fedresda-node-deploy
+cd oxfordia-node-deploy
 ./deploy.sh up
 ```
 

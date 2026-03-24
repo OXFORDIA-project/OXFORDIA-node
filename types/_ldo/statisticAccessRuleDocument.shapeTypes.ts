@@ -19,7 +19,7 @@ export const StatisticAccessRuleDocumentShapeType: ShapeType<StatisticAccessRule
   {
     schema: statisticAccessRuleDocumentSchema,
     shape:
-      "https://fedresda.setmeld.com/statistic-access-rule#StatisticAccessRuleDocumentShape",
+      "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRuleDocumentShape",
     context: statisticAccessRuleDocumentContext,
   };
 
@@ -29,6 +29,6 @@ export const StatisticAccessRuleDocumentShapeType: ShapeType<StatisticAccessRule
 export const StatisticPolicyShapeType: ShapeType<StatisticPolicy> = {
   schema: statisticAccessRuleDocumentSchema,
   shape:
-    "https://fedresda.setmeld.com/statistic-access-rule#StatisticPolicyShape",
+    "https://oxfordia.setmeld.com/statistic-access-rule#StatisticPolicyShape",
   context: statisticAccessRuleDocumentContext,
 };

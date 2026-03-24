@@ -1,4 +1,4 @@
-PREFIX statp: <https://fedresda.setmeld.com/statistics#>
+PREFIX statp: <https://oxfordia.setmeld.com/statistics#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 statp:KaplanMeierStatisticAccessRuleShape {
