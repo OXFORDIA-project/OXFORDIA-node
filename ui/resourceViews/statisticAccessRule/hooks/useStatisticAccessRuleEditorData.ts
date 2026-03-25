@@ -21,7 +21,7 @@ import {
 } from "../utils/graphPathOptionResolver";
 import { asJsonDataSchema, findDataSchema } from "../dataSchemas";
 import { getGraphPathShortcutsForDataSchema } from "../../../graphPathShortcuts";
-import { getStatisticAccessRuleSchemasByStatisticPlugin } from "../../../plugin/StatisticUiPlugin";
+import { getStatisticAccessRuleSchemasByStatisticPlugin } from "../../../plugin";
 import { createDefaultStatisticPolicy } from "../utils/statisticAccessRuleSchemaForm";
 
 function createSnapshot(

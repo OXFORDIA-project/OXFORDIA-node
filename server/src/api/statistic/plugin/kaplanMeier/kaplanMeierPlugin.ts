@@ -1,4 +1,4 @@
-import type { StatisticPlugin } from "../../StatisticPlugin";
+import type { StatisticApiPlugin } from "../../StatisticPlugin";
 import {
   GraphPath,
   KaplanMeierStatisticAccessRule,
@@ -107,7 +107,7 @@ function computeKaplanMeierCurve(
   return points;
 }
 
-export const kaplanMeierPlugin: StatisticPlugin<
+export const kaplanMeierPlugin: StatisticApiPlugin<
   KaplanMeierQuery,
   KaplanMeierOutput,
   KaplanMeierStatisticAccessRule

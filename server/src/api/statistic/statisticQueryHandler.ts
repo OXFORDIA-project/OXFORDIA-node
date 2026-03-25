@@ -9,7 +9,7 @@ import { readableToQuads } from "@solid/community-server";
 import type { IntegrationPodGlobals } from "../../globals";
 import { HttpError } from "../HttpError";
 import { findStatisticPlugin } from "./plugin";
-import type { AnyStatisticPlugin, StatisticQuery } from "./StatisticPlugin";
+import type { AnyStatisticApiPlugin, StatisticQuery } from "./StatisticPlugin";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const STATISTIC_ACCESS_RULE_TYPE =
@@ -26,7 +26,7 @@ function getStatisticAccessRuleUri(resourceUri: string): string {
 }
 
 function validatePluginQuery(
-  plugin: AnyStatisticPlugin,
+  plugin: AnyStatisticApiPlugin,
   query: unknown,
 ): StatisticQuery {
   const validationResult = validate(query as object, plugin.querySchema);

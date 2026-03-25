@@ -1,4 +1,4 @@
-import type { StatisticPlugin } from "../../StatisticPlugin";
+import type { StatisticApiPlugin } from "../../StatisticPlugin";
 import {
   MeanStatisticAccessRule,
   MeanStatisticAccessRuleShapeType,
@@ -39,7 +39,7 @@ const meanQuerySchema: JSONSchema4 = {
   },
 };
 
-export const meanPlugin: StatisticPlugin<
+export const meanPlugin: StatisticApiPlugin<
   MeanQuery,
   MeanOutput,
   MeanStatisticAccessRule
