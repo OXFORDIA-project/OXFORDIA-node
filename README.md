@@ -1,6 +1,6 @@
 # OXFORDIA Pod
 
-OXFORDIA Pod is a Solid Pod deployment for federated research data.
+OXFORDIA (OXford Federation for Orchestrating Remote Data & International Analytics) Pod is a Solid Pod deployment for federated research data.
 
 ## For Deployers
 
