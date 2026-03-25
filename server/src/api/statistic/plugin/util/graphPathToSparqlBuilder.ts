@@ -5,13 +5,17 @@ import type {
   GraphPredicateFilter,
   GraphValueSelector,
 } from "@oxfordia/types";
+import {
+  type IriObject,
+  type ScalarLiteral,
+  toCollectionArray,
+  getIriValue,
+  isScalarLiteral,
+} from "./ldoHelpers";
 
 type WherePatternAppender<T> = {
   WHERE(strings: TemplateStringsArray, ...values: unknown[]): T;
 };
-
-type IriObject = { "@id": string };
-type ScalarLiteral = string | number | boolean;
 
 type GraphPathSparqlBuildResult = {
   startVar: string;
@@ -75,49 +79,15 @@ function appendPattern<T extends WherePatternAppender<T>>(
   return query.WHERE(toTemplateStringsArray(pattern));
 }
 
-function toCollectionArray<T>(value: T | T[] | Iterable<T> | undefined): T[] {
-  if (value === undefined || value === null) return [];
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string") {
-    return [value as T];
-  }
-  if (typeof value === "object" && Symbol.iterator in (value as object)) {
-    return Array.from(value as Iterable<T>);
-  }
-  return [value as T];
-}
-
-function isIriObject(value: unknown): value is IriObject {
-  if (!value || typeof value !== "object") return false;
-  const maybe = value as Record<string, unknown>;
-  return typeof maybe["@id"] === "string";
-}
-
-function toIriString(
-  value: string | IriObject | undefined,
-): string | undefined {
-  if (typeof value === "string") return value;
-  if (isIriObject(value)) return value["@id"];
-  return undefined;
-}
-
 function getRequiredIri(
   value: string | IriObject | undefined,
   fieldName: string,
 ): string {
-  const iri = toIriString(value);
+  const iri = getIriValue(value);
   if (!iri) {
     throw new Error(`Expected IRI value for ${fieldName} in graph path.`);
   }
   return iri;
-}
-
-function isScalarLiteral(value: unknown): value is ScalarLiteral {
-  return (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  );
 }
 
 export function toIriToken(value: string): string {
