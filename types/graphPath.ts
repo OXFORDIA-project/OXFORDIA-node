@@ -39,7 +39,6 @@ export const graphPathSchema: JSONSchema4 = {
     steps: {
       type: "array",
       items: { $ref: "#/definitions/graphTraversalStep" },
-      minItems: 1,
     },
     target: { $ref: "#/definitions/graphValueSelector" },
   },
@@ -54,7 +53,6 @@ export const graphPathSchema: JSONSchema4 = {
         steps: {
           type: "array",
           items: { $ref: "#/definitions/graphTraversalStep" },
-          minItems: 1,
         },
         target: { $ref: "#/definitions/graphValueSelector" },
       },
@@ -70,7 +68,6 @@ export const graphPathSchema: JSONSchema4 = {
         predicates: {
           type: "array",
           items: { $ref: "#/definitions/graphPredicateFilter" },
-          minItems: 1,
         },
       },
     },
@@ -103,6 +100,8 @@ export const graphPathSchema: JSONSchema4 = {
       additionalProperties: false,
       properties: {
         ...metadataSchemaProperties,
+        node: { $ref: "#/definitions/graphNodeFilter" },
+        literal: { $ref: "#/definitions/graphLiteralFilter" },
       },
     },
     graphLiteralFilter: {

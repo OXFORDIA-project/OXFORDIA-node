@@ -22,7 +22,7 @@ export interface AllowedPath {
   "@id"?: string;
   "@context"?: LdoJsonldContext;
   graphPath: GraphPath;
-  minValues: number;
+  minCount: number;
 }
 
 /**

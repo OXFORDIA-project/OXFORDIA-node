@@ -1,6 +1,6 @@
-import type { AnyStatisticPlugin } from "../StatisticPlugin";
-import { kaplanMeierPlugin } from "./kaplanMeierPlugin";
-import { meanPlugin } from "./meanPlugin";
+import type { AnyStatisticApiPlugin } from "../StatisticPlugin";
+import { kaplanMeierPlugin } from "./kaplanMeier/kaplanMeierPlugin";
+import { meanPlugin } from "./mean/meanPlugin";
 
 /** All registered statistic plugins. Add new plugins here. */
 export const statisticsPlugins: AnyStatisticPlugin[] = [

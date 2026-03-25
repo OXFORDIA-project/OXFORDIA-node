@@ -1,4 +1,5 @@
 import type {
+  AllowedPath,
   GraphLiteralFilter,
   GraphNodeFilter,
   GraphPath,
@@ -74,6 +75,58 @@ const STATP_EQUALS_KEY = `${STATP_PREFIX}equals`;
 const STATP_ONE_OF_KEY = `${STATP_PREFIX}oneOf`;
 const STATP_MIN_KEY = `${STATP_PREFIX}min`;
 const STATP_MAX_KEY = `${STATP_PREFIX}max`;
+const STATP_MIN_COUNT_KEY = `${STATP_PREFIX}minCount`;
+
+function findMatchingMeanAllowedPath(
+  queryGraphPath: GraphPath,
+  statisticAccessRule: MeanStatisticAccessRule,
+): AllowedPath | undefined {
+  const querySignature = graphPathSignature(queryGraphPath);
+  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
+  return allowedPaths.find((allowedPath) => {
+    if (!allowedPath?.graphPath) return false;
+    return graphPathSignature(allowedPath.graphPath) === querySignature;
+  });
+}
+
+function readAllowedPathMinCount(allowedPath: AllowedPath): number {
+  const record = toRecord(allowedPath as unknown);
+  const raw = record
+    ? readProperty<number>(record, "minCount", STATP_MIN_COUNT_KEY)
+    : allowedPath.minCount;
+  if (typeof raw !== "number" || !Number.isFinite(raw)) {
+    return Number.NaN;
+  }
+  return Math.max(0, Math.floor(raw));
+}
+
+export function evaluateMeanStatisticAccessRulePostQuery(
+  queryGraphPath: GraphPath,
+  statisticAccessRule: MeanStatisticAccessRule,
+  output: { count: number },
+): true | Error {
+  const match = findMatchingMeanAllowedPath(
+    queryGraphPath,
+    statisticAccessRule,
+  );
+  if (!match) {
+    return new Error(
+      "Requested graphPath is not allowed by mean statistic policy.",
+    );
+  }
+  const minCount = readAllowedPathMinCount(match);
+  if (!Number.isFinite(minCount)) {
+    return new Error(
+      "Mean statistic policy is missing a valid minCount for the matched allowed path.",
+    );
+  }
+  if (output.count < minCount) {
+    return new Error(
+      `Sample count (${output.count}) is below the policy minimum (${minCount}) for this mean statistic.`,
+    );
+  }
+  return true;
+}
 
 function debugLog(payload: {
   runId: string;
@@ -472,12 +525,15 @@ export function evaluateMeanStatisticAccessRule(
   });
 
   const candidateSignatures: string[] = [];
-  const isAllowed = allowedPaths.some((allowedPath) => {
-    if (!allowedPath?.graphPath) return false;
-    const signature = graphPathSignature(allowedPath.graphPath);
-    candidateSignatures.push(signature);
-    return signature === querySignature;
-  });
+  for (const allowedPath of allowedPaths) {
+    if (!allowedPath?.graphPath) continue;
+    candidateSignatures.push(graphPathSignature(allowedPath.graphPath));
+  }
+  const match = findMatchingMeanAllowedPath(
+    queryGraphPath,
+    statisticAccessRule,
+  );
+  const isAllowed = Boolean(match);
 
   debugLog({
     runId: "initial",

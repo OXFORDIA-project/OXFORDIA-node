@@ -38,7 +38,7 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
-              predicate: "https://oxfordia.setmeld.com/statistics#minValues",
+              predicate: "https://oxfordia.setmeld.com/statistics#minCount",
               valueExpr: {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#integer",

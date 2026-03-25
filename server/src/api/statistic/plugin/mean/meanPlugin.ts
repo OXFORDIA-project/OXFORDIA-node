@@ -1,4 +1,4 @@
-import type { StatisticPlugin } from "../StatisticPlugin";
+import type { StatisticPlugin } from "../../StatisticPlugin";
 import {
   MeanStatisticAccessRule,
   MeanStatisticAccessRuleShapeType,
@@ -6,7 +6,14 @@ import {
 } from "@oxfordia/types";
 import type { GraphPath } from "@oxfordia/types";
 import { graphPathSchema } from "@oxfordia/types/graphPath";
+import {
+  evaluateMeanStatisticAccessRule,
+  evaluateMeanStatisticAccessRulePostQuery,
+} from "./evaluateMeanStatisticAccessRule";
 import type { JSONSchema4 } from "json-schema";
+import { IntegrationPodGlobals } from "../../../../globals";
+import { executeStatisticSparqlQuery } from "../util/statisticSparqlQuery";
+import { parseNumericBindingValue } from "../util/sparqlBindingParsers";
 
 export type MeanQuery = {
   resourceUri: string;
@@ -78,3 +85,51 @@ export const meanPlugin: StatisticPlugin<
     };
   },
 };
+
+export type MeanWithCountResult = {
+  mean: number;
+  count: number;
+};
+
+export async function executeMeanWithCountQuery(params: {
+  resourceUri: string;
+  graphPath: GraphPath;
+  globals: IntegrationPodGlobals;
+}): Promise<MeanWithCountResult | undefined> {
+  const rows = await executeStatisticSparqlQuery({
+    resourceUri: params.resourceUri,
+    pathBindings: [
+      {
+        key: "value",
+        graphPath: params.graphPath,
+        requireNumeric: true,
+      },
+    ],
+    selectFields: [
+      {
+        alias: "mean",
+        expression: (pathVars) => `AVG(${pathVars.value ?? "?value"})`,
+      },
+      {
+        alias: "count",
+        expression: (pathVars) => `COUNT(${pathVars.value ?? "?value"})`,
+      },
+    ],
+    globals: params.globals,
+  });
+
+  const firstRow = rows[0];
+  if (!firstRow) return undefined;
+  const mean = parseNumericBindingValue(firstRow, "mean");
+  const countRaw = parseNumericBindingValue(firstRow, "count");
+  const count =
+    countRaw === undefined
+      ? 0
+      : Number.isInteger(countRaw)
+        ? countRaw
+        : Math.round(countRaw);
+  if (count === 0 || mean === undefined) {
+    return undefined;
+  }
+  return { mean, count };
+}

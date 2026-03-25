@@ -3,13 +3,9 @@ import {
   mean_statisticAccessRuleSchemaSchema,
   kaplanMeier_statisticAccessRuleSchemaSchema,
 } from "@oxfordia/types";
+import { StatisticUiPlugin } from "./StatisticUiPlugin";
 
-export type StatisticPluginDefinition = {
-  name: string;
-  statisticAccessRuleSchema: Schema;
-};
-
-export const statisticPlugins: StatisticPluginDefinition[] = [
+export const statisticPlugins: StatisticUiPlugin[] = [
   {
     name: "mean",
     statisticAccessRuleSchema: mean_statisticAccessRuleSchemaSchema,

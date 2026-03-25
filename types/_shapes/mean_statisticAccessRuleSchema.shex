@@ -12,7 +12,7 @@ statp:AllowedPathShape {
   # A definition of the allowed path
   statp:graphPath @statp:GraphPathShape ;
   # The minimum number of values that can exist in this path to return
-  statp:minValues xsd:integer ;
+  statp:minCount xsd:integer ;
 }
 
 # ==============================================================================

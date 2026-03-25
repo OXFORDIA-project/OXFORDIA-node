@@ -1,6 +1,9 @@
 type BindingRecord = Record<string, unknown>;
 
-function readBindingValue(binding: BindingRecord, variableName: string): unknown {
+function readBindingValue(
+  binding: BindingRecord,
+  variableName: string,
+): unknown {
   return (
     binding[variableName] ??
     binding[`?${variableName}`] ??

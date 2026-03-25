@@ -26,8 +26,8 @@ export const HomeView: FunctionComponent = () => {
         <Text style={styles.title}>
           OXFORDIA
         </Text>
-        <Text>
-          Federated Research Data
+        <Text style={styles.subtitle}>
+          OXford Federation for Orchestrating Remote Data & International Analytics
         </Text>
         {/* Login Button */}
         <Button
@@ -56,6 +56,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 60,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  subtitle: {
     textAlign: 'center',
   },
   button: {

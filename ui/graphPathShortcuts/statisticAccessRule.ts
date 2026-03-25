@@ -1,6 +1,8 @@
 import { getGraphPathShortcutsForDataSchema } from "./registry";
-import type { GraphNodeFilter, GraphPath } from "@oxfordia/types";
+import type { GraphNodeFilter, GraphPath, GraphTraversalStep } from "@oxfordia/types";
 import type { GraphPathShortcut } from "./types";
+
+const STATP_PREFIX = "https://oxfordia.setmeld.com/statistics#";
 
 type IriObject = { "@id": string };
 type ComparableWhereFilter = { predicate: string; value: string };
@@ -26,6 +28,14 @@ function toCollectionArray<T>(value: T | T[] | Iterable<T> | undefined): T[] {
   return [value as T];
 }
 
+function readStatpField(
+  record: Record<string, unknown> | undefined,
+  local: string,
+): unknown {
+  if (!record) return undefined;
+  return record[local] ?? record[`${STATP_PREFIX}${local}`];
+}
+
 function getIriValue(value: string | IriObject | undefined): string | undefined {
   if (typeof value === "string") return value;
   if (value && typeof value === "object" && typeof value["@id"] === "string") {
@@ -35,7 +45,12 @@ function getIriValue(value: string | IriObject | undefined): string | undefined 
 }
 
 function getSingleIriValue(nodeFilter: GraphNodeFilter | undefined): string | undefined {
-  const iriValues = toCollectionArray(nodeFilter?.iri);
+  if (!nodeFilter) return undefined;
+  const record = nodeFilter as unknown as Record<string, unknown>;
+  const raw = readStatpField(record, "iri");
+  const iriValues = toCollectionArray(
+    raw as string | string[] | Iterable<string> | undefined,
+  );
   if (iriValues.length !== 1) return undefined;
   return iriValues[0];
 }
@@ -43,19 +58,32 @@ function getSingleIriValue(nodeFilter: GraphNodeFilter | undefined): string | un
 function toComparableFilter(filterValue: unknown): ComparableWhereFilter | null {
   if (!filterValue || typeof filterValue !== "object") return null;
   const filter = filterValue as Record<string, unknown>;
+  const predicate = getIriValue(
+    readStatpField(filter, "predicate") as string | IriObject | undefined,
+  );
+  const someRaw = readStatpField(filter, "some");
+  if (!someRaw || typeof someRaw !== "object") {
+    return null;
+  }
+  const someRecord = someRaw as Record<string, unknown>;
+  const nodeRaw = readStatpField(someRecord, "node");
   const iriValue =
-    filter.some && typeof filter.some === "object" && "node" in filter.some
-      ? getSingleIriValue((filter.some as Record<string, unknown>).node as GraphNodeFilter)
+    nodeRaw && typeof nodeRaw === "object"
+      ? getSingleIriValue(nodeRaw as GraphNodeFilter)
       : undefined;
-  const predicate = getIriValue(filter.predicate as string | IriObject | undefined);
-  if (!iriValue || !predicate) {
+  if (!predicate || !iriValue) {
     return null;
   }
   return { predicate, value: iriValue };
 }
 
 function toComparableWhereFilters(nodeFilter: GraphNodeFilter | undefined): ComparableWhereFilter[] {
-  return toCollectionArray(nodeFilter?.predicates)
+  return toCollectionArray(
+    readStatpField(
+      nodeFilter as unknown as Record<string, unknown> | undefined,
+      "predicates",
+    ),
+  )
     .map((filter) => toComparableFilter(filter))
     .filter((value): value is ComparableWhereFilter => Boolean(value))
     .sort((a, b) => {
@@ -65,15 +93,42 @@ function toComparableWhereFilters(nodeFilter: GraphNodeFilter | undefined): Comp
     });
 }
 
+function readGraphPathStart(graphPath: GraphPath): GraphNodeFilter | undefined {
+  const record = graphPath as unknown as Record<string, unknown>;
+  const start = record.start ?? record[`${STATP_PREFIX}start`];
+  return start as GraphNodeFilter | undefined;
+}
+
+function readGraphPathSteps(graphPath: GraphPath): GraphPath["steps"] | undefined {
+  const record = graphPath as unknown as Record<string, unknown>;
+  return (record.steps ?? record[`${STATP_PREFIX}steps`]) as GraphPath["steps"] | undefined;
+}
+
+function readStepVia(step: GraphTraversalStep): string | IriObject | undefined {
+  const record = step as unknown as Record<string, unknown>;
+  return (record.via ?? record[`${STATP_PREFIX}via`]) as string | IriObject | undefined;
+}
+
+function readStepInverse(step: GraphTraversalStep): boolean {
+  const record = step as unknown as Record<string, unknown>;
+  const v = record.inverse ?? record[`${STATP_PREFIX}inverse`];
+  return Boolean(v);
+}
+
+function readStepWhere(step: GraphTraversalStep): GraphNodeFilter | undefined {
+  const record = step as unknown as Record<string, unknown>;
+  return (record.where ?? record[`${STATP_PREFIX}where`]) as GraphNodeFilter | undefined;
+}
+
 function toComparableGraphPath(graphPath: GraphPath): ComparableGraphPath {
-  const steps = toCollectionArray(graphPath.steps)
+  const steps = toCollectionArray(readGraphPathSteps(graphPath))
     .map((step): ComparableStep | null => {
-      const predicate = getIriValue(step.via as string | IriObject | undefined);
+      const predicate = getIriValue(readStepVia(step));
       if (!predicate) return null;
-      const where = toComparableWhereFilters(step.where as GraphNodeFilter | undefined);
+      const where = toComparableWhereFilters(readStepWhere(step));
       return {
         predicate,
-        inverse: Boolean(step.inverse),
+        inverse: readStepInverse(step),
         where,
       };
     })
@@ -85,7 +140,7 @@ function toComparableGraphPath(graphPath: GraphPath): ComparableGraphPath {
     });
 
   return {
-    where: toComparableWhereFilters(graphPath.start),
+    where: toComparableWhereFilters(readGraphPathStart(graphPath)),
     steps,
   };
 }

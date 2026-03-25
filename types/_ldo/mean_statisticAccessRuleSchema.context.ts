@@ -104,8 +104,8 @@ export const mean_statisticAccessRuleSchemaContext: LdoJsonldContext = {
     "@id": "https://oxfordia.setmeld.com/statistics#target",
     "@type": "@id",
   },
-  minValues: {
-    "@id": "https://oxfordia.setmeld.com/statistics#minValues",
+  minCount: {
+    "@id": "https://oxfordia.setmeld.com/statistics#minCount",
     "@type": "http://www.w3.org/2001/XMLSchema#integer",
   },
 };

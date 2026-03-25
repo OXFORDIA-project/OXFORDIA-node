@@ -109,29 +109,60 @@ export function createStatisticQueryHandler(globals: IntegrationPodGlobals) {
       );
     }
 
-    const evaluationErrors: string[] = [];
-    let hasAllowedPolicy = false;
+    const preEvaluationErrors: string[] = [];
+    const policiesPassingPre: (typeof matchingPolicies)[number][] = [];
     for (const matchingPolicy of matchingPolicies) {
       const typedRule = dataset
         .usingType(plugin.statisticAccessRuleShapeType)
         .fromSubject(getRdfNode(matchingPolicy));
-      const policyResult = plugin.evaluateStatisticAccessRule(query, typedRule);
+      const policyResult = plugin.evaluateStatisticAccessRulePreQuery(
+        query,
+        typedRule,
+      );
       if (policyResult instanceof Error) {
-        evaluationErrors.push(policyResult.message);
+        preEvaluationErrors.push(policyResult.message);
         continue;
       }
-      hasAllowedPolicy = true;
+      policiesPassingPre.push(matchingPolicy);
     }
 
-    if (!hasAllowedPolicy) {
+    if (policiesPassingPre.length === 0) {
       throw new HttpError(
         403,
-        evaluationErrors[0] ??
+        preEvaluationErrors[0] ??
           `Query is not allowed by any matching '${plugin.name}' statistic policy.`,
       );
     }
 
     const result = await plugin.performQuery(query, globals);
+
+    const postEvaluationErrors: string[] = [];
+    let postAllowed = false;
+    for (const matchingPolicy of policiesPassingPre) {
+      const typedRule = dataset
+        .usingType(plugin.statisticAccessRuleShapeType)
+        .fromSubject(getRdfNode(matchingPolicy));
+      const policyResult = plugin.evaluateStatisticAccessRulePostQuery(
+        query,
+        typedRule,
+        result,
+      );
+      if (policyResult instanceof Error) {
+        postEvaluationErrors.push(policyResult.message);
+        continue;
+      }
+      postAllowed = true;
+      break;
+    }
+
+    if (!postAllowed) {
+      throw new HttpError(
+        403,
+        postEvaluationErrors[0] ??
+          `Result is not allowed by any matching '${plugin.name}' statistic policy.`,
+      );
+    }
+
     res.json(result);
   };
 }

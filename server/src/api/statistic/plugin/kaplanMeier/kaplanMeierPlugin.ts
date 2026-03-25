@@ -1,4 +1,4 @@
-import type { StatisticPlugin } from "../StatisticPlugin";
+import type { StatisticPlugin } from "../../StatisticPlugin";
 import {
   GraphPath,
   KaplanMeierStatisticAccessRule,
@@ -6,8 +6,8 @@ import {
   kaplanMeier_statisticAccessRuleSchemaSchema,
 } from "@oxfordia/types";
 import { graphPathSchema } from "@oxfordia/types/graphPath";
-import { executeStatisticSparqlQuery } from "./util/statisticSparqlQuery";
-import { parseNumericBindingValue } from "./util/sparqlBindingParsers";
+import { executeStatisticSparqlQuery } from "../util/statisticSparqlQuery";
+import { parseNumericBindingValue } from "../util/sparqlBindingParsers";
 import type { JSONSchema4 } from "json-schema";
 
 export type KaplanMeierQuery = {

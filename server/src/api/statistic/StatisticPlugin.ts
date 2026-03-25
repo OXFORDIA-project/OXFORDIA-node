@@ -7,7 +7,7 @@ export type StatisticQuery = {
   resourceUri: string;
 };
 
-export interface StatisticPlugin<
+export interface StatisticApiPlugin<
   Query extends StatisticQuery,
   Output,
   StatisticAccessRule extends LdoBase,
@@ -27,15 +27,22 @@ export interface StatisticPlugin<
   querySchema: JSONSchema4;
   // Evaluates if the given query is allowed under the given statistic access rule.
   // Returns true if it is allowed and an error if not.
-  evaluateStatisticAccessRule(
+  evaluateStatisticAccessRulePreQuery(
     query: Query,
     statisticAccessRule: StatisticAccessRule,
   ): true | Error;
   // Performs the query and returns the output
   performQuery(query: Query, globals: IntegrationPodGlobals): Promise<Output>;
+  // Evaluate statistic access rule after a query is performed
+  // Returns true if it is allowed and an error if not.
+  evaluateStatisticAccessRulePostQuery(
+    query: Query,
+    statisticAccessRule: StatisticAccessRule,
+    output: Output,
+  ): true | Error;
 }
 
-export type AnyStatisticPlugin = StatisticPlugin<
+export type AnyStatisticApiPlugin = StatisticApiPlugin<
   StatisticQuery,
   unknown,
   LdoBase
