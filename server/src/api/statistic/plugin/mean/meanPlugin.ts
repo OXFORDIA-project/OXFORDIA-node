@@ -15,15 +15,15 @@ import { IntegrationPodGlobals } from "../../../../globals";
 import { executeStatisticSparqlQuery } from "../util/statisticSparqlQuery";
 import { parseNumericBindingValue } from "../util/sparqlBindingParsers";
 
-export type MeanQuery = {
+export interface MeanQuery {
   resourceUri: string;
   graphPath: GraphPath;
-};
+}
 
-export type MeanOutput = {
+export interface MeanOutput {
   mean: number;
   count: number;
-};
+}
 
 const meanQuerySchema: JSONSchema4 = {
   type: "object",
