@@ -1,7 +1,7 @@
 import { jsonld2graphobject } from "jsonld2graphobject";
 import type { ContextDefinition, JsonLdDocument, NodeObject } from "jsonld";
 import type { GraphNodeFilter, GraphPath } from "@oxfordia/types";
-import type { DataSchemaJsonView } from "../types";
+import type { DataSchemaJsonView } from "../dataSchemas";
 
 type TripleConstraint = {
   predicate: string;
@@ -497,4 +497,17 @@ export async function createGraphPathOptionGetters(
     getStepWhereValueOptions,
     getStepTargetShapeNames,
   };
+}
+
+export function extractPredicateOptions(
+  dataSchema: DataSchemaJsonView | null,
+): string[] {
+  if (!dataSchema?.shapes) return [];
+  const uniq = new Set<string>();
+  dataSchema.shapes.forEach((shape) => {
+    extractConstraints(shape).forEach((tc) => {
+      if (tc.predicate.length > 0) uniq.add(tc.predicate);
+    });
+  });
+  return Array.from(uniq).sort();
 }

@@ -1,10 +1,21 @@
 import type { Schema } from "shexj";
 import { nemaline_dataSchemaSchema } from "@oxfordia/types";
-import type {
-  DataSchemaJsonTripleConstraint,
-  DataSchemaJsonShape,
-  DataSchemaJsonView,
-} from "./types";
+
+export type DataSchemaJsonTripleConstraint = {
+  predicate: string;
+  valueExpr: string;
+};
+
+export type DataSchemaJsonShape = {
+  id: string;
+  tripleConstraints?: DataSchemaJsonTripleConstraint[];
+};
+
+export type DataSchemaJsonView = {
+  name: string;
+  shapeCount: number;
+  shapes?: DataSchemaJsonShape[];
+};
 
 const dataSchemaRegistry: Record<string, Schema> = {
   nemaline: nemaline_dataSchemaSchema,

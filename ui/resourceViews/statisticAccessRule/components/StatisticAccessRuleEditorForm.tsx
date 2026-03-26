@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import {
   Button,
@@ -12,12 +13,11 @@ import {
 import { Trash2 } from "lucide-react-native";
 import type { GraphPath } from "@oxfordia/types";
 import type {
-  StatisticPolicy,
-  StatisticAccessRuleObjectValue,
-  StatisticAccessRuleScalarValue,
-  StatisticAccessRuleSchemas,
-} from "../types";
-import { createEmptyGraphPath, makeId } from "../types";
+  PolicyFormState,
+  MeanAllowedPathForm,
+  KmAllowedPathForm,
+} from "../hooks/useStatisticAccessRuleEditorData";
+import { createEmptyGraphPath } from "../hooks/useStatisticAccessRuleEditorData";
 import type {
   StartPredicateOptionGetter,
   StartValueOptionGetter,
@@ -26,11 +26,6 @@ import type {
   StepWherePredicateOptionGetter,
   StepWhereValueOptionGetter,
 } from "../utils/graphPathOptionResolver";
-import {
-  getGraphPathFromValue,
-  getPolicyFieldDefinitions,
-  type SchemaFieldDefinition,
-} from "../utils/statisticAccessRuleSchemaForm";
 import { GraphPathBuilder } from "./GraphPathBuilder";
 import {
   instantiateGraphPathShortcut,
@@ -38,14 +33,8 @@ import {
   type GraphPathShortcut,
 } from "../../../graphPathShortcuts";
 
-type Props = {
-  error: string | null;
+type GraphPathOptions = {
   dataSchemaName: string | null;
-  statisticAccessRuleSchemas: StatisticAccessRuleSchemas;
-  statisticPolicies: StatisticPolicy[];
-  setStatisticPolicies: React.Dispatch<React.SetStateAction<StatisticPolicy[]>>;
-  statisticNames: string[];
-  addStatisticPolicyByName: (name: string) => void;
   predicateOptions: string[];
   graphPathShortcuts: GraphPathShortcut[];
   getStartPredicateOptions: StartPredicateOptionGetter;
@@ -56,25 +45,18 @@ type Props = {
   getStepTargetShapeNames: StepTargetShapeNameGetter;
 };
 
-type GraphPathFieldEditorProps = {
-  dataSchemaName: string | null;
-  graphPathValue: GraphPath;
-  graphPathShortcuts: GraphPathShortcut[];
-  predicateOptions: string[];
-  getStartPredicateOptions: StartPredicateOptionGetter;
-  getStartValueOptions: StartValueOptionGetter;
-  getStepPredicateOptions: StepPredicateOptionGetter;
-  getStepWherePredicateOptions: StepWherePredicateOptionGetter;
-  getStepWhereValueOptions: StepWhereValueOptionGetter;
-  getStepTargetShapeNames: StepTargetShapeNameGetter;
-  onChange: (nextGraphPath: GraphPath) => void;
+type Props = {
+  error: string | null;
+  policies: PolicyFormState[];
+  setPolicies: React.Dispatch<React.SetStateAction<PolicyFormState[]>>;
+  statisticNames: string[];
+  addPolicy: (name: string) => void;
+  gpOptions: GraphPathOptions;
 };
 
 function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
   return StyleSheet.create({
-    root: {
-      gap: 14,
-    },
+    root: { gap: 14 },
     banner: {
       borderWidth: 1,
       borderColor: colors.notification,
@@ -84,10 +66,8 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       backgroundColor: colors.card,
     },
     error: { color: colors.notification },
-    policyList: {
-      gap: 14,
-    },
     policyCard: {
+      position: "relative",
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 14,
@@ -102,7 +82,6 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       minHeight: 32,
     },
     policyTitle: { fontWeight: "700", fontSize: 16, flexShrink: 1, paddingRight: 8 },
-    policyActions: { alignItems: "center", justifyContent: "center" },
     policyBody: {
       borderTopWidth: 1,
       borderTopColor: colors.border,
@@ -110,11 +89,8 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       paddingTop: 14,
       gap: 12,
     },
-    block: { gap: 10 },
-    sectionLabel: { fontWeight: "700", marginBottom: 2, fontSize: 14 },
-    fieldWrapper: { gap: 6 },
-    fieldLabel: { fontWeight: "600", fontSize: 13, opacity: 0.92 },
-    nestedCard: {
+    pathCard: {
+      position: "relative",
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 12,
@@ -122,14 +98,9 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       backgroundColor: colors.background,
       gap: 10,
     },
-    nestedHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 8,
-    },
-    nestedHeaderSpacer: { flex: 1 },
-    nestedTitle: { fontWeight: "600", fontSize: 13 },
+    fieldWrapper: { gap: 6 },
+    fieldLabel: { fontWeight: "600", fontSize: 13, opacity: 0.92 },
+    sectionLabel: { fontWeight: "700", marginBottom: 2, fontSize: 14 },
     input: {
       minHeight: 40,
       borderWidth: 1,
@@ -141,59 +112,20 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       color: colors.text,
       fontSize: 14,
     },
-    switchRow: { alignSelf: "flex-start" },
-    repeatedItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
-    repeatedInputWrap: {
-      flex: 1,
-    },
-    nestedItemsList: {
-      gap: 10,
-    },
-    repeatedList: {
-      gap: 8,
-    },
-    addPolicyRow: {
-      marginTop: 4,
-      alignItems: "center",
-      width: "100%",
-    },
-    addPolicyButton: {
-      minWidth: 260,
-      alignSelf: "center",
-    },
-    addItemButton: {
-      alignSelf: "flex-start",
-    },
     inlineRow: {
       flexDirection: "row",
       flexWrap: "wrap",
       alignItems: "center",
       gap: 8,
-      justifyContent: "flex-start",
     },
-    secondaryActionButton: {
-      minWidth: 120,
-    },
-    graphPathBuilderWrap: {
-      marginTop: 8,
-    },
-    dropdownTriggerButton: {
-      minWidth: 240,
-      maxWidth: 460,
-    },
-    dropdownContent: {
-      maxHeight: 320,
-      minWidth: 280,
-      paddingVertical: 8,
-      paddingHorizontal: 6,
-    },
-    dropdownScroll: {
-      maxHeight: 304,
-    },
+    addBtn: { alignSelf: "flex-start" },
+    addPolicyRow: { marginTop: 4, alignItems: "center", width: "100%" },
+    addPolicyButton: { minWidth: 260, alignSelf: "center" },
+    dropdownTriggerButton: { minWidth: 240, maxWidth: 460 },
+    dropdownContent: { maxHeight: 320, minWidth: 280, paddingVertical: 8, paddingHorizontal: 6 },
+    dropdownScroll: { maxHeight: 304 },
+    secondaryActionButton: { minWidth: 120 },
+    graphPathBuilderWrap: { marginTop: 8 },
     iconButton: {
       width: 32,
       height: 32,
@@ -204,20 +136,30 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       justifyContent: "center",
       backgroundColor: colors.background,
     },
+    cornerRemoveButton: {
+      position: "absolute",
+      top: -10,
+      right: -10,
+      zIndex: 2,
+    },
   });
 }
 
-type RemoveIconButtonProps = {
+function RemoveButton({
+  onPress,
+  styles,
+  color,
+  style,
+}: {
   onPress: () => void;
   styles: ReturnType<typeof createStyles>;
   color: string;
-};
-
-function RemoveIconButton({ onPress, styles, color }: RemoveIconButtonProps) {
+  style?: StyleProp<ViewStyle>;
+}) {
   return (
     <Pressable
       onPress={onPress}
-      style={styles.iconButton}
+      style={[styles.iconButton, style]}
       accessibilityRole="button"
       accessibilityLabel="Remove"
     >
@@ -226,72 +168,34 @@ function RemoveIconButton({ onPress, styles, color }: RemoveIconButtonProps) {
   );
 }
 
-function renderScalarInput(
-  value: StatisticAccessRuleScalarValue,
-  field: SchemaFieldDefinition,
-  onChange: (next: StatisticAccessRuleScalarValue) => void,
-  styles: ReturnType<typeof createStyles>,
-) {
-  if (field.type === "integer") {
-    return (
-      <TextInput
-        value={String(typeof value === "number" ? value : Number(value || 1))}
-        onChangeText={(nextValue) => {
-          const asNumber = Math.max(1, Number(nextValue || "1"));
-          onChange(Number.isFinite(asNumber) ? asNumber : 1);
-        }}
-        keyboardType="numeric"
-        style={styles.input}
-      />
-    );
-  }
-  if (field.type === "boolean") {
-    return (
-      <View style={styles.switchRow}>
-        <Switch value={Boolean(value)} onValueChange={(nextValue) => onChange(nextValue)} />
-      </View>
-    );
-  }
-  return (
-    <TextInput
-      value={typeof value === "string" ? value : String(value ?? "")}
-      onChangeText={(nextValue) => onChange(nextValue)}
-      style={styles.input}
-      autoCapitalize="none"
-      autoCorrect={false}
-    />
-  );
-}
-
 function GraphPathFieldEditor({
-  dataSchemaName,
-  graphPathValue,
-  graphPathShortcuts,
-  predicateOptions,
-  getStartPredicateOptions,
-  getStartValueOptions,
-  getStepPredicateOptions,
-  getStepWherePredicateOptions,
-  getStepWhereValueOptions,
-  getStepTargetShapeNames,
+  value,
   onChange,
-}: GraphPathFieldEditorProps) {
+  gpOptions,
+}: {
+  value: GraphPath;
+  onChange: (next: GraphPath) => void;
+  gpOptions: GraphPathOptions;
+}) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const [isAdvancedOpen, setIsAdvancedOpen] = React.useState(false);
-  const matchedShortcut = resolveGraphPathShortcut(dataSchemaName, graphPathValue);
-  const choosePathLabel = matchedShortcut ? matchedShortcut.name : "Choose path";
+  const [showAdvanced, setShowAdvanced] = React.useState(false);
+  const matched = resolveGraphPathShortcut(gpOptions.dataSchemaName, value);
 
   return (
     <View style={styles.fieldWrapper}>
       <View style={styles.inlineRow}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button text={choosePathLabel} variant="secondary" style={styles.dropdownTriggerButton} />
+            <Button
+              text={matched ? matched.name : "Choose path"}
+              variant="secondary"
+              style={styles.dropdownTriggerButton}
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent style={styles.dropdownContent}>
             <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
-              {graphPathShortcuts.map((shortcut) => (
+              {gpOptions.graphPathShortcuts.map((shortcut) => (
                 <DropdownMenuItem
                   key={shortcut.name}
                   onPress={() => onChange(instantiateGraphPathShortcut(shortcut))}
@@ -303,503 +207,290 @@ function GraphPathFieldEditor({
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
-          text={isAdvancedOpen ? "Hide advanced" : "Advanced"}
+          text={showAdvanced ? "Hide advanced" : "Advanced"}
           variant="secondary"
           style={styles.secondaryActionButton}
-          onPress={() => setIsAdvancedOpen((prev) => !prev)}
+          onPress={() => setShowAdvanced((prev) => !prev)}
         />
       </View>
-
-      {isAdvancedOpen ? (
+      {showAdvanced && (
         <View style={styles.graphPathBuilderWrap}>
           <GraphPathBuilder
-            value={graphPathValue}
-            predicateOptions={predicateOptions}
-            getStartPredicateOptions={getStartPredicateOptions}
-            getStartValueOptions={getStartValueOptions}
-            getStepPredicateOptions={getStepPredicateOptions}
-            getStepWherePredicateOptions={getStepWherePredicateOptions}
-            getStepWhereValueOptions={getStepWhereValueOptions}
-            getStepTargetShapeNames={getStepTargetShapeNames}
+            value={value}
+            predicateOptions={gpOptions.predicateOptions}
+            getStartPredicateOptions={gpOptions.getStartPredicateOptions}
+            getStartValueOptions={gpOptions.getStartValueOptions}
+            getStepPredicateOptions={gpOptions.getStepPredicateOptions}
+            getStepWherePredicateOptions={gpOptions.getStepWherePredicateOptions}
+            getStepWhereValueOptions={gpOptions.getStepWhereValueOptions}
+            getStepTargetShapeNames={gpOptions.getStepTargetShapeNames}
             onChange={onChange}
           />
         </View>
-      ) : null}
+      )}
     </View>
   );
 }
 
-function getDefaultFieldValue(field: SchemaFieldDefinition): StatisticAccessRuleScalarValue | GraphPath | GraphPath[] | StatisticAccessRuleObjectValue[] | string[] | number[] | boolean[] {
-  if (field.type === "graphPath") {
-    return field.repeated ? [] : createEmptyGraphPath();
-  }
-  if (field.type === "object") {
-    return [];
-  }
-  if (field.repeated) {
-    return [];
-  }
-  if (field.type === "integer") {
-    return 1;
-  }
-  if (field.type === "boolean") {
-    return false;
-  }
-  return "";
+function MeanPolicyEditor({
+  policy,
+  onUpdate,
+  gpOptions,
+  styles,
+  removeColor,
+}: {
+  policy: Extract<PolicyFormState, { statisticName: "mean" }>;
+  onUpdate: (paths: MeanAllowedPathForm[]) => void;
+  gpOptions: GraphPathOptions;
+  styles: ReturnType<typeof createStyles>;
+  removeColor: string;
+}) {
+  const paths = policy.allowedPaths;
+
+  const updatePath = (idx: number, patch: Partial<MeanAllowedPathForm>) =>
+    onUpdate(paths.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
+  const removePath = (idx: number) =>
+    onUpdate(paths.filter((_, i) => i !== idx));
+
+  return (
+    <View style={{ gap: 12 }}>
+      {paths.map((path, idx) => (
+        <View key={idx} style={styles.pathCard}>
+          <RemoveButton
+            onPress={() => removePath(idx)}
+            styles={styles}
+            color={removeColor}
+            style={styles.cornerRemoveButton}
+          />
+          <View style={styles.fieldWrapper}>
+            <Text style={styles.fieldLabel}>Graph Path</Text>
+            <GraphPathFieldEditor
+              value={path.graphPath}
+              onChange={(next) => updatePath(idx, { graphPath: next })}
+              gpOptions={gpOptions}
+            />
+          </View>
+          <View style={styles.fieldWrapper}>
+            <Text style={styles.fieldLabel}>Min Count</Text>
+            <TextInput
+              value={String(path.minCount)}
+              onChangeText={(v) => {
+                const n = Math.max(1, Number(v || "1"));
+                updatePath(idx, { minCount: Number.isFinite(n) ? n : 1 });
+              }}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+          </View>
+        </View>
+      ))}
+      <Button
+        text="Add Allowed Path"
+        variant="secondary"
+        style={styles.addBtn}
+        onPress={() =>
+          onUpdate([
+            ...paths,
+            { graphPath: createEmptyGraphPath(), minCount: 1 },
+          ])
+        }
+      />
+    </View>
+  );
+}
+
+function KaplanMeierPolicyEditor({
+  policy,
+  onUpdate,
+  gpOptions,
+  styles,
+  removeColor,
+}: {
+  policy: Extract<PolicyFormState, { statisticName: "kaplan-meier" }>;
+  onUpdate: (paths: KmAllowedPathForm[]) => void;
+  gpOptions: GraphPathOptions;
+  styles: ReturnType<typeof createStyles>;
+  removeColor: string;
+}) {
+  const paths = policy.allowedPaths;
+
+  const updatePath = (idx: number, patch: Partial<KmAllowedPathForm>) =>
+    onUpdate(paths.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
+  const removePath = (idx: number) =>
+    onUpdate(paths.filter((_, i) => i !== idx));
+
+  return (
+    <View style={{ gap: 12 }}>
+      {paths.map((path, idx) => (
+        <View key={idx} style={styles.pathCard}>
+          <RemoveButton
+            onPress={() => removePath(idx)}
+            styles={styles}
+            color={removeColor}
+            style={styles.cornerRemoveButton}
+          />
+
+          <View style={styles.fieldWrapper}>
+            <Text style={styles.fieldLabel}>Time Graph Path</Text>
+            <GraphPathFieldEditor
+              value={path.timeGraphPath}
+              onChange={(next) => updatePath(idx, { timeGraphPath: next })}
+              gpOptions={gpOptions}
+            />
+          </View>
+
+          <View style={styles.fieldWrapper}>
+            <Text style={styles.fieldLabel}>Event Graph Path</Text>
+            <GraphPathFieldEditor
+              value={path.eventGraphPath}
+              onChange={(next) => updatePath(idx, { eventGraphPath: next })}
+              gpOptions={gpOptions}
+            />
+          </View>
+
+          <View style={{ gap: 10 }}>
+            <Text style={styles.sectionLabel}>Group By Graph Paths</Text>
+            {path.groupByGraphPaths.map((gp, gpIdx) => (
+              <View key={gpIdx} style={styles.pathCard}>
+                <RemoveButton
+                  onPress={() =>
+                    updatePath(idx, {
+                      groupByGraphPaths: path.groupByGraphPaths.filter(
+                        (_, i) => i !== gpIdx,
+                      ),
+                    })
+                  }
+                  styles={styles}
+                  color={removeColor}
+                  style={styles.cornerRemoveButton}
+                />
+                <GraphPathFieldEditor
+                  value={gp}
+                  onChange={(next) =>
+                    updatePath(idx, {
+                      groupByGraphPaths: path.groupByGraphPaths.map((g, i) =>
+                        i === gpIdx ? next : g,
+                      ),
+                    })
+                  }
+                  gpOptions={gpOptions}
+                />
+              </View>
+            ))}
+            <Button
+              text="Add Group By Path"
+              variant="secondary"
+              style={styles.addBtn}
+              onPress={() =>
+                updatePath(idx, {
+                  groupByGraphPaths: [
+                    ...path.groupByGraphPaths,
+                    createEmptyGraphPath(),
+                  ],
+                })
+              }
+            />
+          </View>
+
+          <View style={styles.fieldWrapper}>
+            <Text style={styles.fieldLabel}>k-Anonymity</Text>
+            <TextInput
+              value={String(path.kAnonymity)}
+              onChangeText={(v) => {
+                const n = Math.max(1, Number(v || "1"));
+                updatePath(idx, { kAnonymity: Number.isFinite(n) ? n : 1 });
+              }}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+          </View>
+        </View>
+      ))}
+      <Button
+        text="Add Allowed Path"
+        variant="secondary"
+        style={styles.addBtn}
+        onPress={() =>
+          onUpdate([
+            ...paths,
+            {
+              timeGraphPath: createEmptyGraphPath(),
+              eventGraphPath: createEmptyGraphPath(),
+              groupByGraphPaths: [],
+              kAnonymity: 1,
+            },
+          ])
+        }
+      />
+    </View>
+  );
 }
 
 export function StatisticAccessRuleEditorForm({
   error,
-  dataSchemaName,
-  statisticAccessRuleSchemas,
-  statisticPolicies,
-  setStatisticPolicies,
+  policies,
+  setPolicies,
   statisticNames,
-  addStatisticPolicyByName,
-  predicateOptions,
-  graphPathShortcuts,
-  getStartPredicateOptions,
-  getStartValueOptions,
-  getStepPredicateOptions,
-  getStepWherePredicateOptions,
-  getStepWhereValueOptions,
-  getStepTargetShapeNames,
+  addPolicy,
+  gpOptions,
 }: Props) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const updatePolicy = (id: string, updater: (policy: StatisticPolicy) => StatisticPolicy) =>
-    setStatisticPolicies((prev) => prev.map((policy) => (policy.id === id ? updater(policy) : policy)));
+
+  const updatePolicy = (key: string, updated: PolicyFormState) =>
+    setPolicies((prev) => prev.map((p) => (p.key === key ? updated : p)));
+  const removePolicy = (key: string) =>
+    setPolicies((prev) => prev.filter((p) => p.key !== key));
 
   return (
     <View style={styles.root}>
-      {error ? (
+      {error && (
         <View style={styles.banner}>
           <Text style={styles.error}>{error}</Text>
         </View>
-      ) : null}
+      )}
 
-      <View style={styles.policyList}>
-        {statisticPolicies.map((policy, policyIndex) => {
-          const schema = statisticAccessRuleSchemas[policy.statisticName];
-          const fields = schema ? getPolicyFieldDefinitions(schema, policy.statisticName) : [];
-
-          return (
-            <View key={policy.id} style={styles.policyCard}>
-              <View style={styles.policyHeader}>
-                <Text style={styles.policyTitle}>{policyIndex + 1}. {policy.statisticName}</Text>
-                <View style={styles.policyActions}>
-                  <RemoveIconButton
-                    styles={styles}
-                    color={colors.text}
-                    onPress={() =>
-                      setStatisticPolicies((prev) => prev.filter((entry) => entry.id !== policy.id))
-                    }
-                  />
-                </View>
-              </View>
-
-              <View style={styles.policyBody}>
-                {fields.map((field) => {
-                  const fieldValue = policy.values[field.key];
-                  const normalizedFieldName = `${field.key} ${field.label}`.replace(/\s+/g, "").toLowerCase();
-                  const isAllowedPathField = normalizedFieldName.includes("allowedpath");
-
-                  if (field.type === "object") {
-                    const objects = Array.isArray(fieldValue)
-                      ? (fieldValue as StatisticAccessRuleObjectValue[])
-                      : [];
-                    return (
-                      <View key={field.key} style={styles.block}>
-                        {isAllowedPathField ? null : <Text style={styles.sectionLabel}>{field.label}</Text>}
-                        <View style={styles.nestedItemsList}>
-                          {objects.map((item, itemIndex) => (
-                            <View key={item.id} style={styles.nestedCard}>
-                              <View style={styles.nestedHeader}>
-                                {isAllowedPathField ? (
-                                  <View style={styles.nestedHeaderSpacer} />
-                                ) : (
-                                  <Text style={styles.nestedTitle}>{field.label} {itemIndex + 1}</Text>
-                                )}
-                                <RemoveIconButton
-                                  styles={styles}
-                                  color={colors.text}
-                                  onPress={() =>
-                                    updatePolicy(policy.id, (entry) => ({
-                                      ...entry,
-                                      values: { ...entry.values, [field.key]: objects.filter((x) => x.id !== item.id) },
-                                    }))
-                                  }
-                                />
-                              </View>
-                              {(field.nestedFields ?? []).map((nestedField) => {
-                                const nestedValue = item.values[nestedField.key];
-                                if (nestedField.type === "graphPath") {
-                                  if (nestedField.repeated) {
-                                    const nestedGraphPaths = Array.isArray(nestedValue)
-                                      ? (nestedValue as GraphPath[])
-                                      : [];
-                                    return (
-                                      <View key={nestedField.key} style={styles.block}>
-                                        <Text style={styles.sectionLabel}>{nestedField.label}</Text>
-                                        <View style={styles.nestedItemsList}>
-                                          {nestedGraphPaths.map((graphPathItem, graphPathIndex) => (
-                                            <View key={`${nestedField.key}-${graphPathIndex}`} style={styles.nestedCard}>
-                                              <View style={styles.nestedHeader}>
-                                                <Text style={styles.nestedTitle}>{nestedField.label} {graphPathIndex + 1}</Text>
-                                                <RemoveIconButton
-                                                  styles={styles}
-                                                  color={colors.text}
-                                                  onPress={() =>
-                                                    updatePolicy(policy.id, (entry) => ({
-                                                      ...entry,
-                                                      values: {
-                                                        ...entry.values,
-                                                        [field.key]: objects.map((x) =>
-                                                          x.id !== item.id
-                                                            ? x
-                                                            : {
-                                                                ...x,
-                                                                values: {
-                                                                  ...x.values,
-                                                                  [nestedField.key]: nestedGraphPaths.filter(
-                                                                    (_, idx) => idx !== graphPathIndex,
-                                                                  ),
-                                                                },
-                                                              },
-                                                        ),
-                                                      },
-                                                    }))
-                                                  }
-                                                />
-                                              </View>
-                                              <GraphPathFieldEditor
-                                                dataSchemaName={dataSchemaName}
-                                                graphPathValue={getGraphPathFromValue(graphPathItem)}
-                                                graphPathShortcuts={graphPathShortcuts}
-                                                predicateOptions={predicateOptions}
-                                                getStartPredicateOptions={getStartPredicateOptions}
-                                                getStartValueOptions={getStartValueOptions}
-                                                getStepPredicateOptions={getStepPredicateOptions}
-                                                getStepWherePredicateOptions={getStepWherePredicateOptions}
-                                                getStepWhereValueOptions={getStepWhereValueOptions}
-                                                getStepTargetShapeNames={getStepTargetShapeNames}
-                                                onChange={(nextGraphPath: GraphPath) =>
-                                                  updatePolicy(policy.id, (entry) => ({
-                                                    ...entry,
-                                                    values: {
-                                                      ...entry.values,
-                                                      [field.key]: objects.map((x) =>
-                                                        x.id !== item.id
-                                                          ? x
-                                                          : {
-                                                              ...x,
-                                                              values: {
-                                                                ...x.values,
-                                                                [nestedField.key]: nestedGraphPaths.map(
-                                                                  (existingPath, idx) =>
-                                                                    idx === graphPathIndex ? nextGraphPath : existingPath,
-                                                                ),
-                                                              },
-                                                            },
-                                                      ),
-                                                    },
-                                                  }))
-                                                }
-                                              />
-                                            </View>
-                                          ))}
-                                        </View>
-                                        <Button
-                                          text={`Add ${nestedField.label}`}
-                                          variant="secondary"
-                                          style={styles.addItemButton}
-                                          onPress={() =>
-                                            updatePolicy(policy.id, (entry) => ({
-                                              ...entry,
-                                              values: {
-                                                ...entry.values,
-                                                [field.key]: objects.map((x) =>
-                                                  x.id !== item.id
-                                                    ? x
-                                                    : {
-                                                        ...x,
-                                                        values: {
-                                                          ...x.values,
-                                                          [nestedField.key]: [...nestedGraphPaths, createEmptyGraphPath()],
-                                                        },
-                                                      },
-                                                ),
-                                              },
-                                            }))
-                                          }
-                                        />
-                                      </View>
-                                    );
-                                  }
-                                  return (
-                                    <View key={nestedField.key} style={styles.fieldWrapper}>
-                                      <Text style={styles.fieldLabel}>{nestedField.label}</Text>
-                                      <GraphPathFieldEditor
-                                        dataSchemaName={dataSchemaName}
-                                        graphPathValue={getGraphPathFromValue(nestedValue)}
-                                        graphPathShortcuts={graphPathShortcuts}
-                                        predicateOptions={predicateOptions}
-                                        getStartPredicateOptions={getStartPredicateOptions}
-                                        getStartValueOptions={getStartValueOptions}
-                                        getStepPredicateOptions={getStepPredicateOptions}
-                                        getStepWherePredicateOptions={getStepWherePredicateOptions}
-                                        getStepWhereValueOptions={getStepWhereValueOptions}
-                                        getStepTargetShapeNames={getStepTargetShapeNames}
-                                        onChange={(nextGraphPath: GraphPath) =>
-                                          updatePolicy(policy.id, (entry) => ({
-                                            ...entry,
-                                            values: {
-                                              ...entry.values,
-                                              [field.key]: objects.map((x) =>
-                                                x.id !== item.id
-                                                  ? x
-                                                  : {
-                                                      ...x,
-                                                      values: { ...x.values, [nestedField.key]: nextGraphPath },
-                                                    },
-                                              ),
-                                            },
-                                          }))
-                                        }
-                                      />
-                                    </View>
-                                  );
-                                }
-                                if (nestedField.type === "object") return null;
-                                return (
-                                  <View key={nestedField.key} style={styles.fieldWrapper}>
-                                    <Text style={styles.fieldLabel}>{nestedField.label}</Text>
-                                    {renderScalarInput(
-                                      (nestedValue as StatisticAccessRuleScalarValue) ?? "",
-                                      nestedField,
-                                      (nextValue) =>
-                                        updatePolicy(policy.id, (entry) => ({
-                                          ...entry,
-                                          values: {
-                                            ...entry.values,
-                                            [field.key]: objects.map((x) =>
-                                              x.id !== item.id
-                                                ? x
-                                                : { ...x, values: { ...x.values, [nestedField.key]: nextValue } },
-                                            ),
-                                          },
-                                        })),
-                                      styles,
-                                    )}
-                                  </View>
-                                );
-                              })}
-                            </View>
-                          ))}
-                        </View>
-                        <Button
-                          text={`Add ${field.label}`}
-                          variant="secondary"
-                          style={styles.addItemButton}
-                          onPress={() =>
-                            updatePolicy(policy.id, (entry) => ({
-                              ...entry,
-                              values: {
-                                ...entry.values,
-                                [field.key]: [
-                                  ...objects,
-                                  {
-                                    id: makeId("item"),
-                                    values: Object.fromEntries(
-                                      (field.nestedFields ?? []).map((nestedField) => [
-                                        nestedField.key,
-                                        getDefaultFieldValue(nestedField),
-                                      ]),
-                                    ),
-                                  },
-                                ],
-                              },
-                            }))
-                          }
-                        />
-                      </View>
-                    );
-                  }
-
-                  if (field.type === "graphPath") {
-                    if (field.repeated) {
-                      const graphPathValues = Array.isArray(fieldValue)
-                        ? (fieldValue as GraphPath[])
-                        : [];
-                      return (
-                        <View key={field.key} style={styles.block}>
-                          <Text style={styles.sectionLabel}>{field.label}</Text>
-                          <View style={styles.nestedItemsList}>
-                            {graphPathValues.map((graphPathItem, graphPathIndex) => (
-                              <View key={`${field.key}-${graphPathIndex}`} style={styles.nestedCard}>
-                                <View style={styles.nestedHeader}>
-                                  <Text style={styles.nestedTitle}>{field.label} {graphPathIndex + 1}</Text>
-                                  <RemoveIconButton
-                                    styles={styles}
-                                    color={colors.text}
-                                    onPress={() =>
-                                      updatePolicy(policy.id, (entry) => ({
-                                        ...entry,
-                                        values: {
-                                          ...entry.values,
-                                          [field.key]: graphPathValues.filter((_, idx) => idx !== graphPathIndex),
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </View>
-                                <GraphPathFieldEditor
-                                  dataSchemaName={dataSchemaName}
-                                  graphPathValue={getGraphPathFromValue(graphPathItem)}
-                                  graphPathShortcuts={graphPathShortcuts}
-                                  predicateOptions={predicateOptions}
-                                  getStartPredicateOptions={getStartPredicateOptions}
-                                  getStartValueOptions={getStartValueOptions}
-                                  getStepPredicateOptions={getStepPredicateOptions}
-                                  getStepWherePredicateOptions={getStepWherePredicateOptions}
-                                  getStepWhereValueOptions={getStepWhereValueOptions}
-                                  getStepTargetShapeNames={getStepTargetShapeNames}
-                                  onChange={(nextGraphPath: GraphPath) =>
-                                    updatePolicy(policy.id, (entry) => ({
-                                      ...entry,
-                                      values: {
-                                        ...entry.values,
-                                        [field.key]: graphPathValues.map((existingPath, idx) =>
-                                          idx === graphPathIndex ? nextGraphPath : existingPath,
-                                        ),
-                                      },
-                                    }))
-                                  }
-                                />
-                              </View>
-                            ))}
-                          </View>
-                          <Button
-                            text={`Add ${field.label}`}
-                            variant="secondary"
-                            style={styles.addItemButton}
-                            onPress={() =>
-                              updatePolicy(policy.id, (entry) => ({
-                                ...entry,
-                                values: {
-                                  ...entry.values,
-                                  [field.key]: [...graphPathValues, createEmptyGraphPath()],
-                                },
-                              }))
-                            }
-                          />
-                        </View>
-                      );
-                    }
-                    return (
-                      <View key={field.key} style={styles.fieldWrapper}>
-                        <Text style={styles.fieldLabel}>{field.label}</Text>
-                        <GraphPathFieldEditor
-                          dataSchemaName={dataSchemaName}
-                          graphPathValue={getGraphPathFromValue(fieldValue)}
-                          graphPathShortcuts={graphPathShortcuts}
-                          predicateOptions={predicateOptions}
-                          getStartPredicateOptions={getStartPredicateOptions}
-                          getStartValueOptions={getStartValueOptions}
-                          getStepPredicateOptions={getStepPredicateOptions}
-                          getStepWherePredicateOptions={getStepWherePredicateOptions}
-                          getStepWhereValueOptions={getStepWhereValueOptions}
-                          getStepTargetShapeNames={getStepTargetShapeNames}
-                          onChange={(nextGraphPath: GraphPath) =>
-                            updatePolicy(policy.id, (entry) => ({
-                              ...entry,
-                              values: { ...entry.values, [field.key]: nextGraphPath },
-                            }))
-                          }
-                        />
-                      </View>
-                    );
-                  }
-
-                  if (field.repeated) {
-                    const values = Array.isArray(fieldValue)
-                      ? (fieldValue as StatisticAccessRuleScalarValue[])
-                      : [];
-                    return (
-                      <View key={field.key} style={styles.block}>
-                        <Text style={styles.sectionLabel}>{field.label}</Text>
-                        <View style={styles.repeatedList}>
-                          {values.map((itemValue, itemIndex) => (
-                            <View key={`${field.key}-${itemIndex}`} style={styles.repeatedItem}>
-                              <View style={styles.repeatedInputWrap}>
-                                {renderScalarInput(
-                                  itemValue,
-                                  field,
-                                  (nextValue) =>
-                                    updatePolicy(policy.id, (entry) => ({
-                                      ...entry,
-                                      values: {
-                                        ...entry.values,
-                                        [field.key]: values.map((v, idx) => (idx === itemIndex ? nextValue : v)),
-                                      },
-                                    })),
-                                  styles,
-                                )}
-                              </View>
-                              <RemoveIconButton
-                                styles={styles}
-                                color={colors.text}
-                                onPress={() =>
-                                  updatePolicy(policy.id, (entry) => ({
-                                    ...entry,
-                                    values: {
-                                      ...entry.values,
-                                      [field.key]: values.filter((_, idx) => idx !== itemIndex),
-                                    },
-                                  }))
-                                }
-                              />
-                            </View>
-                          ))}
-                        </View>
-                        <Button
-                          text={`Add ${field.label}`}
-                          variant="secondary"
-                          style={styles.addItemButton}
-                          onPress={() =>
-                            updatePolicy(policy.id, (entry) => ({
-                              ...entry,
-                              values: {
-                                ...entry.values,
-                                [field.key]: [...values, field.type === "integer" ? 1 : field.type === "boolean" ? false : ""],
-                              },
-                            }))
-                          }
-                        />
-                      </View>
-                    );
-                  }
-
-                  return (
-                    <View key={field.key} style={styles.fieldWrapper}>
-                      <Text style={styles.fieldLabel}>{field.label}</Text>
-                      {renderScalarInput(
-                        (fieldValue as StatisticAccessRuleScalarValue) ?? "",
-                        field,
-                        (nextValue) =>
-                          updatePolicy(policy.id, (entry) => ({
-                            ...entry,
-                            values: { ...entry.values, [field.key]: nextValue },
-                          })),
-                        styles,
-                      )}
-                    </View>
-                  );
-                })}
-              </View>
+      <View style={{ gap: 14 }}>
+        {policies.map((policy, idx) => (
+          <View key={policy.key} style={styles.policyCard}>
+            <RemoveButton
+              onPress={() => removePolicy(policy.key)}
+              styles={styles}
+              color={colors.text}
+              style={styles.cornerRemoveButton}
+            />
+            <View style={styles.policyHeader}>
+              <Text style={styles.policyTitle}>
+                {idx + 1}. {policy.statisticName}
+              </Text>
             </View>
-          );
-        })}
+
+            <View style={styles.policyBody}>
+              {policy.statisticName === "mean" && (
+                <MeanPolicyEditor
+                  policy={policy}
+                  onUpdate={(paths) =>
+                    updatePolicy(policy.key, { ...policy, allowedPaths: paths })
+                  }
+                  gpOptions={gpOptions}
+                  styles={styles}
+                  removeColor={colors.text}
+                />
+              )}
+              {policy.statisticName === "kaplan-meier" && (
+                <KaplanMeierPolicyEditor
+                  policy={policy}
+                  onUpdate={(paths) =>
+                    updatePolicy(policy.key, { ...policy, allowedPaths: paths })
+                  }
+                  gpOptions={gpOptions}
+                  styles={styles}
+                  removeColor={colors.text}
+                />
+              )}
+            </View>
+          </View>
+        ))}
       </View>
 
       <View style={styles.addPolicyRow}>
@@ -814,7 +505,7 @@ export function StatisticAccessRuleEditorForm({
           <DropdownMenuContent style={styles.dropdownContent}>
             <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
               {statisticNames.map((name) => (
-                <DropdownMenuItem key={name} onPress={() => addStatisticPolicyByName(name)}>
+                <DropdownMenuItem key={name} onPress={() => addPolicy(name)}>
                   <Text>{name}</Text>
                 </DropdownMenuItem>
               ))}
