@@ -798,6 +798,8 @@ export const oxfordiaSchema: Schema = {
                 "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
               valueExpr:
                 "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+              min: 0,
+              max: -1,
             },
             {
               type: "TripleConstraint",

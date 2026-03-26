@@ -334,6 +334,7 @@ export const oxfordiaContext: LdoJsonldContext = {
   groupByGraphPath: {
     "@id": "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
     "@type": "@id",
+    "@isCollection": true,
   },
   kAnonymity: {
     "@id": "https://oxfordia.setmeld.com/statistics#k-anonymity",
