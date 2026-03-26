@@ -61,7 +61,6 @@ function getShapeDeclById(schema: Schema, shapeId: string): Record<string, unkno
 }
 
 function getTopShapeId(schema: Schema): string | null {
-  if (typeof schema.start === "string") return schema.start;
   const shapes = Array.isArray(schema.shapes) ? schema.shapes : [];
   const statisticAccessRuleShape = shapes.find((shape) => {
     const id = (shape as { id?: unknown })?.id;
@@ -73,6 +72,7 @@ function getTopShapeId(schema: Schema): string | null {
   ) {
     return (statisticAccessRuleShape as { id: string }).id;
   }
+  if (typeof schema.start === "string") return schema.start;
   const first = shapes[0] as { id?: unknown } | undefined;
   return typeof first?.id === "string" ? first.id : null;
 }
