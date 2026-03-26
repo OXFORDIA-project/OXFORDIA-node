@@ -1,0 +1,386 @@
+openapi: 3.1.0
+info:
+  title: Oxfordia Node Custom API
+  version: 0.0.1
+  description: >
+    Custom endpoints implemented by this repository. Note: most Solid/Community Server
+    endpoints are outside this spec.
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: localhost
+paths:
+  /.api/stat/{route}:
+    post:
+      operationId: runStatistic
+      summary: Run a statistic plugin query
+      description: >
+        Executes one of the registered statistics plugins. `{route}` is matched against
+        the plugin registry (currently: `mean` and `kaplan-meier`). Request validation uses
+        each plugin's `querySchema`. Authorization and policy checks are applied per request.
+      parameters:
+        - name: route
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [mean, kaplan-meier]
+      security:
+        - bearerAuth: []
+          dpopHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/MeanQuery"
+                - $ref: "#/components/schemas/KaplanMeierQuery"
+            examples:
+              meanExample:
+                summary: Mean query example
+                value:
+                  resourceUri: "http://localhost:3000/admin/FakeData2.ttl"
+                  graphPath:
+                    start:
+                      predicates:
+                        - predicate: { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" }
+                          some:
+                            node: { iri: "https://w3id.org/semanticarts/ns/ontology/gist/Person" }
+                    steps:
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" }
+                        where:
+                          predicates:
+                            - predicate: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" }
+                              some:
+                                node: { iri: "https://w3id.org/semanticarts/ns/ontology/gist/Aspect_Age" }
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" }
+              kaplanMeierExample:
+                summary: Kaplan–Meier query example
+                value:
+                  resourceUri: "http://localhost:3000/admin/FakeData2.ttl"
+                  timePath:
+                    start:
+                      predicates:
+                        - predicate: { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" }
+                          some:
+                            node: { iri: "https://w3id.org/semanticarts/ns/ontology/gist/Person" }
+                    steps:
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" }
+                        inverse: true
+                        where:
+                          predicates:
+                            - predicate: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" }
+                              some:
+                                node: { iri: "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_KaplanMeier" }
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" }
+                        where:
+                          predicates:
+                            - predicate: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" }
+                              some:
+                                node: { iri: "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_KaplanMeierTimeToEvent" }
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" }
+                  eventPath:
+                    start:
+                      predicates:
+                        - predicate: { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" }
+                          some:
+                            node: { iri: "https://w3id.org/semanticarts/ns/ontology/gist/Person" }
+                    steps:
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" }
+                        inverse: true
+                        where:
+                          predicates:
+                            - predicate: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" }
+                              some:
+                                node: { iri: "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_KaplanMeier" }
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" }
+                        where:
+                          predicates:
+                            - predicate: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" }
+                              some:
+                                node: { iri: "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_KaplanMeierEventIndicator" }
+                      - via: { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" }
+      responses:
+        "200":
+          description: Successful result (plugin output)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MeanOutput"
+                  - $ref: "#/components/schemas/KaplanMeierOutput"
+              examples:
+                meanResponseExample:
+                  summary: Mean output example
+                  value:
+                    mean: 42.7
+                    count: 12
+                kaplanMeierResponseExample:
+                  summary: Kaplan–Meier output example
+                  value:
+                    observations:
+                      - time: 0.5
+                        event: true
+              # Grouping is optional; add "group" if your access rule allows groupByPath.
+        "404":
+          description: Unknown statistic route
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [error]
+                properties:
+                  error:
+                    type: string
+              examples:
+                unknownRoute:
+                  value:
+                    error: "Unknown statistic: some-route"
+        "400":
+          description: Invalid request body (querySchema validation failed)
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                invalidBody:
+                  value: "Invalid query for statistic 'mean': <message>"
+        "401":
+          description: Unauthorized (token verification failed)
+          content:
+            text/plain:
+              schema:
+                type: string
+        "403":
+          description: Forbidden (access token WebID mismatch or policy denied)
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    dpopHeader:
+      type: apiKey
+      in: header
+      name: DPoP
+  schemas:
+    MeanQuery:
+      type: object
+      additionalProperties: false
+      required: [resourceUri, graphPath]
+      properties:
+        resourceUri:
+          type: string
+          format: uri
+          minLength: 1
+        graphPath:
+          $ref: "#/components/schemas/GraphPath"
+    MeanOutput:
+      type: object
+      additionalProperties: false
+      required: [mean, count]
+      properties:
+        mean:
+          type: number
+        count:
+          type: integer
+    KaplanMeierQuery:
+      type: object
+      additionalProperties: false
+      required: [resourceUri, timePath, eventPath]
+      properties:
+        resourceUri:
+          type: string
+          format: uri
+          minLength: 1
+        timePath:
+          $ref: "#/components/schemas/GraphPath"
+        eventPath:
+          $ref: "#/components/schemas/GraphPath"
+        groupByPath:
+          $ref: "#/components/schemas/GraphPath"
+    KaplanMeierOutput:
+      type: object
+      additionalProperties: false
+      required: [observations]
+      properties:
+        observations:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [time, event]
+            properties:
+              time:
+                type: number
+              event:
+                type: boolean
+              group:
+                type: string
+    # This schema mirrors `plugins/graphPath.ts` (GraphPath JSONSchema4).
+    GraphPath:
+      type: object
+      additionalProperties: false
+      required: [start]
+      properties:
+        "@id":
+          type: string
+        "@context": {}
+        start:
+          $ref: "#/definitions/graphNodeFilter"
+        steps:
+          type: array
+          items:
+            $ref: "#/definitions/graphTraversalStep"
+        target:
+          $ref: "#/definitions/graphValueSelector"
+      definitions:
+        # Included for parity with `plugins/graphPath.ts`; the server expects the root object.
+        graphPath:
+          type: object
+          additionalProperties: false
+          required: [start]
+          properties:
+            "@id":
+              type: string
+            "@context": {}
+            start:
+              $ref: "#/definitions/graphNodeFilter"
+            steps:
+              type: array
+              items:
+                $ref: "#/definitions/graphTraversalStep"
+            target:
+              $ref: "#/definitions/graphValueSelector"
+        graphNodeFilter:
+          type: object
+          additionalProperties: false
+          properties:
+            "@id":
+              type: string
+            "@context": {}
+            rdfType:
+              anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+                  minItems: 1
+            iri:
+              anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+                  minItems: 1
+            categories:
+              anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+                  minItems: 1
+            predicates:
+              type: array
+              items:
+                $ref: "#/definitions/graphPredicateFilter"
+        graphPredicateFilter:
+          type: object
+          additionalProperties: false
+          required: [predicate]
+          properties:
+            "@id":
+              type: string
+            "@context": {}
+            predicate:
+              type: object
+              additionalProperties: false
+              required: ["@id"]
+              properties:
+                "@id":
+                  type: string
+            inverse:
+              type: boolean
+            some:
+              $ref: "#/definitions/graphValueSelector"
+            every:
+              $ref: "#/definitions/graphValueSelector"
+            none:
+              $ref: "#/definitions/graphValueSelector"
+        graphTraversalStep:
+          type: object
+          additionalProperties: false
+          required: [via]
+          properties:
+            "@id":
+              type: string
+            "@context": {}
+            via:
+              type: object
+              additionalProperties: false
+              required: ["@id"]
+              properties:
+                "@id":
+                  type: string
+            inverse:
+              type: boolean
+            where:
+              $ref: "#/definitions/graphNodeFilter"
+        graphValueSelector:
+          type: object
+          additionalProperties: false
+          properties:
+            "@id":
+              type: string
+            "@context": {}
+            node:
+              $ref: "#/definitions/graphNodeFilter"
+            literal:
+              $ref: "#/definitions/graphLiteralFilter"
+        graphLiteralFilter:
+          type: object
+          additionalProperties: false
+          properties:
+            "@id":
+              type: string
+            "@context": {}
+            datatype:
+              anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+                  minItems: 1
+            lang:
+              anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+                  minItems: 1
+            equals: {}
+            oneOf:
+              anyOf:
+                - {}
+                - type: array
+                  items: {}
+                  minItems: 1
+            min:
+              type: number
+            max:
+              type: number
+      description: >
+        GraphPath JSON object (shape mirrors `plugins/graphPath.ts`).
+security: []

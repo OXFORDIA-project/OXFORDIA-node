@@ -1,19 +1,24 @@
-import { nemalineGraphPathShortcuts } from "./schemas/nemaline";
-import type { GraphPathShortcut, GraphPathShortcutMap, GraphPathShortcutRegistry } from "./types";
+import type { Schema } from "shexj";
+import type { GraphPathShortcut, GraphPathShortcutMap } from "./types";
+import { nemalineDataPlugin } from "./nemaline";
 
-const graphPathShortcutRegistry: GraphPathShortcutRegistry = {
-  nemaline: nemalineGraphPathShortcuts,
-};
+const dataPlugins = [nemalineDataPlugin];
 
 function normalizeSchemaName(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase();
 }
 
+export function findDataSchema(name: string): Schema | undefined {
+  return dataPlugins.find((plugin) => plugin.name === normalizeSchemaName(name))?.schema;
+}
+
 export function getGraphPathShortcutMapForDataSchema(
   dataSchemaName: string | null | undefined,
 ): GraphPathShortcutMap {
-  const normalizedName = normalizeSchemaName(dataSchemaName);
-  return graphPathShortcutRegistry[normalizedName] ?? {};
+  return (
+    dataPlugins.find((plugin) => plugin.name === normalizeSchemaName(dataSchemaName))
+      ?.graphPathShortcuts ?? {}
+  );
 }
 
 export function getGraphPathShortcutsForDataSchema(
@@ -31,3 +36,7 @@ export function findGraphPathShortcutByName(
   const graphPath = shortcutMap[shortcutName];
   return graphPath ? { name: shortcutName, graphPath } : null;
 }
+
+export * from "./nemaline";
+export * from "./shortcutMatching";
+export * from "./types";

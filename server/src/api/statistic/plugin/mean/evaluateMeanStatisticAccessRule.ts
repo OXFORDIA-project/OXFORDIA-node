@@ -2,7 +2,7 @@ import type {
   MeanAllowedPath,
   GraphPath,
   MeanStatisticAccessRule,
-} from "@oxfordia/types";
+} from "@oxfordia/plugins";
 import { toCollectionArray, toRecord, readProperty } from "../util/ldoHelpers";
 import { findMatchingAllowedPath } from "../util/evaluateAllowedPaths";
 

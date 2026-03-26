@@ -11,7 +11,9 @@ import {
   Text,
 } from "linked-data-browser";
 import { Trash2 } from "lucide-react-native";
-import type { GraphPath } from "@oxfordia/types";
+import type { GraphPath } from "@oxfordia/plugins";
+import type { GraphPathShortcut } from "@oxfordia/plugins/dataPlugin";
+import { resolveGraphPathShortcut } from "@oxfordia/plugins/dataPlugin";
 import type {
   PolicyFormState,
   MeanAllowedPathForm,
@@ -27,11 +29,6 @@ import type {
   StepWhereValueOptionGetter,
 } from "../utils/graphPathOptionResolver";
 import { GraphPathBuilder } from "./GraphPathBuilder";
-import {
-  instantiateGraphPathShortcut,
-  resolveGraphPathShortcut,
-  type GraphPathShortcut,
-} from "../../../graphPathShortcuts";
 
 type GraphPathOptions = {
   dataSchemaName: string | null;
@@ -198,7 +195,7 @@ function GraphPathFieldEditor({
               {gpOptions.graphPathShortcuts.map((shortcut) => (
                 <DropdownMenuItem
                   key={shortcut.name}
-                  onPress={() => onChange(instantiateGraphPathShortcut(shortcut))}
+                  onPress={() => onChange(shortcut.graphPath)}
                 >
                   <Text>{shortcut.name}</Text>
                 </DropdownMenuItem>

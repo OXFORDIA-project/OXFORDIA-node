@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.5",
-    "@oxfordia/types": "*",
+    "@oxfordia/plugins": "*",
     "@ldo/ldo": "^1.0.0-alpha.38",
     "@ldo/solid-react": "^1.0.0-alpha.38",
     "expo": "^53.0.9",

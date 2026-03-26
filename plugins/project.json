@@ -1,19 +1,19 @@
 {
-  "name": "types",
+  "name": "plugins",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "types",
+  "sourceRoot": "plugins",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npm run build --workspace types"
+        "command": "npm run build --workspace plugins"
       }
     },
     "build:ldo": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npm run build:ldo --workspace types"
+        "command": "npm run build:ldo --workspace plugins"
       }
     }
   }

@@ -9,13 +9,12 @@ import {
   Text,
 } from 'linked-data-browser';
 import { useSolidAuth } from '@ldo/solid-react';
-import type { GraphPath } from '@oxfordia/types';
+import type { GraphPath } from '@oxfordia/plugins';
 import {
   findGraphPathShortcutByName,
   getGraphPathShortcutsForDataSchema,
-  instantiateGraphPathShortcut,
   resolveGraphPathShortcut,
-} from '../../graphPathShortcuts';
+} from '@oxfordia/plugins/dataPlugin';
 
 const DEFAULT_RESOURCE_URI = 'http://localhost:3000/admin/FakeData2.ttl';
 const DATA_SCHEMA_NAME = 'nemaline';
@@ -71,7 +70,7 @@ function createDefaultMeanQueryDraft(): MeanQueryDraft {
   if (baselineAgeShortcut) {
     return {
       resourceUri: DEFAULT_RESOURCE_URI,
-      graphPath: instantiateGraphPathShortcut(baselineAgeShortcut),
+      graphPath: baselineAgeShortcut.graphPath,
     };
   }
   return {
@@ -148,7 +147,7 @@ export function MeanQueryTester() {
     if (!shortcut) return;
     updateDraft({
       ...lastValidDraft,
-      graphPath: instantiateGraphPathShortcut(shortcut),
+      graphPath: shortcut.graphPath,
     });
   }, [graphPathShortcuts, lastValidDraft, updateDraft]);
 

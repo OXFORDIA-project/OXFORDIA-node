@@ -10,6 +10,11 @@
   },
   "include": [
     "index.ts",
-    ".ldo/**/*.ts"
+    "_ldo/**/*.ts",
+    "graphPath.ts",
+    "StatisticUiPlugin.ts",
+    "StatisticApiPlugin.ts",
+    "dataPlugin/**/*.ts",
+    "statisticPlugin/**/*.ts"
   ]
 }

@@ -9,13 +9,12 @@ import {
   Text,
 } from "linked-data-browser";
 import { useSolidAuth } from "@ldo/solid-react";
-import type { GraphPath } from "@oxfordia/types";
+import type { GraphPath } from "@oxfordia/plugins";
 import {
   findGraphPathShortcutByName,
   getGraphPathShortcutsForDataSchema,
-  instantiateGraphPathShortcut,
   resolveGraphPathShortcut,
-} from "../../graphPathShortcuts";
+} from "@oxfordia/plugins/dataPlugin";
 
 const DEFAULT_RESOURCE_URI = "http://localhost:3000/admin/FakeData2.ttl";
 const DATA_SCHEMA_NAME = "nemaline";
@@ -33,10 +32,10 @@ function createDefaultKaplanMeierQueryDraft(): KaplanMeierQueryDraft {
   return {
     resourceUri: DEFAULT_RESOURCE_URI,
     timePath: timeShortcut
-      ? instantiateGraphPathShortcut(timeShortcut)
+      ? timeShortcut.graphPath
       : ({ start: {}, steps: [] } as unknown as GraphPath),
     eventPath: eventShortcut
-      ? instantiateGraphPathShortcut(eventShortcut)
+      ? eventShortcut.graphPath
       : ({ start: {}, steps: [] } as unknown as GraphPath),
   };
 }
@@ -70,7 +69,7 @@ export function KaplanMeierObservationsTester() {
       if (!shortcut) return;
       setQueryDraft((prev) => ({
         ...prev,
-        [field]: instantiateGraphPathShortcut(shortcut),
+        [field]: shortcut.graphPath,
       }));
     },
     [graphPathShortcuts],

@@ -133,7 +133,7 @@ git push -u origin main
 
 - `server` (`@oxfordia/server`): Community Solid Server integration and API layer
 - `ui` (`@oxfordia/ui`): React/Expo UI app
-- `types` (`@oxfordia/types`): shared generated/schema types
+- `plugins` (`@oxfordia/plugins`): shared generated/schema types and plugin definitions
 
 ### Local Development
 
@@ -145,7 +145,7 @@ npm run dev
 ### Common Scripts
 
 - `npm run dev` / `npm run dev:server` / `npm run dev:ui`
-- `npm run build` / `npm run build:types` / `npm run build:server` / `npm run build:ui`
+- `npm run build` / `npm run build:plugins` / `npm run build:server` / `npm run build:ui`
 - `npm run graph`
 - `npm run deploy:package`
 - `npm run version:get`

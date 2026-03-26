@@ -10,7 +10,7 @@
         "command": "npm run build --workspace server"
       },
       "dependsOn": [
-        "types:build"
+        "plugins:build"
       ]
     },
     "dev": {

@@ -1,17 +1,17 @@
-import type { StatisticApiPlugin } from "../../StatisticPlugin";
+import type { StatisticApiPlugin } from "@oxfordia/plugins";
 import {
   MeanStatisticAccessRule,
   MeanStatisticAccessRuleShapeType,
   mean_statisticAccessRuleSchemaSchema,
-} from "@oxfordia/types";
-import type { GraphPath } from "@oxfordia/types";
-import { graphPathSchema } from "@oxfordia/types/graphPath";
+} from "@oxfordia/plugins";
+import type { GraphPath } from "@oxfordia/plugins";
+import { graphPathSchema } from "@oxfordia/plugins/graphPath";
 import {
   evaluateMeanStatisticAccessRule,
   evaluateMeanStatisticAccessRulePostQuery,
 } from "./evaluateMeanStatisticAccessRule";
 import type { JSONSchema4 } from "json-schema";
-import { IntegrationPodGlobals } from "../../../../globals";
+import type { IntegrationPodGlobals } from "../../../../globals";
 import { executeStatisticSparqlQuery } from "../util/statisticSparqlQuery";
 import { parseNumericBindingValue } from "../util/sparqlBindingParsers";
 
@@ -42,7 +42,8 @@ const meanQuerySchema: JSONSchema4 = {
 export const meanPlugin: StatisticApiPlugin<
   MeanQuery,
   MeanOutput,
-  MeanStatisticAccessRule
+  MeanStatisticAccessRule,
+  IntegrationPodGlobals
 > = {
   name: "mean",
   route: "mean",
