@@ -60,8 +60,26 @@ function getShapeDeclById(schema: Schema, shapeId: string): Record<string, unkno
   ) as Record<string, unknown> | undefined;
 }
 
-function getTopShapeId(schema: Schema): string | null {
+function toPascalCase(value: string): string {
+  return value
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join("");
+}
+
+function getTopShapeId(schema: Schema, statisticName?: string): string | null {
   const shapes = Array.isArray(schema.shapes) ? schema.shapes : [];
+  if (statisticName) {
+    const expectedShapeSuffix = `${toPascalCase(statisticName)}StatisticAccessRuleShape`;
+    const namedShape = shapes.find((shape) => {
+      const id = (shape as { id?: unknown })?.id;
+      return typeof id === "string" && id.endsWith(expectedShapeSuffix);
+    });
+    if (namedShape && typeof (namedShape as { id?: unknown }).id === "string") {
+      return (namedShape as { id: string }).id;
+    }
+  }
   const statisticAccessRuleShape = shapes.find((shape) => {
     const id = (shape as { id?: unknown })?.id;
     return typeof id === "string" && id.endsWith("StatisticAccessRuleShape");
@@ -134,8 +152,11 @@ function buildFieldDefinition(
   };
 }
 
-export function getPolicyFieldDefinitions(schema: Schema): SchemaFieldDefinition[] {
-  const topShapeId = getTopShapeId(schema);
+export function getPolicyFieldDefinitions(
+  schema: Schema,
+  statisticName?: string,
+): SchemaFieldDefinition[] {
+  const topShapeId = getTopShapeId(schema, statisticName);
   if (!topShapeId) return [];
   const shape = getShapeDeclById(schema, topShapeId);
   if (!shape) return [];
@@ -177,9 +198,10 @@ function createDefaultObjectItem(
 
 export function createDefaultPolicyValues(
   schema: Schema,
+  statisticName?: string,
 ): Record<string, StatisticAccessRuleValue> {
   const values: Record<string, StatisticAccessRuleValue> = {};
-  getPolicyFieldDefinitions(schema).forEach((field) => {
+  getPolicyFieldDefinitions(schema, statisticName).forEach((field) => {
     if (field.type === "graphPath") {
       values[field.key] = field.repeated ? [] : createEmptyGraphPath();
       return;
@@ -200,7 +222,7 @@ export function createDefaultStatisticPolicy(
   return {
     id: makeId("stat"),
     statisticName,
-    values: createDefaultPolicyValues(schema),
+    values: createDefaultPolicyValues(schema, statisticName),
   };
 }
 
