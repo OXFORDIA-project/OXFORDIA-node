@@ -27,7 +27,7 @@ const metadataSchemaProperties: Record<string, JSONSchema4> = {
 
 /**
  * JSON Schema representation of GraphPath.
- * Mirrors the canonical LDO typings generated from mean_statisticAccessRuleSchema.
+ * Mirrors the canonical LDO typings generated from oxfordia (mean policy graph-path shapes).
  */
 export const graphPathSchema: JSONSchema4 = {
   type: "object",

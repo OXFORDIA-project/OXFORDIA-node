@@ -1,8 +1,0 @@
-PREFIX statp: <https://oxfordia.setmeld.com/statistics#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-statp:KaplanMeierStatisticAccessRuleShape {
-  statp:cohortPath xsd:string + ;
-  statp:eventPath xsd:string + ;
-  statp:timePath xsd:string +
-}
