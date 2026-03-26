@@ -48,9 +48,7 @@ export function evaluateKaplanMeierStatisticAccessRule(
 ): true | Error {
   const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
   if (allowedPaths.length === 0) {
-    return new Error(
-      "No allowed paths are configured for kaplan-meier.",
-    );
+    return new Error("No allowed paths are configured for kaplan-meier.");
   }
   const match = findMatchingKaplanMeierAllowedPath(
     queryTimePath,

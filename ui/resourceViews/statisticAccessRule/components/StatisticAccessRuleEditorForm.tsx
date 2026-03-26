@@ -357,7 +357,7 @@ export function StatisticAccessRuleEditorForm({
       <View style={styles.policyList}>
         {statisticPolicies.map((policy, policyIndex) => {
           const schema = statisticAccessRuleSchemas[policy.statisticName];
-          const fields = schema ? getPolicyFieldDefinitions(schema) : [];
+          const fields = schema ? getPolicyFieldDefinitions(schema, policy.statisticName) : [];
 
           return (
             <View key={policy.id} style={styles.policyCard}>

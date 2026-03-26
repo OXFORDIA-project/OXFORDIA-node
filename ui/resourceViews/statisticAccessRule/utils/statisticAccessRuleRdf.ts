@@ -576,9 +576,11 @@ export async function loadStatisticAccessRule(
         );
         if (!statisticName) return;
         const schema = statisticAccessRuleSchemas[statisticName];
-        const fieldDefs = schema ? getPolicyFieldDefinitions(schema) : [];
+        const fieldDefs = schema
+          ? getPolicyFieldDefinitions(schema, statisticName)
+          : [];
         const values: Record<string, StatisticAccessRuleValue> = schema
-          ? createDefaultPolicyValues(schema)
+          ? createDefaultPolicyValues(schema, statisticName)
           : {};
         fieldDefs.forEach((field) => {
           values[field.key] = parseFieldValue(datasetLike, policyNode, field);
@@ -616,7 +618,9 @@ export function buildStatisticAccessRuleTurtle(
 
   statisticPolicies.forEach((policy) => {
     const schema = statisticAccessRuleSchemas[policy.statisticName];
-    const fieldDefs = schema ? getPolicyFieldDefinitions(schema) : [];
+    const fieldDefs = schema
+      ? getPolicyFieldDefinitions(schema, policy.statisticName)
+      : [];
     const policyNode = createNamedNode("statistic-policy");
     addTriple(lines, "<#policy>", "sar:hasStatisticPolicy", policyNode);
     addTriple(
