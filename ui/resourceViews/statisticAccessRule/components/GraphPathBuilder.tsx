@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Button, Text } from "linked-data-browser";
-import type { GraphNodeFilter, GraphPath } from "@oxfordia/types";
+import type { GraphNodeFilter, GraphPath } from "@oxfordia/plugins";
 import type {
   StartPredicateOptionGetter,
   StartValueOptionGetter,

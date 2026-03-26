@@ -5,7 +5,7 @@ import type {
   GraphPredicateFilter,
   GraphTraversalStep,
   GraphValueSelector,
-} from "@oxfordia/types";
+} from "@oxfordia/plugins";
 import {
   type IriObject,
   type ScalarLiteral,

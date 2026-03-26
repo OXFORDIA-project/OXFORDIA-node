@@ -15,8 +15,8 @@ import { useResource, useMatchSubject, useSolidAuth } from '@ldo/solid-react';
 import { getDataset } from '@ldo/ldo';
 import { namedNode } from '@ldo/rdf-utils';
 import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-react-native';
-import { PersonShapeType } from '@oxfordia/types';
-import type { Person } from '@oxfordia/types';
+import { PersonShapeType } from '@oxfordia/plugins';
+import type { Person } from '@oxfordia/plugins';
 import { MeanQueryTester } from './MeanQueryTester';
 import { KaplanMeierObservationsTester } from './KaplanMeierObservationsTester';
 

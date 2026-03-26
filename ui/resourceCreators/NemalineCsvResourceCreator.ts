@@ -7,7 +7,7 @@ import type {
 } from '@ldo/connected';
 import { Stethoscope } from 'lucide-react-native';
 import { ResourceCreatorConfig } from 'linked-data-browser';
-import { PersonShapeType } from '@oxfordia/types';
+import { PersonShapeType } from '@oxfordia/plugins';
 import type {
   Person,
   MFMAssessmentEvent,
@@ -21,7 +21,7 @@ import type {
   TotalMFMMagnitude,
   TimeFromBaselineMagnitude,
   MFMScoreMagnitude,
-} from '@oxfordia/types';
+} from '@oxfordia/plugins';
 
 /** Container with context exposed so we can get the dataset for createData/commitToRemote. */
 type ContainerWithContext = SolidContainer & {

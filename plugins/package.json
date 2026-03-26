@@ -1,5 +1,5 @@
 {
-  "name": "@oxfordia/types",
+  "name": "@oxfordia/plugins",
   "version": "0.0.0",
   "private": false,
   "main": "./dist/index.js",
@@ -9,13 +9,21 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./statisticPlugin": {
+      "types": "./dist/statisticPlugin/index.d.ts",
+      "default": "./dist/statisticPlugin/index.js"
+    },
+    "./dataPlugin": {
+      "types": "./dist/dataPlugin/index.d.ts",
+      "default": "./dist/dataPlugin/index.js"
+    },
     "./graphPath": {
       "types": "./dist/graphPath.d.ts",
       "default": "./dist/graphPath.js"
     }
   },
   "scripts": {
-    "build:ldo": "ldo build --input _shapes --output _ldo",
+    "build:ldo": "ldo build --input _shex --output _ldo",
     "build:ts": "tsc -p tsconfig.json",
     "build": "npm run build:ldo && npm run build:ts"
   },

@@ -1,11 +1,11 @@
-import type { StatisticApiPlugin } from "../../StatisticPlugin";
-import type { GraphPath } from "@oxfordia/types";
+import type { StatisticApiPlugin } from "@oxfordia/plugins";
+import type { GraphPath } from "@oxfordia/plugins";
 import {
   KaplanMeierStatisticAccessRule,
   KaplanMeierStatisticAccessRuleShapeType,
   kaplanMeier_statisticAccessRuleSchemaSchema,
-} from "@oxfordia/types";
-import { graphPathSchema } from "@oxfordia/types/graphPath";
+} from "@oxfordia/plugins";
+import { graphPathSchema } from "@oxfordia/plugins/graphPath";
 import type { JSONSchema4 } from "json-schema";
 import type { IntegrationPodGlobals } from "../../../../globals";
 import {
@@ -55,7 +55,8 @@ const kaplanMeierQuerySchema: JSONSchema4 = {
 export const kaplanMeierPlugin: StatisticApiPlugin<
   KaplanMeierQuery,
   KaplanMeierOutput,
-  KaplanMeierStatisticAccessRule
+  KaplanMeierStatisticAccessRule,
+  IntegrationPodGlobals
 > = {
   name: "kaplan-meier",
   route: "kaplan-meier",

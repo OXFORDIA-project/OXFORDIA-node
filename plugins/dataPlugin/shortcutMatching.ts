@@ -1,5 +1,9 @@
-import { getGraphPathShortcutsForDataSchema } from "./registry";
-import type { GraphNodeFilter, GraphPath, GraphTraversalStep } from "@oxfordia/types";
+import type {
+  GraphNodeFilter,
+  GraphPath,
+  GraphTraversalStep,
+} from "../_ldo/oxfordia.typings";
+import { getGraphPathShortcutsForDataSchema } from "./index";
 import type { GraphPathShortcut } from "./types";
 
 const STATP_PREFIX = "https://oxfordia.setmeld.com/statistics#";
@@ -19,9 +23,7 @@ type ComparableGraphPath = {
 function toCollectionArray<T>(value: T | T[] | Iterable<T> | undefined): T[] {
   if (value === undefined || value === null) return [];
   if (Array.isArray(value)) return value;
-  if (typeof value === "string") {
-    return [value as T];
-  }
+  if (typeof value === "string") return [value as T];
   if (typeof value === "object" && Symbol.iterator in (value as object)) {
     return Array.from(value as Iterable<T>);
   }
@@ -62,18 +64,15 @@ function toComparableFilter(filterValue: unknown): ComparableWhereFilter | null 
     readStatpField(filter, "predicate") as string | IriObject | undefined,
   );
   const someRaw = readStatpField(filter, "some");
-  if (!someRaw || typeof someRaw !== "object") {
-    return null;
-  }
+  if (!someRaw || typeof someRaw !== "object") return null;
+
   const someRecord = someRaw as Record<string, unknown>;
   const nodeRaw = readStatpField(someRecord, "node");
   const iriValue =
     nodeRaw && typeof nodeRaw === "object"
       ? getSingleIriValue(nodeRaw as GraphNodeFilter)
       : undefined;
-  if (!predicate || !iriValue) {
-    return null;
-  }
+  if (!predicate || !iriValue) return null;
   return { predicate, value: iriValue };
 }
 
@@ -95,8 +94,9 @@ function toComparableWhereFilters(nodeFilter: GraphNodeFilter | undefined): Comp
 
 function readGraphPathStart(graphPath: GraphPath): GraphNodeFilter | undefined {
   const record = graphPath as unknown as Record<string, unknown>;
-  const start = record.start ?? record[`${STATP_PREFIX}start`];
-  return start as GraphNodeFilter | undefined;
+  return (record.start ?? record[`${STATP_PREFIX}start`]) as
+    | GraphNodeFilter
+    | undefined;
 }
 
 function readGraphPathSteps(graphPath: GraphPath): GraphPath["steps"] | undefined {
@@ -111,13 +111,14 @@ function readStepVia(step: GraphTraversalStep): string | IriObject | undefined {
 
 function readStepInverse(step: GraphTraversalStep): boolean {
   const record = step as unknown as Record<string, unknown>;
-  const v = record.inverse ?? record[`${STATP_PREFIX}inverse`];
-  return Boolean(v);
+  return Boolean(record.inverse ?? record[`${STATP_PREFIX}inverse`]);
 }
 
 function readStepWhere(step: GraphTraversalStep): GraphNodeFilter | undefined {
   const record = step as unknown as Record<string, unknown>;
-  return (record.where ?? record[`${STATP_PREFIX}where`]) as GraphNodeFilter | undefined;
+  return (record.where ?? record[`${STATP_PREFIX}where`]) as
+    | GraphNodeFilter
+    | undefined;
 }
 
 function toComparableGraphPath(graphPath: GraphPath): ComparableGraphPath {
@@ -125,11 +126,10 @@ function toComparableGraphPath(graphPath: GraphPath): ComparableGraphPath {
     .map((step): ComparableStep | null => {
       const predicate = getIriValue(readStepVia(step));
       if (!predicate) return null;
-      const where = toComparableWhereFilters(readStepWhere(step));
       return {
         predicate,
         inverse: readStepInverse(step),
-        where,
+        where: toComparableWhereFilters(readStepWhere(step)),
       };
     })
     .filter((value): value is ComparableStep => Boolean(value))
@@ -145,20 +145,13 @@ function toComparableGraphPath(graphPath: GraphPath): ComparableGraphPath {
   };
 }
 
-export function instantiateGraphPathShortcut(
-  shortcut: GraphPathShortcut,
-): GraphPath {
-  return shortcut.graphPath;
-}
-
 export function resolveGraphPathShortcut(
   dataSchemaName: string | null | undefined,
   graphPath: GraphPath,
 ): GraphPathShortcut | null {
   const normalizedPath = JSON.stringify(toComparableGraphPath(graphPath));
-  const shortcuts = getGraphPathShortcutsForDataSchema(dataSchemaName);
   return (
-    shortcuts.find((shortcut) => {
+    getGraphPathShortcutsForDataSchema(dataSchemaName).find((shortcut) => {
       const shortcutPath = JSON.stringify(
         toComparableGraphPath(shortcut.graphPath),
       );

@@ -2,7 +2,7 @@ import type {
   GraphPath,
   KaplanMeierAllowedPath,
   KaplanMeierStatisticAccessRule,
-} from "@oxfordia/types";
+} from "@oxfordia/plugins";
 import { toCollectionArray } from "../util/ldoHelpers";
 import { graphPathSignature } from "../util/graphPathSignature";
 

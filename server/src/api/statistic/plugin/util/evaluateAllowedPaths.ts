@@ -1,4 +1,4 @@
-import type { GraphPath } from "@oxfordia/types";
+import type { GraphPath } from "@oxfordia/plugins";
 import { graphPathSignature } from "./graphPathSignature";
 
 export interface AllowedPathEntry {

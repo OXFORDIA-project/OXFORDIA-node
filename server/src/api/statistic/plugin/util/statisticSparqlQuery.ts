@@ -1,5 +1,5 @@
 import type { IntegrationPodGlobals } from "../../../../globals";
-import type { GraphPath } from "@oxfordia/types";
+import type { GraphPath } from "@oxfordia/plugins";
 import {
   buildGraphPathWhereClause,
   toIriToken,

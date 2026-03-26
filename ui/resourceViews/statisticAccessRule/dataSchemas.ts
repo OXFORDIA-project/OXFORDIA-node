@@ -1,5 +1,4 @@
 import type { Schema } from "shexj";
-import { nemaline_dataSchemaSchema } from "@oxfordia/types";
 
 export type DataSchemaJsonTripleConstraint = {
   predicate: string;
@@ -16,14 +15,6 @@ export type DataSchemaJsonView = {
   shapeCount: number;
   shapes?: DataSchemaJsonShape[];
 };
-
-const dataSchemaRegistry: Record<string, Schema> = {
-  nemaline: nemaline_dataSchemaSchema,
-};
-
-export function findDataSchema(name: string): Schema | undefined {
-  return dataSchemaRegistry[name.toLowerCase()];
-}
 
 function normalizeValueExpr(valueExpr: unknown): string {
   if (typeof valueExpr === "string") {

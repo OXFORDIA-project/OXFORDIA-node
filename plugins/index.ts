@@ -2,6 +2,10 @@ export * from "./_ldo/oxfordia.context";
 export * from "./_ldo/oxfordia.schema";
 export * from "./_ldo/oxfordia.shapeTypes";
 export * from "./_ldo/oxfordia.typings";
+export * from "./StatisticApiPlugin";
+export * from "./StatisticUiPlugin";
+export * from "./dataPlugin";
+export * from "./statisticPlugin";
 
 /** Same ShexJ schema as {@link oxfordiaSchema}; retained for call sites keyed by data schema id. */
 export { oxfordiaSchema as nemaline_dataSchemaSchema } from "./_ldo/oxfordia.schema";

@@ -11,16 +11,19 @@ import {
   type MeanStatisticAccessRule,
   type StatisticAccessRuleDocument,
   type StatisticPolicy as LdoStatisticPolicy,
-} from "@oxfordia/types";
+} from "@oxfordia/plugins";
+import { findDataSchema } from "@oxfordia/plugins/dataPlugin";
+import {
+  getGraphPathShortcutsForDataSchema,
+} from "@oxfordia/plugins/dataPlugin";
+import { statisticPlugins } from "@oxfordia/plugins/statisticPlugin";
 import type { DataSchemaJsonView } from "../dataSchemas";
-import { asJsonDataSchema, findDataSchema } from "../dataSchemas";
+import { asJsonDataSchema } from "../dataSchemas";
 import {
   createEmptyGraphPathOptionGetters,
   createGraphPathOptionGetters,
   extractPredicateOptions,
 } from "../utils/graphPathOptionResolver";
-import { getGraphPathShortcutsForDataSchema } from "../../../graphPathShortcuts";
-import { statisticPlugins } from "../../../plugin";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const SAR_TYPE =

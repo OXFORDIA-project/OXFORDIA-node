@@ -15,8 +15,8 @@
     "start:server": "nx run server:start",
     "build:server": "nx run server:build",
     "build:ui": "npm run build --workspace ui",
-    "build:types": "npm run build --workspace types",
-    "build": "nx run-many -t build -p types,server,ui --parallel=3",
+    "build:plugins": "npm run build --workspace plugins",
+    "build": "nx run-many -t build -p plugins,server,ui --parallel=3",
     "test:schema-migration": "npm run test:schema-migration --workspace server",
     "deploy:package": "npm run build && node scripts/create-deploy-package.js",
     "version:get": "bash ./scripts/version.sh get",
@@ -26,7 +26,7 @@
   "workspaces": [
     "server",
     "ui",
-    "types"
+    "plugins"
   ],
   "repository": {
     "type": "git",
@@ -58,7 +58,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@oxfordia/types": "*",
+    "@oxfordia/plugins": "*",
     "@ldo/ldo": "^1.0.0-alpha.46",
     "@ldo/connected-solid": "^1.0.0-alpha.46",
     "@solid/access-token-verifier": "^2.1.0",
