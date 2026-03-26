@@ -10,7 +10,7 @@ Most Solid/Community Server endpoints are not covered here.
 `POST /.api/stat/{route}`
 
 The `{route}` path segment is resolved dynamically against the registered statistics
-plugins in `server/src/api/statistic/plugin/index.ts`.
+plugins in `server/src/api/statistic/statisticQueryHandler.ts`.
 
 Currently supported values:
 

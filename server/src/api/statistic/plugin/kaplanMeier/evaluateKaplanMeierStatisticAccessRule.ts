@@ -4,11 +4,15 @@ import type {
   KaplanMeierStatisticAccessRule,
 } from "@oxfordia/plugins";
 import { toCollectionArray } from "../util/ldoHelpers";
-import { graphPathSignature } from "../util/graphPathSignature";
+import {
+  graphPathDebugString,
+  graphPathsAreEqual,
+} from "../util/graphPathEquality";
 
-function summarizeSignature(signature: string): string {
-  if (signature.length <= 220) return signature;
-  return `${signature.slice(0, 220)}...`;
+function summarizeGraphPath(graphPath: GraphPath): string {
+  const debugString = graphPathDebugString(graphPath);
+  if (debugString.length <= 220) return debugString;
+  return `${debugString.slice(0, 220)}...`;
 }
 
 /**
@@ -22,21 +26,15 @@ function findMatchingKaplanMeierAllowedPath(
   queryGroupByPath: GraphPath | undefined,
   allowedPaths: KaplanMeierAllowedPath[],
 ): KaplanMeierAllowedPath | undefined {
-  const timeSig = graphPathSignature(queryTimePath);
-  const eventSig = graphPathSignature(queryEventPath);
-  const groupBySig = queryGroupByPath
-    ? graphPathSignature(queryGroupByPath)
-    : undefined;
-
   return allowedPaths.find((entry) => {
     if (!entry.timeGraphPath || !entry.eventGraphPath) return false;
-    if (graphPathSignature(entry.timeGraphPath) !== timeSig) return false;
-    if (graphPathSignature(entry.eventGraphPath) !== eventSig) return false;
+    if (!graphPathsAreEqual(entry.timeGraphPath, queryTimePath)) return false;
+    if (!graphPathsAreEqual(entry.eventGraphPath, queryEventPath)) return false;
 
-    if (groupBySig !== undefined) {
+    if (queryGroupByPath !== undefined) {
       const allowedGroupPaths = toCollectionArray(entry.groupByGraphPath);
       const groupMatch = allowedGroupPaths.some(
-        (gp) => gp && graphPathSignature(gp) === groupBySig,
+        (gp) => gp && graphPathsAreEqual(gp, queryGroupByPath),
       );
       if (!groupMatch) return false;
     }
@@ -56,13 +54,6 @@ export function evaluateKaplanMeierStatisticAccessRule(
     return new Error("No allowed paths are configured for kaplan-meier.");
   }
 
-  const queryTimeSig = graphPathSignature(queryTimePath);
-  const queryEventSig = graphPathSignature(queryEventPath);
-  const queryGroupBySig =
-    queryGroupByPath !== undefined
-      ? graphPathSignature(queryGroupByPath)
-      : undefined;
-
   const match = findMatchingKaplanMeierAllowedPath(
     queryTimePath,
     queryEventPath,
@@ -73,29 +64,29 @@ export function evaluateKaplanMeierStatisticAccessRule(
     const sameTimeEntries = allowedPaths.filter(
       (entry) =>
         entry.timeGraphPath &&
-        graphPathSignature(entry.timeGraphPath) === queryTimeSig,
+        graphPathsAreEqual(entry.timeGraphPath, queryTimePath),
     );
     const sameEventEntries = allowedPaths.filter(
       (entry) =>
         entry.eventGraphPath &&
-        graphPathSignature(entry.eventGraphPath) === queryEventSig,
+        graphPathsAreEqual(entry.eventGraphPath, queryEventPath),
     );
     const sameTimeAndEventEntries = allowedPaths.filter(
       (entry) =>
         entry.timeGraphPath &&
         entry.eventGraphPath &&
-        graphPathSignature(entry.timeGraphPath) === queryTimeSig &&
-        graphPathSignature(entry.eventGraphPath) === queryEventSig,
+        graphPathsAreEqual(entry.timeGraphPath, queryTimePath) &&
+        graphPathsAreEqual(entry.eventGraphPath, queryEventPath),
     );
 
     if (sameTimeEntries.length === 0) {
       return new Error(
-        `Requested timePath is not allowed by kaplan-meier statistic policy. timePath=${summarizeSignature(queryTimeSig)}`,
+        `Requested timePath is not allowed by kaplan-meier statistic policy. timePath=${summarizeGraphPath(queryTimePath)}`,
       );
     }
     if (sameEventEntries.length === 0) {
       return new Error(
-        `Requested eventPath is not allowed by kaplan-meier statistic policy. eventPath=${summarizeSignature(queryEventSig)}`,
+        `Requested eventPath is not allowed by kaplan-meier statistic policy. eventPath=${summarizeGraphPath(queryEventPath)}`,
       );
     }
     if (sameTimeAndEventEntries.length === 0) {
@@ -103,17 +94,17 @@ export function evaluateKaplanMeierStatisticAccessRule(
         "Requested timePath and eventPath are each allowed individually, but that combination is not allowed by kaplan-meier statistic policy.",
       );
     }
-    if (queryGroupBySig !== undefined) {
+    if (queryGroupByPath !== undefined) {
       const groupByMatches = sameTimeAndEventEntries.some((entry) =>
         toCollectionArray(entry.groupByGraphPath).some(
           (allowedGroupPath) =>
             allowedGroupPath &&
-            graphPathSignature(allowedGroupPath) === queryGroupBySig,
+            graphPathsAreEqual(allowedGroupPath, queryGroupByPath),
         ),
       );
       if (!groupByMatches) {
         return new Error(
-          `Requested groupByPath is not allowed for the requested timePath/eventPath combination in kaplan-meier statistic policy. groupByPath=${summarizeSignature(queryGroupBySig)}`,
+          `Requested groupByPath is not allowed for the requested timePath/eventPath combination in kaplan-meier statistic policy. groupByPath=${summarizeGraphPath(queryGroupByPath)}`,
         );
       }
     }
