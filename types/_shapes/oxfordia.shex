@@ -244,8 +244,12 @@ statp:KaplanMeierStatisticAccessRuleShape {
 
 # The allowed paths
 statp:KaplanMeierAllowedPathShape {
-  # A definition of the allowed path
-  statp:graphPath @statp:GraphPathShape ;
+  # A definition of the allowed time path
+  statp:timeGraphPath @statp:GraphPathShape ;
+  # A definition of the allowed event path
+  statp:eventGraphPath @statp:GraphPathShape ;
+  # Allowed paths to group by
+  statp:groupByGraphPath @statp:GraphPathShape ;
   # The minimum number of values that can exist in this path to return
   statp:k-anonymity xsd:integer ;
 }

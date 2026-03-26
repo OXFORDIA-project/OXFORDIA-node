@@ -323,6 +323,18 @@ export const oxfordiaContext: LdoJsonldContext = {
     "@id": "https://oxfordia.setmeld.com/statistics#minCount",
     "@type": "http://www.w3.org/2001/XMLSchema#integer",
   },
+  timeGraphPath: {
+    "@id": "https://oxfordia.setmeld.com/statistics#timeGraphPath",
+    "@type": "@id",
+  },
+  eventGraphPath: {
+    "@id": "https://oxfordia.setmeld.com/statistics#eventGraphPath",
+    "@type": "@id",
+  },
+  groupByGraphPath: {
+    "@id": "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
+    "@type": "@id",
+  },
   kAnonymity: {
     "@id": "https://oxfordia.setmeld.com/statistics#k-anonymity",
     "@type": "http://www.w3.org/2001/XMLSchema#integer",
