@@ -1,5 +1,5 @@
 import type {
-  AllowedPath,
+  MeanAllowedPath,
   GraphPath,
   MeanStatisticAccessRule,
 } from "@oxfordia/types";
@@ -8,7 +8,7 @@ import { findMatchingAllowedPath } from "../util/evaluateAllowedPaths";
 
 const STATP_MIN_COUNT_KEY = "https://oxfordia.setmeld.com/statistics#minCount";
 
-function readAllowedPathMinCount(allowedPath: AllowedPath): number {
+function readAllowedPathMinCount(allowedPath: MeanAllowedPath): number {
   const record = toRecord(allowedPath as unknown);
   const raw = record
     ? readProperty<number>(record, "minCount", STATP_MIN_COUNT_KEY)

@@ -34,3 +34,22 @@ export function parseNumericBindingValue(
   }
   return undefined;
 }
+
+export function parseStringBindingValue(
+  binding: BindingRecord,
+  variableName: string,
+): string | undefined {
+  const bindingValue = readBindingValue(binding, variableName);
+  if (typeof bindingValue === "string") {
+    return bindingValue;
+  }
+  if (
+    bindingValue &&
+    typeof bindingValue === "object" &&
+    "value" in bindingValue &&
+    typeof (bindingValue as { value: unknown }).value === "string"
+  ) {
+    return (bindingValue as { value: string }).value;
+  }
+  return undefined;
+}
