@@ -1,5 +1,5 @@
 import type { GraphPath } from "@oxfordia/plugins";
-import { graphPathSignature } from "./graphPathSignature";
+import { graphPathsAreEqual } from "./graphPathEquality";
 
 export interface AllowedPathEntry {
   graphPath?: GraphPath;
@@ -7,15 +7,14 @@ export interface AllowedPathEntry {
 
 /**
  * Find the first allowed path whose graphPath is structurally equivalent
- * to the query graph path (using canonical signature comparison).
+ * to the query graph path.
  */
 export function findMatchingAllowedPath<T extends AllowedPathEntry>(
   queryGraphPath: GraphPath,
   allowedPaths: T[],
 ): T | undefined {
-  const querySignature = graphPathSignature(queryGraphPath);
   return allowedPaths.find((entry) => {
     if (!entry.graphPath) return false;
-    return graphPathSignature(entry.graphPath) === querySignature;
+    return graphPathsAreEqual(entry.graphPath, queryGraphPath);
   });
 }

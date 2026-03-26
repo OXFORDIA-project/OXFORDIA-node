@@ -10,11 +10,16 @@ import {
 import { readableToQuads } from "@solid/community-server";
 import type { IntegrationPodGlobals } from "../../globals";
 import { HttpError } from "../HttpError";
-import { findStatisticPlugin } from "./plugin";
+import { kaplanMeierPlugin } from "./plugin/kaplanMeier/kaplanMeierPlugin";
+import { meanPlugin } from "./plugin/mean/meanPlugin";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const STATISTIC_ACCESS_RULE_TYPE =
   "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule";
+const statisticPlugins: AnyStatisticApiPlugin<IntegrationPodGlobals>[] = [
+  meanPlugin,
+  kaplanMeierPlugin,
+];
 
 function getStatisticAccessRuleUri(resourceUri: string): string {
   if (resourceUri.endsWith(".statistic-access-rule.ttl")) {
@@ -42,6 +47,12 @@ function validatePluginQuery(
   }
 
   return query as StatisticQuery;
+}
+
+function findStatisticPlugin(
+  route: string,
+): AnyStatisticApiPlugin<IntegrationPodGlobals> | undefined {
+  return statisticPlugins.find((plugin) => plugin.route === route);
 }
 
 async function getStatisticAccessRuleFor(

@@ -92,7 +92,7 @@ export type MeanWithCountResult = {
   count: number;
 };
 
-export async function executeMeanWithCountQuery(params: {
+async function executeMeanWithCountQuery(params: {
   resourceUri: string;
   graphPath: GraphPath;
   globals: IntegrationPodGlobals;
