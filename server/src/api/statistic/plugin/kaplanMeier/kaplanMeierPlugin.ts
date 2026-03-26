@@ -18,11 +18,6 @@ import {
   parseStringBindingValue,
 } from "../util/sparqlBindingParsers";
 import { evaluateKaplanMeierStatisticAccessRule } from "./evaluateKaplanMeierStatisticAccessRule";
-import {
-  computeKaplanMeierCurves,
-  type KaplanMeierCurve,
-  type KaplanMeierObservationRow,
-} from "./computeKaplanMeierCurve";
 
 export interface KaplanMeierQuery {
   resourceUri: string;
@@ -31,8 +26,14 @@ export interface KaplanMeierQuery {
   groupByPath?: GraphPath;
 }
 
+export interface KaplanMeierObservationRow {
+  time: number;
+  event: boolean;
+  group?: string;
+}
+
 export type KaplanMeierOutput = {
-  curves: KaplanMeierCurve[];
+  observations: KaplanMeierObservationRow[];
 };
 
 const kaplanMeierQuerySchema: JSONSchema4 = {
@@ -83,11 +84,7 @@ export const kaplanMeierPlugin: StatisticApiPlugin<
   },
 
   async performQuery(query, globals): Promise<KaplanMeierOutput> {
-    const rows = await executeKaplanMeierQuery(query, globals);
-    if (rows.length === 0) {
-      return { curves: [] };
-    }
-    return { curves: computeKaplanMeierCurves(rows) };
+    return { observations: await executeKaplanMeierQuery(query, globals) };
   },
 };
 
