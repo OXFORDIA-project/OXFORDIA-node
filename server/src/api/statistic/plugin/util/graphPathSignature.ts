@@ -81,6 +81,27 @@ const STATP_ONE_OF_KEY = `${STATP_PREFIX}oneOf`;
 const STATP_MIN_KEY = `${STATP_PREFIX}min`;
 const STATP_MAX_KEY = `${STATP_PREFIX}max`;
 
+const COMPACT_IRI_MAP: Record<string, string> = {
+  type: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+  rdfType: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+  isCategorizedBy:
+    "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy",
+  hasParticipant:
+    "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant",
+  hasMagnitude: "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude",
+  hasAspect: "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect",
+  numericValue: "https://w3id.org/semanticarts/ns/ontology/gist/numericValue",
+  produces: "https://w3id.org/semanticarts/ns/ontology/gist/produces",
+};
+
+function normalizeIri(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  if (value.includes("://")) return value;
+  if (value.startsWith("urn:")) return value;
+  if (value.startsWith("#")) return value;
+  return COMPACT_IRI_MAP[value] ?? value;
+}
+
 function normalizeLiteralFilter(
   filter: GraphLiteralFilter | undefined,
 ): ComparableLiteralFilter {
@@ -187,7 +208,7 @@ function normalizePredicateFilter(
     : filter.inverse;
 
   return {
-    predicate: getIriValue(predicateValue),
+    predicate: normalizeIri(getIriValue(predicateValue)),
     inverse: Boolean(inverseValue),
     some: normalizeValueSelector(someValue),
     every: normalizeValueSelector(everyValue),
@@ -261,8 +282,10 @@ function normalizeGraphPath(graphPath: GraphPath): ComparableGraphPath {
     .map((step) => {
       const stepRecord = toRecord(step as unknown) ?? {};
       return {
-        via: getIriValue(
-          readProperty<string | IriObject>(stepRecord, "via", STATP_VIA_KEY),
+        via: normalizeIri(
+          getIriValue(
+            readProperty<string | IriObject>(stepRecord, "via", STATP_VIA_KEY),
+          ),
         ),
         inverse: Boolean(
           readProperty<boolean>(stepRecord, "inverse", STATP_INVERSE_KEY),
