@@ -292,7 +292,7 @@ export interface KaplanMeierAllowedPath {
   "@context"?: LdoJsonldContext;
   timeGraphPath: GraphPath;
   eventGraphPath: GraphPath;
-  groupByGraphPath: GraphPath;
+  groupByGraphPath?: LdSet<GraphPath>;
   kAnonymity: number;
 }
 
