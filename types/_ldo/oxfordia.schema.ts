@@ -780,7 +780,22 @@ export const oxfordiaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
-              predicate: "https://oxfordia.setmeld.com/statistics#graphPath",
+              predicate:
+                "https://oxfordia.setmeld.com/statistics#timeGraphPath",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate:
+                "https://oxfordia.setmeld.com/statistics#eventGraphPath",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate:
+                "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
               valueExpr:
                 "https://oxfordia.setmeld.com/statistics#GraphPathShape",
             },

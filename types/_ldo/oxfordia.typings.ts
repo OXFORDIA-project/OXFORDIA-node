@@ -290,7 +290,9 @@ export interface KaplanMeierStatisticAccessRule {
 export interface KaplanMeierAllowedPath {
   "@id"?: string;
   "@context"?: LdoJsonldContext;
-  graphPath: GraphPath;
+  timeGraphPath: GraphPath;
+  eventGraphPath: GraphPath;
+  groupByGraphPath: GraphPath;
   kAnonymity: number;
 }
 
