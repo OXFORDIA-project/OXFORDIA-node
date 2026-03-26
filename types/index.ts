@@ -1,21 +1,20 @@
-export * from "./_ldo/kaplanMeier_statisticAccessRuleSchema.context";
-export * from "./_ldo/kaplanMeier_statisticAccessRuleSchema.schema";
-export * from "./_ldo/kaplanMeier_statisticAccessRuleSchema.shapeTypes";
-export * from "./_ldo/kaplanMeier_statisticAccessRuleSchema.typings";
+export * from "./_ldo/oxfordia.context";
+export * from "./_ldo/oxfordia.schema";
+export * from "./_ldo/oxfordia.shapeTypes";
+export * from "./_ldo/oxfordia.typings";
 
-export * from "./_ldo/mean_statisticAccessRuleSchema.context";
-export * from "./_ldo/mean_statisticAccessRuleSchema.schema";
-export * from "./_ldo/mean_statisticAccessRuleSchema.shapeTypes";
-export * from "./_ldo/mean_statisticAccessRuleSchema.typings";
+/** Same ShexJ schema as {@link oxfordiaSchema}; retained for call sites keyed by data schema id. */
+export { oxfordiaSchema as nemaline_dataSchemaSchema } from "./_ldo/oxfordia.schema";
+/** Same ShexJ schema as {@link oxfordiaSchema}; retained for mean statistic plugin registration. */
+export { oxfordiaSchema as mean_statisticAccessRuleSchemaSchema } from "./_ldo/oxfordia.schema";
+/** Same ShexJ schema as {@link oxfordiaSchema}; retained for Kaplan–Meier plugin registration. */
+export { oxfordiaSchema as kaplanMeier_statisticAccessRuleSchemaSchema } from "./_ldo/oxfordia.schema";
+/** Same ShexJ schema as {@link oxfordiaSchema}; retained for statistic access rule document tooling. */
+export { oxfordiaSchema as statisticAccessRuleDocumentSchema } from "./_ldo/oxfordia.schema";
 
-export * from "./_ldo/nemaline_dataSchema.context";
-export * from "./_ldo/nemaline_dataSchema.schema";
-export * from "./_ldo/nemaline_dataSchema.shapeTypes";
-export * from "./_ldo/nemaline_dataSchema.typings";
-
-export * from "./_ldo/statisticAccessRuleDocument.context";
-export * from "./_ldo/statisticAccessRuleDocument.schema";
-export * from "./_ldo/statisticAccessRuleDocument.shapeTypes";
-export * from "./_ldo/statisticAccessRuleDocument.typings";
+export { oxfordiaContext as nemaline_dataSchemaContext } from "./_ldo/oxfordia.context";
+export { oxfordiaContext as mean_statisticAccessRuleSchemaContext } from "./_ldo/oxfordia.context";
+export { oxfordiaContext as kaplanMeier_statisticAccessRuleSchemaContext } from "./_ldo/oxfordia.context";
+export { oxfordiaContext as statisticAccessRuleDocumentContext } from "./_ldo/oxfordia.context";
 
 export * from "./graphPath";

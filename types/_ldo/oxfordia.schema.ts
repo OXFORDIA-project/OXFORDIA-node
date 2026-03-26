@@ -2,13 +2,69 @@ import { Schema } from "shexj";
 
 /**
  * =============================================================================
- * nemaline_dataSchemaSchema: ShexJ Schema for nemaline_dataSchema
+ * oxfordiaSchema: ShexJ Schema for oxfordia
  * =============================================================================
  */
-export const nemaline_dataSchemaSchema: Schema = {
+export const oxfordiaSchema: Schema = {
   type: "Schema",
   start: "https://paediatrics.ox.ac.uk/terms/PersonShape",
   shapes: [
+    {
+      id: "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRuleDocumentShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+              valueExpr: {
+                type: "NodeConstraint",
+                values: [
+                  "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule",
+                ],
+              },
+            },
+            {
+              type: "TripleConstraint",
+              predicate:
+                "https://oxfordia.setmeld.com/statistic-access-rule#dataSchema",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+            },
+            {
+              type: "TripleConstraint",
+              predicate:
+                "https://oxfordia.setmeld.com/statistic-access-rule#hasStatisticPolicy",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistic-access-rule#StatisticPolicyShape",
+              min: 0,
+              max: -1,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistic-access-rule#StatisticPolicyShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "TripleConstraint",
+          predicate:
+            "https://oxfordia.setmeld.com/statistic-access-rule#statisticName",
+          valueExpr: {
+            type: "NodeConstraint",
+            datatype: "http://www.w3.org/2001/XMLSchema#string",
+          },
+        },
+      },
+    },
     {
       id: "https://paediatrics.ox.ac.uk/terms/PersonShape",
       type: "ShapeDecl",
@@ -653,6 +709,352 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
               },
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#MeanStatisticAccessRuleShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "TripleConstraint",
+          predicate: "https://oxfordia.setmeld.com/statistics#allowedPath",
+          valueExpr:
+            "https://oxfordia.setmeld.com/statistics#MeanAllowedPathShape",
+          min: 1,
+          max: -1,
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#MeanAllowedPathShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#graphPath",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#minCount",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#integer",
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#KaplanMeierStatisticAccessRuleShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "TripleConstraint",
+          predicate: "https://oxfordia.setmeld.com/statistics#allowedPath",
+          valueExpr:
+            "https://oxfordia.setmeld.com/statistics#KaplanMeierAllowedPathShape",
+          min: 1,
+          max: -1,
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#KaplanMeierAllowedPathShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#graphPath",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#k-anonymity",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#integer",
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#start",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#steps",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphTraversalStepShape",
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#target",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
+              min: 0,
+              max: 1,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#rdfType",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#iri",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#categories",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#predicates",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPredicateFilterShape",
+              min: 0,
+              max: -1,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#GraphPredicateFilterShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#predicate",
+              valueExpr: {
+                type: "NodeConstraint",
+                nodeKind: "iri",
+              },
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#inverse",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#boolean",
+              },
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#some",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#every",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#none",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
+              min: 0,
+              max: 1,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#GraphTraversalStepShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#via",
+              valueExpr: {
+                type: "NodeConstraint",
+                nodeKind: "iri",
+              },
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#inverse",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#boolean",
+              },
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#where",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",
+              min: 0,
+              max: 1,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "OneOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#node",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#literal",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphLiteralFilterShape",
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: "https://oxfordia.setmeld.com/statistics#GraphLiteralFilterShape",
+      type: "ShapeDecl",
+      shapeExpr: {
+        type: "Shape",
+        expression: {
+          type: "EachOf",
+          expressions: [
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#datatype",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#lang",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#equals",
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#oneOf",
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#min",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#decimal",
+              },
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#max",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#decimal",
+              },
+              min: 0,
+              max: 1,
             },
           ],
         },

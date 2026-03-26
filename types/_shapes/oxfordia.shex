@@ -1,0 +1,327 @@
+# ==============================================================================
+# Oxfordia — consolidated ShEx shapes
+#
+# This file merges all shapes previously split across:
+#   statisticAccessRuleDocument.shex
+#   nemaline_dataSchema.shex
+#   mean_statisticAccessRuleSchema.shex
+#   kaplanMeier_statisticAccessRuleSchema.shex
+# ==============================================================================
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX ox: <https://paediatrics.ox.ac.uk/terms/>
+PREFIX nm: <https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/>
+PREFIX sar: <https://oxfordia.setmeld.com/statistic-access-rule#>
+PREFIX statp: <https://oxfordia.setmeld.com/statistics#>
+
+# Default start shape for whole-document validation (nemaline clinical graph).
+start = @ox:PersonShape
+
+
+################################################################################
+#                                                                              #
+#  STATISTIC ACCESS RULE DOCUMENT (sar:)                                       #
+#  Root document shape for *.statistic-access-rule.ttl resources.              #
+#                                                                              #
+################################################################################
+
+# Represents the statistic access rule document as initialized by
+# NemalineCsvResourceCreator and then edited/saved by StatisticAccessRuleView.
+sar:StatisticAccessRuleDocumentShape {
+  a [sar:StatisticAccessRule] ;
+  sar:dataSchema xsd:string ;
+  sar:hasStatisticPolicy @sar:StatisticPolicyShape *
+}
+
+sar:StatisticPolicyShape {
+  sar:statisticName xsd:string
+}
+
+
+################################################################################
+#                                                                              #
+#  NEMALINE DATA SCHEMA (gist / ox / nm)                                       #
+#  Clinical nemaline-myopathy dataset shapes.                                  #
+#                                                                              #
+################################################################################
+
+# ---------------------------------------------------------
+# Shape: Person
+# Represents the clinical subject. Static demographics and aggregate
+# data are attached directly to this node.
+# ---------------------------------------------------------
+ox:PersonShape {
+    a [gist:Person] ;
+
+    # --- Identity ---
+    gist:isIdentifiedBy @ox:IDShape ;
+
+    # --- Demographics (Study Specific) ---
+    # Maps internal codes to semantic categories defined in the NM namespace.
+    gist:isCategorizedBy [nm:Cluster_1 nm:Cluster_2 nm:Cluster_3] ;
+    gist:isCategorizedBy [nm:GeneticGroup_Variant1 nm:GeneticGroup_Variant2 nm:GeneticGroup_Variant3] ;
+    
+    # --- Demographics (General) ---
+    gist:isCategorizedBy [ox:LeftHanded ox:RightHanded] ? ;
+
+    # --- Clinical Status ---
+    # Captures the ambulation status at the start of the study.
+    gist:isCategorizedBy [nm:Status_Ambulant nm:Status_NonAmbulant] ;
+
+    # Indicates if the patient's overall performance is flagged as below the cohort average.
+    gist:isCategorizedBy [nm:Performance_BelowAverage] ? ;
+
+    # --- Static Magnitudes ---
+    # Age at the time of baseline assessment.
+    gist:hasMagnitude @ox:BaselineAgeMagnitude ;
+
+    # Age at which ambulation was lost (if applicable).
+    gist:hasMagnitude @ox:LoAAgeMagnitude ? ;
+
+    # The sum of MFM scores across all visits recorded in this dataset.
+    gist:hasMagnitude @ox:TotalMFMMagnitude ? ;
+
+    # --- Longitudinal Assessments ---
+    # Links the person to specific assessment events.
+    # Modeled as an inverse relationship: The Person "participated in" these events.
+    ^gist:hasParticipant @nm:MFMAssessmentEventShape * ;
+
+    # Links the person to derived Kaplan-Meier observation data.
+    ^gist:hasParticipant @nm:KaplanMeierObservationShape ? ;
+}
+
+# ---------------------------------------------------------
+# Shape: MFM Assessment Event
+# Represents a discrete clinical encounter where Motor Function Measure (MFM)
+# data was collected. Corresponds to V1-V5 columns.
+# ---------------------------------------------------------
+nm:MFMAssessmentEventShape {
+    # Modeled as a gist:Determination because the event calculates/determines a value.
+    a [gist:Determination] ;
+
+    # Categorizes the event so generic systems recognize the assessment type.
+    gist:isCategorizedBy [nm:AssessmentType_MFM32] ;
+
+    # Captures the timing of the visit relative to the study baseline.
+    gist:hasMagnitude @nm:TimeFromBaselineMagnitude ;
+
+    # Links the event to the subject being assessed.
+    gist:hasParticipant @ox:PersonShape ;
+
+    # The event produces a content node (the record) which holds the actual score.
+    gist:produces @nm:AssessmentResult ;
+}
+
+# ---------------------------------------------------------
+# Shape: Kaplan-Meier Observation
+# Represents a derived survival-analysis determination for one person.
+# ---------------------------------------------------------
+nm:KaplanMeierObservationShape {
+    a [gist:Determination] ;
+    gist:isCategorizedBy [nm:AssessmentType_KaplanMeier] ;
+    gist:hasParticipant @ox:PersonShape ;
+    gist:hasMagnitude @ox:KaplanMeierEventMagnitude ;
+    gist:hasMagnitude @ox:KaplanMeierTimeMagnitude ;
+}
+
+# ---------------------------------------------------------
+# Shape: Assessment Result
+# The informational content produced by the assessment event.
+# ---------------------------------------------------------
+nm:AssessmentResult {
+    a [gist:Content] ;
+    
+    # Explicitly states the subject matter of this record.
+    gist:isAbout [nm:Concept_MotorFunction] ;
+    
+    # The actual score value derived from the assessment.
+    gist:hasMagnitude @nm:MFMScoreMagnitude ;
+}
+
+# ---------------------------------------------------------
+# Magnitudes
+# Gist requires numeric values to be wrapped in a Magnitude object
+# that defines the 'Aspect' (what is measured) and the Unit.
+# ---------------------------------------------------------
+
+# Represents the time elapsed since study enrollment (e.g., 0.5 years).
+nm:TimeFromBaselineMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [nm:Aspect_DurationSinceStudyEnrollment] ;
+    gist:hasUnitOfMeasure [gist:Unit_Year] ;
+    gist:numericValue xsd:decimal ;
+}
+
+# Represents the score achieved on the MFM-32 assessment during a specific visit.
+nm:MFMScoreMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [nm:Aspect_MFM32_VisitScore] ;
+    gist:numericValue xsd:integer ;
+}
+
+# Represents the aggregate MFM score for the patient across the dataset.
+ox:TotalMFMMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [nm:Aspect_MFM32_AggregateScore] ;
+    gist:numericValue xsd:integer ;
+}
+
+# Represents Kaplan-Meier event indicator (1=event observed, 0=censored).
+ox:KaplanMeierEventMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [nm:Aspect_KaplanMeierEventIndicator] ;
+    gist:numericValue xsd:integer ;
+}
+
+# Represents Kaplan-Meier time in years to event/censoring.
+ox:KaplanMeierTimeMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [nm:Aspect_KaplanMeierTimeToEvent] ;
+    gist:hasUnitOfMeasure [gist:Unit_Year] ;
+    gist:numericValue xsd:decimal ;
+}
+
+# Represents the patient's age at the start of the study.
+ox:BaselineAgeMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [gist:Aspect_Age] ;
+    gist:hasUnitOfMeasure [gist:Unit_Year] ;
+    gist:numericValue xsd:decimal ;
+}
+
+# Represents the age at which the patient lost the ability to ambulate.
+ox:LoAAgeMagnitude {
+    a [gist:Magnitude] ;
+    gist:hasAspect [nm:Aspect_AgeAtLossOfAmbulation] ;
+    gist:hasUnitOfMeasure [gist:Unit_Year] ;
+    gist:numericValue xsd:decimal ;
+}
+
+# ---------------------------------------------------------
+# Identity
+# ---------------------------------------------------------
+ox:IDShape {
+    a [gist:ID] ;
+    gist:uniqueText xsd:string ;
+}
+
+
+################################################################################
+#                                                                              #
+#  MEAN STATISTIC ACCESS RULE (statp:)                                         #
+#  Policy shape for mean statistics                                            #
+#                                                                              #
+################################################################################
+
+# A statistic access rule that defines whats allowed for mean statistics
+statp:MeanStatisticAccessRuleShape {
+  # A list of paths that are allowed to be calculated
+  statp:allowedPath @statp:MeanAllowedPathShape +
+}
+
+# The allowed paths
+statp:MeanAllowedPathShape {
+  # A definition of the allowed path
+  statp:graphPath @statp:GraphPathShape ;
+  # The minimum number of values that can exist in this path to return
+  statp:minCount xsd:integer ;
+}
+
+################################################################################
+#                                                                              #
+#  KAPLAN MEIER STATISTIC ACCESS RULE (statp:)                                 #
+#  Policy shape for kaplan meier statistics                                    #
+#                                                                              #
+################################################################################
+
+# A statistic access rule that defines whats allowed for mean statistics
+statp:KaplanMeierStatisticAccessRuleShape {
+  # A list of paths that are allowed to be calculated
+  statp:allowedPath @statp:KaplanMeierAllowedPathShape +
+}
+
+# The allowed paths
+statp:KaplanMeierAllowedPathShape {
+  # A definition of the allowed path
+  statp:graphPath @statp:GraphPathShape ;
+  # The minimum number of values that can exist in this path to return
+  statp:k-anonymity xsd:integer ;
+}
+
+################################################################################
+#                                                                              #
+#  GRAPH PATH                                                                  #
+#                                                                              #
+################################################################################
+
+# The entry point to a graph path
+statp:GraphPathShape {
+  # The starting node filter in the graph
+  statp:start @statp:GraphNodeFilterShape ;
+  # The traversal steps to follow
+  statp:steps @statp:GraphTraversalStepShape * ;
+  # Optional target selector for the resulting value
+  statp:target @statp:GraphValueSelectorShape ? ;
+}
+
+# Filters nodes based on type/iri/category/predicate constraints
+statp:GraphNodeFilterShape {
+  # Optional rdf:type constraints
+  statp:rdfType xsd:string * ;
+  # Optional subject IRI constraints
+  statp:iri xsd:string * ;
+  # Optional category constraints
+  statp:categories xsd:string * ;
+  # Optional predicate-level filters
+  statp:predicates @statp:GraphPredicateFilterShape * ;
+}
+
+# Filters a predicate edge by selector semantics
+statp:GraphPredicateFilterShape {
+  # The predicate to inspect
+  statp:predicate IRI ;
+  # Whether to inspect inverse direction
+  statp:inverse xsd:boolean ? ;
+  # At least one object must match this selector
+  statp:some @statp:GraphValueSelectorShape ? ;
+  # All objects must match this selector
+  statp:every @statp:GraphValueSelectorShape ? ;
+  # No objects may match this selector
+  statp:none @statp:GraphValueSelectorShape ? ;
+}
+
+# A step in graph traversal
+statp:GraphTraversalStepShape {
+  # The predicate to traverse through
+  statp:via IRI ;
+  # Whether or not this is an inverse predicate (defaults to false)
+  statp:inverse xsd:boolean ? ;
+  # Optional node filter for the reached node
+  statp:where @statp:GraphNodeFilterShape ? ;
+}
+
+# Selects either a node filter or a literal filter
+statp:GraphValueSelectorShape {
+  (
+    statp:node @statp:GraphNodeFilterShape
+    | statp:literal @statp:GraphLiteralFilterShape
+  )
+}
+
+# Literal-specific selector constraints
+statp:GraphLiteralFilterShape {
+  # Optional datatype constraints
+  statp:datatype xsd:string * ;
+  # Optional language constraints
+  statp:lang xsd:string * ;
+  # Optional exact scalar value
+  statp:equals . ? ;
+  # Optional set of allowed scalar values
+  statp:oneOf . * ;
+  # Optional numeric lower bound
+  statp:min xsd:decimal ? ;
+  # Optional numeric upper bound
+  statp:max xsd:decimal ? ;
+}
