@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Switch, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import {
   Button,
@@ -191,6 +191,9 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       paddingVertical: 8,
       paddingHorizontal: 6,
     },
+    dropdownScroll: {
+      maxHeight: 304,
+    },
     iconButton: {
       width: 32,
       height: 32,
@@ -287,14 +290,16 @@ function GraphPathFieldEditor({
             <Button text={choosePathLabel} variant="secondary" style={styles.dropdownTriggerButton} />
           </DropdownMenuTrigger>
           <DropdownMenuContent style={styles.dropdownContent}>
-            {graphPathShortcuts.map((shortcut) => (
-              <DropdownMenuItem
-                key={shortcut.name}
-                onPress={() => onChange(instantiateGraphPathShortcut(shortcut))}
-              >
-                <Text>{shortcut.name}</Text>
-              </DropdownMenuItem>
-            ))}
+            <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
+              {graphPathShortcuts.map((shortcut) => (
+                <DropdownMenuItem
+                  key={shortcut.name}
+                  onPress={() => onChange(instantiateGraphPathShortcut(shortcut))}
+                >
+                  <Text>{shortcut.name}</Text>
+                </DropdownMenuItem>
+              ))}
+            </ScrollView>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
@@ -322,6 +327,25 @@ function GraphPathFieldEditor({
       ) : null}
     </View>
   );
+}
+
+function getDefaultFieldValue(field: SchemaFieldDefinition): StatisticAccessRuleScalarValue | GraphPath | GraphPath[] | StatisticAccessRuleObjectValue[] | string[] | number[] | boolean[] {
+  if (field.type === "graphPath") {
+    return field.repeated ? [] : createEmptyGraphPath();
+  }
+  if (field.type === "object") {
+    return [];
+  }
+  if (field.repeated) {
+    return [];
+  }
+  if (field.type === "integer") {
+    return 1;
+  }
+  if (field.type === "boolean") {
+    return false;
+  }
+  return "";
 }
 
 export function StatisticAccessRuleEditorForm({
@@ -410,6 +434,108 @@ export function StatisticAccessRuleEditorForm({
                               {(field.nestedFields ?? []).map((nestedField) => {
                                 const nestedValue = item.values[nestedField.key];
                                 if (nestedField.type === "graphPath") {
+                                  if (nestedField.repeated) {
+                                    const nestedGraphPaths = Array.isArray(nestedValue)
+                                      ? (nestedValue as GraphPath[])
+                                      : [];
+                                    return (
+                                      <View key={nestedField.key} style={styles.block}>
+                                        <Text style={styles.sectionLabel}>{nestedField.label}</Text>
+                                        <View style={styles.nestedItemsList}>
+                                          {nestedGraphPaths.map((graphPathItem, graphPathIndex) => (
+                                            <View key={`${nestedField.key}-${graphPathIndex}`} style={styles.nestedCard}>
+                                              <View style={styles.nestedHeader}>
+                                                <Text style={styles.nestedTitle}>{nestedField.label} {graphPathIndex + 1}</Text>
+                                                <RemoveIconButton
+                                                  styles={styles}
+                                                  color={colors.text}
+                                                  onPress={() =>
+                                                    updatePolicy(policy.id, (entry) => ({
+                                                      ...entry,
+                                                      values: {
+                                                        ...entry.values,
+                                                        [field.key]: objects.map((x) =>
+                                                          x.id !== item.id
+                                                            ? x
+                                                            : {
+                                                                ...x,
+                                                                values: {
+                                                                  ...x.values,
+                                                                  [nestedField.key]: nestedGraphPaths.filter(
+                                                                    (_, idx) => idx !== graphPathIndex,
+                                                                  ),
+                                                                },
+                                                              },
+                                                        ),
+                                                      },
+                                                    }))
+                                                  }
+                                                />
+                                              </View>
+                                              <GraphPathFieldEditor
+                                                dataSchemaName={dataSchemaName}
+                                                graphPathValue={getGraphPathFromValue(graphPathItem)}
+                                                graphPathShortcuts={graphPathShortcuts}
+                                                predicateOptions={predicateOptions}
+                                                getStartPredicateOptions={getStartPredicateOptions}
+                                                getStartValueOptions={getStartValueOptions}
+                                                getStepPredicateOptions={getStepPredicateOptions}
+                                                getStepWherePredicateOptions={getStepWherePredicateOptions}
+                                                getStepWhereValueOptions={getStepWhereValueOptions}
+                                                getStepTargetShapeNames={getStepTargetShapeNames}
+                                                onChange={(nextGraphPath: GraphPath) =>
+                                                  updatePolicy(policy.id, (entry) => ({
+                                                    ...entry,
+                                                    values: {
+                                                      ...entry.values,
+                                                      [field.key]: objects.map((x) =>
+                                                        x.id !== item.id
+                                                          ? x
+                                                          : {
+                                                              ...x,
+                                                              values: {
+                                                                ...x.values,
+                                                                [nestedField.key]: nestedGraphPaths.map(
+                                                                  (existingPath, idx) =>
+                                                                    idx === graphPathIndex ? nextGraphPath : existingPath,
+                                                                ),
+                                                              },
+                                                            },
+                                                      ),
+                                                    },
+                                                  }))
+                                                }
+                                              />
+                                            </View>
+                                          ))}
+                                        </View>
+                                        <Button
+                                          text={`Add ${nestedField.label}`}
+                                          variant="secondary"
+                                          style={styles.addItemButton}
+                                          onPress={() =>
+                                            updatePolicy(policy.id, (entry) => ({
+                                              ...entry,
+                                              values: {
+                                                ...entry.values,
+                                                [field.key]: objects.map((x) =>
+                                                  x.id !== item.id
+                                                    ? x
+                                                    : {
+                                                        ...x,
+                                                        values: {
+                                                          ...x.values,
+                                                          [nestedField.key]: [...nestedGraphPaths, createEmptyGraphPath()],
+                                                        },
+                                                      },
+                                                ),
+                                              },
+                                            }))
+                                          }
+                                        />
+                                      </View>
+                                    );
+                                  }
                                   return (
                                     <View key={nestedField.key} style={styles.fieldWrapper}>
                                       <Text style={styles.fieldLabel}>{nestedField.label}</Text>
@@ -487,13 +613,7 @@ export function StatisticAccessRuleEditorForm({
                                     values: Object.fromEntries(
                                       (field.nestedFields ?? []).map((nestedField) => [
                                         nestedField.key,
-                                        nestedField.type === "graphPath"
-                                          ? createEmptyGraphPath()
-                                          : nestedField.type === "integer"
-                                            ? 1
-                                            : nestedField.type === "boolean"
-                                              ? false
-                                              : "",
+                                        getDefaultFieldValue(nestedField),
                                       ]),
                                     ),
                                   },
@@ -507,6 +627,75 @@ export function StatisticAccessRuleEditorForm({
                   }
 
                   if (field.type === "graphPath") {
+                    if (field.repeated) {
+                      const graphPathValues = Array.isArray(fieldValue)
+                        ? (fieldValue as GraphPath[])
+                        : [];
+                      return (
+                        <View key={field.key} style={styles.block}>
+                          <Text style={styles.sectionLabel}>{field.label}</Text>
+                          <View style={styles.nestedItemsList}>
+                            {graphPathValues.map((graphPathItem, graphPathIndex) => (
+                              <View key={`${field.key}-${graphPathIndex}`} style={styles.nestedCard}>
+                                <View style={styles.nestedHeader}>
+                                  <Text style={styles.nestedTitle}>{field.label} {graphPathIndex + 1}</Text>
+                                  <RemoveIconButton
+                                    styles={styles}
+                                    color={colors.text}
+                                    onPress={() =>
+                                      updatePolicy(policy.id, (entry) => ({
+                                        ...entry,
+                                        values: {
+                                          ...entry.values,
+                                          [field.key]: graphPathValues.filter((_, idx) => idx !== graphPathIndex),
+                                        },
+                                      }))
+                                    }
+                                  />
+                                </View>
+                                <GraphPathFieldEditor
+                                  dataSchemaName={dataSchemaName}
+                                  graphPathValue={getGraphPathFromValue(graphPathItem)}
+                                  graphPathShortcuts={graphPathShortcuts}
+                                  predicateOptions={predicateOptions}
+                                  getStartPredicateOptions={getStartPredicateOptions}
+                                  getStartValueOptions={getStartValueOptions}
+                                  getStepPredicateOptions={getStepPredicateOptions}
+                                  getStepWherePredicateOptions={getStepWherePredicateOptions}
+                                  getStepWhereValueOptions={getStepWhereValueOptions}
+                                  getStepTargetShapeNames={getStepTargetShapeNames}
+                                  onChange={(nextGraphPath: GraphPath) =>
+                                    updatePolicy(policy.id, (entry) => ({
+                                      ...entry,
+                                      values: {
+                                        ...entry.values,
+                                        [field.key]: graphPathValues.map((existingPath, idx) =>
+                                          idx === graphPathIndex ? nextGraphPath : existingPath,
+                                        ),
+                                      },
+                                    }))
+                                  }
+                                />
+                              </View>
+                            ))}
+                          </View>
+                          <Button
+                            text={`Add ${field.label}`}
+                            variant="secondary"
+                            style={styles.addItemButton}
+                            onPress={() =>
+                              updatePolicy(policy.id, (entry) => ({
+                                ...entry,
+                                values: {
+                                  ...entry.values,
+                                  [field.key]: [...graphPathValues, createEmptyGraphPath()],
+                                },
+                              }))
+                            }
+                          />
+                        </View>
+                      );
+                    }
                     return (
                       <View key={field.key} style={styles.fieldWrapper}>
                         <Text style={styles.fieldLabel}>{field.label}</Text>
@@ -623,11 +812,13 @@ export function StatisticAccessRuleEditorForm({
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent style={styles.dropdownContent}>
-            {statisticNames.map((name) => (
-              <DropdownMenuItem key={name} onPress={() => addStatisticPolicyByName(name)}>
-                <Text>{name}</Text>
-              </DropdownMenuItem>
-            ))}
+            <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
+              {statisticNames.map((name) => (
+                <DropdownMenuItem key={name} onPress={() => addStatisticPolicyByName(name)}>
+                  <Text>{name}</Text>
+                </DropdownMenuItem>
+              ))}
+            </ScrollView>
           </DropdownMenuContent>
         </DropdownMenu>
       </View>
