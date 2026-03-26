@@ -1,103 +1,232 @@
+import { set } from "@ldo/ldo";
 import { useEffect, useMemo, useState } from "react";
-import { parseRdf } from "@ldo/ldo";
-import { defaultGraph, namedNode, quad } from "@ldo/rdf-utils";
-import { useChangeDataset, useResource } from "@ldo/solid-react";
-import type {
-  DataSchemaJsonView,
-  StatisticPolicy,
-  StatisticAccessRuleSchemas,
-} from "../types";
+import { useChangeSubject, useMatchSubject, useResource } from "@ldo/solid-react";
 import {
-  buildStatisticAccessRuleTurtle,
-  getStatisticAccessRuleTtlUri,
-  loadStatisticAccessRule,
-} from "../utils/statisticAccessRuleRdf";
-import {
-  extractPredicateOptions,
-} from "../utils/schemaOptions";
+  KaplanMeierStatisticAccessRuleShapeType,
+  MeanStatisticAccessRuleShapeType,
+  StatisticAccessRuleDocumentShapeType,
+  type GraphPath,
+  type GraphNodeFilter,
+  type KaplanMeierStatisticAccessRule,
+  type MeanStatisticAccessRule,
+  type StatisticAccessRuleDocument,
+  type StatisticPolicy as LdoStatisticPolicy,
+} from "@oxfordia/types";
+import type { DataSchemaJsonView } from "../dataSchemas";
+import { asJsonDataSchema, findDataSchema } from "../dataSchemas";
 import {
   createEmptyGraphPathOptionGetters,
   createGraphPathOptionGetters,
+  extractPredicateOptions,
 } from "../utils/graphPathOptionResolver";
-import { asJsonDataSchema, findDataSchema } from "../dataSchemas";
 import { getGraphPathShortcutsForDataSchema } from "../../../graphPathShortcuts";
-import { getStatisticAccessRuleSchemasByStatisticPlugin } from "../../../plugin";
-import { createDefaultStatisticPolicy } from "../utils/statisticAccessRuleSchemaForm";
+import { statisticPlugins } from "../../../plugin";
 
-function createSnapshot(
-  dataSchemaName: string | null,
-  statisticPolicies: StatisticPolicy[],
-): string {
-  return JSON.stringify({ dataSchemaName, statisticPolicies });
+const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+const SAR_TYPE =
+  "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule";
+
+export type MeanAllowedPathForm = {
+  graphPath: GraphPath;
+  minCount: number;
+};
+
+export type KmAllowedPathForm = {
+  timeGraphPath: GraphPath;
+  eventGraphPath: GraphPath;
+  groupByGraphPaths: GraphPath[];
+  kAnonymity: number;
+};
+
+export type PolicyFormState =
+  | {
+      key: string;
+      statisticName: "mean";
+      allowedPaths: MeanAllowedPathForm[];
+    }
+  | {
+      key: string;
+      statisticName: "kaplan-meier";
+      allowedPaths: KmAllowedPathForm[];
+    };
+
+function toArray<T>(value: Iterable<T> | undefined): T[] {
+  if (!value) return [];
+  return Array.from(value);
 }
 
-function getDataSchema(schemaName: string): DataSchemaJsonView {
-  const schema = findDataSchema(schemaName);
-  if (!schema) {
-    throw new Error(`Unknown data schema: ${schemaName}`);
-  }
-  return asJsonDataSchema(schemaName, schema);
+export function createEmptyGraphPath(): GraphPath {
+  return { start: {} as GraphNodeFilter } as GraphPath;
+}
+
+function uid(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+function readPoliciesFromLdo(
+  document: StatisticAccessRuleDocument | undefined,
+  meanMap: Map<string, MeanStatisticAccessRule>,
+  kmMap: Map<string, KaplanMeierStatisticAccessRule>,
+): PolicyFormState[] {
+  if (!document?.hasStatisticPolicy) return [];
+  return toArray(document.hasStatisticPolicy)
+    .map((policy): PolicyFormState | null => {
+      const id = policy["@id"] ?? uid();
+      const name = policy.statisticName;
+
+      if (name === "mean") {
+        const mean = meanMap.get(id);
+        return {
+          key: id,
+          statisticName: "mean",
+          allowedPaths: mean
+            ? toArray(mean.allowedPath).map((p) => ({
+                graphPath: p.graphPath ?? createEmptyGraphPath(),
+                minCount: p.minCount ?? 1,
+              }))
+            : [],
+        };
+      }
+
+      if (name === "kaplan-meier") {
+        const km = kmMap.get(id);
+        return {
+          key: id,
+          statisticName: "kaplan-meier",
+          allowedPaths: km
+            ? toArray(km.allowedPath).map((p) => ({
+                timeGraphPath: p.timeGraphPath ?? createEmptyGraphPath(),
+                eventGraphPath: p.eventGraphPath ?? createEmptyGraphPath(),
+                groupByGraphPaths: p.groupByGraphPath
+                  ? toArray(p.groupByGraphPath)
+                  : [],
+                kAnonymity: p.kAnonymity ?? 1,
+              }))
+            : [],
+        };
+      }
+
+      return null;
+    })
+    .filter((p): p is PolicyFormState => p !== null);
+}
+
+function buildPoliciesForWrite(
+  baseUri: string,
+  policies: PolicyFormState[],
+): LdoStatisticPolicy[] {
+  return policies.map((policy) => {
+    const policyId = policy.key.startsWith("http")
+      ? policy.key
+      : `${baseUri}#${policy.key}`;
+
+    if (policy.statisticName === "mean") {
+      return {
+        "@id": policyId,
+        statisticName: "mean",
+        allowedPath: set(
+          ...policy.allowedPaths.map((p) => ({
+            graphPath: p.graphPath,
+            minCount: p.minCount,
+          })),
+        ),
+      } as unknown as LdoStatisticPolicy;
+    }
+
+    return {
+      "@id": policyId,
+      statisticName: "kaplan-meier",
+      allowedPath: set(
+        ...policy.allowedPaths.map((p) => ({
+          timeGraphPath: p.timeGraphPath,
+          eventGraphPath: p.eventGraphPath,
+          groupByGraphPath:
+            p.groupByGraphPaths.length > 0
+              ? set(...p.groupByGraphPaths)
+              : undefined,
+          kAnonymity: p.kAnonymity,
+        })),
+      ),
+    } as unknown as LdoStatisticPolicy;
+  });
 }
 
 export function useStatisticAccessRuleEditorData(
-  authFetch: typeof fetch,
   targetUri: string | undefined,
 ) {
-  const statisticAccessRuleUri = useMemo(
-    () => (targetUri ? getStatisticAccessRuleTtlUri(targetUri) : undefined),
-    [targetUri],
-  );
-  const statisticAccessRuleResource = useResource(statisticAccessRuleUri);
-  const [, setDataset, commitDataset] = useChangeDataset();
-  const [isLoading, setIsLoading] = useState(true);
+  const resource = useResource(targetUri);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [statisticAccessRuleSchemas, setStatisticAccessRuleSchemas] =
-    useState<StatisticAccessRuleSchemas>(
-    {},
+  const [policies, setPolicies] = useState<PolicyFormState[]>([]);
+  const [initialJson, setInitialJson] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const matchedDocs = useMatchSubject(
+    StatisticAccessRuleDocumentShapeType,
+    RDF_TYPE,
+    SAR_TYPE,
+    targetUri,
   );
-  const [dataSchemaName, setDataSchemaName] = useState<string | null>(null);
-  const [dataSchema, setDataSchema] = useState<DataSchemaJsonView | null>(null);
-  const [statisticPolicies, setStatisticPolicies] = useState<StatisticPolicy[]>([]);
-  const [initialSnapshot, setInitialSnapshot] = useState<string | null>(null);
+  const document = useMemo(
+    () => toArray(matchedDocs as Iterable<StatisticAccessRuleDocument>)[0],
+    [matchedDocs],
+  );
+
+  const rootId = useMemo(
+    () =>
+      document?.["@id"] ?? (targetUri ? `${targetUri}#policy` : undefined),
+    [document, targetUri],
+  );
+
+  const meanSubjects = useMatchSubject(
+    MeanStatisticAccessRuleShapeType,
+    undefined,
+    undefined,
+    targetUri,
+  );
+  const kmSubjects = useMatchSubject(
+    KaplanMeierStatisticAccessRuleShapeType,
+    undefined,
+    undefined,
+    targetUri,
+  );
+
+  const meanMap = useMemo(() => {
+    const map = new Map<string, MeanStatisticAccessRule>();
+    for (const s of meanSubjects) if (s["@id"]) map.set(s["@id"], s);
+    return map;
+  }, [meanSubjects]);
+
+  const kmMap = useMemo(() => {
+    const map = new Map<string, KaplanMeierStatisticAccessRule>();
+    for (const s of kmSubjects) if (s["@id"]) map.set(s["@id"], s);
+    return map;
+  }, [kmSubjects]);
+
+  const loadedPolicies = useMemo(
+    () => readPoliciesFromLdo(document, meanMap, kmMap),
+    [document, meanMap, kmMap],
+  );
+
+  const dataSchemaName = document?.dataSchema ?? null;
+  const dataSchema = useMemo<DataSchemaJsonView | null>(() => {
+    if (!dataSchemaName) return null;
+    const raw = findDataSchema(dataSchemaName);
+    return raw ? asJsonDataSchema(dataSchemaName, raw) : null;
+  }, [dataSchemaName]);
 
   useEffect(() => {
     if (!targetUri) return;
-    let cancelled = false;
-    setIsLoading(true);
-    setError(null);
-    setInitialSnapshot(null);
-    const schemas = getStatisticAccessRuleSchemasByStatisticPlugin();
-    setStatisticAccessRuleSchemas(schemas);
+    const snapshot = JSON.stringify(loadedPolicies);
+    if (isHydrated && initialJson === snapshot) return;
+    setPolicies(loadedPolicies);
+    setInitialJson(snapshot);
+    setIsHydrated(true);
+  }, [initialJson, isHydrated, loadedPolicies, targetUri]);
 
-    Promise.resolve(loadStatisticAccessRule(authFetch, targetUri, schemas))
-      .then((statisticAccessRule) => {
-        let loadedDataSchema: DataSchemaJsonView | null = null;
-        if (statisticAccessRule.dataSchemaName) {
-          loadedDataSchema = getDataSchema(statisticAccessRule.dataSchemaName);
-        }
-        if (cancelled) return;
-        setDataSchemaName(statisticAccessRule.dataSchemaName);
-        setDataSchema(loadedDataSchema);
-        setStatisticPolicies(statisticAccessRule.statisticPolicies);
-        setInitialSnapshot(
-          createSnapshot(
-            statisticAccessRule.dataSchemaName,
-            statisticAccessRule.statisticPolicies,
-          ),
-        );
-        setIsLoading(false);
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        setError(e instanceof Error ? e.message : String(e));
-        setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authFetch, targetUri]);
+  const isLoading = !isHydrated;
+  const isDirty =
+    initialJson !== null && JSON.stringify(policies) !== initialJson;
 
   const predicateOptions = useMemo(
     () => extractPredicateOptions(dataSchema),
@@ -107,93 +236,74 @@ export function useStatisticAccessRuleEditorData(
     () => getGraphPathShortcutsForDataSchema(dataSchemaName),
     [dataSchemaName],
   );
-  const emptyGetters = useMemo(() => createEmptyGraphPathOptionGetters(), []);
+  const emptyGetters = useMemo(
+    () => createEmptyGraphPathOptionGetters(),
+    [],
+  );
   const [graphPathGetters, setGraphPathGetters] = useState(emptyGetters);
   useEffect(() => {
     let cancelled = false;
     setGraphPathGetters(emptyGetters);
-    Promise.resolve(createGraphPathOptionGetters(dataSchema))
+    createGraphPathOptionGetters(dataSchema)
       .then((getters) => {
-        if (cancelled) return;
-        setGraphPathGetters(getters);
+        if (!cancelled) setGraphPathGetters(getters);
       })
       .catch(() => {
-        if (cancelled) return;
-        setGraphPathGetters(emptyGetters);
+        if (!cancelled) setGraphPathGetters(emptyGetters);
       });
     return () => {
       cancelled = true;
     };
   }, [dataSchema, emptyGetters]);
+
   const statisticNames = useMemo(
-    () => Object.keys(statisticAccessRuleSchemas).sort(),
-    [statisticAccessRuleSchemas],
-  );
-  const currentSnapshot = useMemo(
-    () => createSnapshot(dataSchemaName, statisticPolicies),
-    [dataSchemaName, statisticPolicies],
-  );
-  const isDirty = useMemo(
-    () => initialSnapshot !== null && currentSnapshot !== initialSnapshot,
-    [currentSnapshot, initialSnapshot],
+    () => statisticPlugins.map((p) => p.name).sort(),
+    [],
   );
 
-  const addStatisticPolicy = (selectedName?: string) => {
-    const selected = selectedName || statisticNames[0];
-    if (!selected) return;
-    const schema = statisticAccessRuleSchemas[selected];
-    if (!schema) return;
-    setStatisticPolicies((prev) => [
-      ...prev,
-      createDefaultStatisticPolicy(selected, schema),
-    ]);
+  const [, setDoc, commitDoc] = useChangeSubject(
+    StatisticAccessRuleDocumentShapeType,
+    rootId,
+  );
+
+  const addPolicy = (name: string) => {
+    if (name === "mean") {
+      setPolicies((prev) => [
+        ...prev,
+        { key: uid(), statisticName: "mean", allowedPaths: [] },
+      ]);
+    } else if (name === "kaplan-meier") {
+      setPolicies((prev) => [
+        ...prev,
+        { key: uid(), statisticName: "kaplan-meier", allowedPaths: [] },
+      ]);
+    }
   };
 
   const save = async () => {
-    if (!statisticAccessRuleUri) return;
+    if (!targetUri || !rootId || !resource) return;
     setIsSaving(true);
     setError(null);
     try {
-      const ttl = buildStatisticAccessRuleTurtle(
-        dataSchemaName,
-        statisticPolicies,
-        statisticAccessRuleSchemas,
-      );
-      const readResult = await statisticAccessRuleResource.read();
-      if (readResult.isError) {
-        throw new Error(readResult.message);
-      }
-
-      const parsedDataset = await parseRdf(ttl, {
-        baseIRI: statisticAccessRuleUri,
-        format: "Turtle",
-      });
-      const graph = namedNode(statisticAccessRuleUri);
-      const parsedQuads = Array.from(parsedDataset).map((q) =>
-        quad(q.subject, q.predicate, q.object, graph),
+      const policyData = buildPoliciesForWrite(targetUri, policies);
+      setDoc(
+        resource,
+        (doc: StatisticAccessRuleDocument) => {
+          doc.type = set({ "@id": "StatisticAccessRule" });
+          doc.dataSchema = dataSchemaName ?? "nemaline";
+          doc.hasStatisticPolicy = set(...policyData);
+        },
+        document ??
+          ({
+            "@id": rootId,
+            type: set({ "@id": "StatisticAccessRule" }),
+            dataSchema: dataSchemaName ?? "nemaline",
+          } as StatisticAccessRuleDocument),
       );
 
-      setDataset((dataset: {
-        deleteMatches: (
-          subject?: unknown,
-          predicate?: unknown,
-          object?: unknown,
-          graph?: unknown,
-        ) => unknown;
-        addAll: (quads: unknown[]) => unknown;
-      }) => {
-        // Keep non-resource graphs untouched while replacing this resource graph.
-        dataset.deleteMatches(undefined, undefined, undefined, graph);
-        dataset.deleteMatches(undefined, undefined, undefined, defaultGraph());
-        dataset.addAll(parsedQuads);
-      });
-
-      const commitResult = await commitDataset();
-      if (commitResult.isError) {
-        throw new Error(commitResult.message);
-      }
-
-      setInitialSnapshot(currentSnapshot);
+      const result = await commitDoc();
+      if (result.isError) throw new Error(result.message);
+      setInitialJson(JSON.stringify(policies));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -202,27 +312,18 @@ export function useStatisticAccessRuleEditorData(
   };
 
   return {
-    statisticAccessRuleUri,
     isLoading,
     isSaving,
     error,
-    statisticAccessRuleSchemas,
+    isDirty,
     dataSchemaName,
-    dataSchema,
-    statisticPolicies,
-    setStatisticPolicies,
+    policies,
+    setPolicies,
     statisticNames,
+    addPolicy,
+    save,
     predicateOptions,
     graphPathShortcuts,
-    getStartPredicateOptions: graphPathGetters.getStartPredicateOptions,
-    getStartValueOptions: graphPathGetters.getStartValueOptions,
-    getStepPredicateOptions: graphPathGetters.getStepPredicateOptions,
-    getStepWherePredicateOptions: graphPathGetters.getStepWherePredicateOptions,
-    getStepWhereValueOptions: graphPathGetters.getStepWhereValueOptions,
-    getStepTargetShapeNames: graphPathGetters.getStepTargetShapeNames,
-    isDirty,
-    addStatisticPolicyByName: addStatisticPolicy,
-    save,
+    ...graphPathGetters,
   };
 }
-
