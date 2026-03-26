@@ -63,6 +63,19 @@ function uid(): string {
   return Math.random().toString(36).slice(2, 10);
 }
 
+function makeNodeId(baseUri: string, prefix: string): string {
+  return `${baseUri}#${prefix}-${uid()}`;
+}
+
+function ensureGraphPathId(
+  baseUri: string,
+  graphPath: GraphPath,
+  prefix: string,
+): GraphPath {
+  if (graphPath["@id"]) return graphPath;
+  return { ...graphPath, "@id": makeNodeId(baseUri, prefix) };
+}
+
 function readPoliciesFromLdo(
   document: StatisticAccessRuleDocument | undefined,
   meanMap: Map<string, MeanStatisticAccessRule>,
@@ -126,7 +139,12 @@ function buildPoliciesForWrite(
         statisticName: "mean",
         allowedPath: set(
           ...policy.allowedPaths.map((p) => ({
-            graphPath: p.graphPath,
+            "@id": makeNodeId(baseUri, "mean-allowed-path"),
+            graphPath: ensureGraphPathId(
+              baseUri,
+              p.graphPath,
+              "mean-allowed-path-graph-path",
+            ),
             minCount: p.minCount,
           })),
         ),
@@ -138,11 +156,28 @@ function buildPoliciesForWrite(
       statisticName: "kaplan-meier",
       allowedPath: set(
         ...policy.allowedPaths.map((p) => ({
-          timeGraphPath: p.timeGraphPath,
-          eventGraphPath: p.eventGraphPath,
+          "@id": makeNodeId(baseUri, "km-allowed-path"),
+          timeGraphPath: ensureGraphPathId(
+            baseUri,
+            p.timeGraphPath,
+            "km-time-graph-path",
+          ),
+          eventGraphPath: ensureGraphPathId(
+            baseUri,
+            p.eventGraphPath,
+            "km-event-graph-path",
+          ),
           groupByGraphPath:
             p.groupByGraphPaths.length > 0
-              ? set(...p.groupByGraphPaths)
+              ? set(
+                  ...p.groupByGraphPaths.map((groupByPath) =>
+                    ensureGraphPathId(
+                      baseUri,
+                      groupByPath,
+                      "km-group-by-graph-path",
+                    ),
+                  ),
+                )
               : undefined,
           kAnonymity: p.kAnonymity,
         })),
