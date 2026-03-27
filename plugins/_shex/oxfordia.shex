@@ -262,6 +262,8 @@ statp:KaplanMeierAllowedPathShape {
 
 # The entry point to a graph path
 statp:GraphPathShape {
+  # Optional Name for the graph path
+  statp:name xsd:string ? ;
   # The starting node filter in the graph
   statp:start @statp:GraphNodeFilterShape ;
   # The traversal steps to follow

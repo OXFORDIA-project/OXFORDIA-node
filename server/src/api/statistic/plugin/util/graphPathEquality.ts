@@ -91,8 +91,11 @@ function getField<T>(value: unknown, key: string): T | undefined {
   return undefined;
 }
 
-function normalizeIri(value: string | undefined): string | undefined {
-  if (!value) return undefined;
+function normalizeIri(value: unknown): string | undefined {
+  if (typeof value === "object" && value !== null) {
+    return normalizeIri(getIriValue(value as string | IriObject | undefined));
+  }
+  if (typeof value !== "string" || value.length === 0) return undefined;
   if (value.includes("://")) return value;
   if (value.startsWith("urn:")) return value;
   if (value.startsWith("#")) return value;
@@ -107,9 +110,10 @@ function normalizeIriObject(
 
 function normalizeIriCollection(value: unknown): string[] {
   return toCollectionArray(
-    value as string | string[] | Iterable<string> | undefined,
+    value as string | IriObject | Array<string | IriObject> | Iterable<string | IriObject> | undefined,
   )
     .map((item) => normalizeIri(item) ?? item)
+    .filter((item): item is string => typeof item === "string")
     .sort();
 }
 

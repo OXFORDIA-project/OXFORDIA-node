@@ -823,6 +823,16 @@ export const oxfordiaSchema: Schema = {
           expressions: [
             {
               type: "TripleConstraint",
+              predicate: "https://oxfordia.setmeld.com/statistics#name",
+              valueExpr: {
+                type: "NodeConstraint",
+                datatype: "http://www.w3.org/2001/XMLSchema#string",
+              },
+              min: 0,
+              max: 1,
+            },
+            {
+              type: "TripleConstraint",
               predicate: "https://oxfordia.setmeld.com/statistics#start",
               valueExpr:
                 "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",

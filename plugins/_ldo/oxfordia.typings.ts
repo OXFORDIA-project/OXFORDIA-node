@@ -302,6 +302,7 @@ export interface KaplanMeierAllowedPath {
 export interface GraphPath {
   "@id"?: string;
   "@context"?: LdoJsonldContext;
+  name?: string;
   start: GraphNodeFilter;
   steps?: LdSet<GraphTraversalStep>;
   target?: GraphValueSelector;

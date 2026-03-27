@@ -23,6 +23,7 @@ const idObjectSchema: JSONSchema4 = {
 const metadataSchemaProperties: Record<string, JSONSchema4> = {
   "@id": { type: "string" },
   "@context": {},
+  name: { type: "string" },
 };
 
 /**

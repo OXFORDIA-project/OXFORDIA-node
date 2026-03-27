@@ -230,6 +230,10 @@ export const oxfordiaContext: LdoJsonldContext = {
     "@id": "https://oxfordia.setmeld.com/statistics#graphPath",
     "@type": "@id",
   },
+  name: {
+    "@id": "https://oxfordia.setmeld.com/statistics#name",
+    "@type": "http://www.w3.org/2001/XMLSchema#string",
+  },
   start: {
     "@id": "https://oxfordia.setmeld.com/statistics#start",
     "@type": "@id",

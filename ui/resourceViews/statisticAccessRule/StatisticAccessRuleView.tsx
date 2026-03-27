@@ -72,7 +72,7 @@ export const StatisticAccessRuleView: FunctionComponent = () => {
 
   const dataDocumentUri = getDataDocumentUri(targetUri);
   const dataDocumentName = dataDocumentUri?.split("/").pop() ?? "document.ttl";
-  const isSaveDisabled = editor.isSaving || !editor.isDirty;
+  const isSaveDisabled = editor.isSaving;
 
   return (
     <View style={styles.container}>
@@ -119,9 +119,15 @@ export const StatisticAccessRuleView: FunctionComponent = () => {
         <StatisticAccessRuleEditorForm
           error={editor.error}
           policies={editor.policies}
-          setPolicies={editor.setPolicies}
           statisticNames={editor.statisticNames}
           addPolicy={editor.addPolicy}
+          removePolicy={editor.removePolicy}
+          addMeanAllowedPath={editor.addMeanAllowedPath}
+          updateMeanAllowedPath={editor.updateMeanAllowedPath}
+          removeMeanAllowedPath={editor.removeMeanAllowedPath}
+          addKaplanMeierAllowedPath={editor.addKaplanMeierAllowedPath}
+          updateKaplanMeierAllowedPath={editor.updateKaplanMeierAllowedPath}
+          removeKaplanMeierAllowedPath={editor.removeKaplanMeierAllowedPath}
           gpOptions={{
             dataSchemaName: editor.dataSchemaName,
             predicateOptions: editor.predicateOptions,

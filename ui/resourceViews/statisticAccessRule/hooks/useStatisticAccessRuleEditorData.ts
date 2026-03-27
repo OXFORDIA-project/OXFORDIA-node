@@ -2,24 +2,19 @@ import { set } from "@ldo/ldo";
 import { useEffect, useMemo, useState } from "react";
 import { useChangeSubject, useMatchSubject, useResource } from "@ldo/solid-react";
 import {
-  KaplanMeierStatisticAccessRuleShapeType,
-  MeanStatisticAccessRuleShapeType,
   StatisticAccessRuleDocumentShapeType,
   type GraphLiteralFilter,
+  type GraphNodeFilter,
   type GraphPath,
   type GraphPredicateFilter,
-  type GraphNodeFilter,
   type GraphTraversalStep,
   type GraphValueSelector,
-  type KaplanMeierStatisticAccessRule,
-  type MeanStatisticAccessRule,
+  type KaplanMeierAllowedPath,
+  type MeanAllowedPath,
   type StatisticAccessRuleDocument,
   type StatisticPolicy as LdoStatisticPolicy,
 } from "@oxfordia/plugins";
-import { findDataSchema } from "@oxfordia/plugins/dataPlugin";
-import {
-  getGraphPathShortcutsForDataSchema,
-} from "@oxfordia/plugins/dataPlugin";
+import { findDataSchema, getGraphPathShortcutsForDataSchema } from "@oxfordia/plugins/dataPlugin";
 import { statisticPlugins } from "@oxfordia/plugins/statisticPlugin";
 import type { DataSchemaJsonView } from "../dataSchemas";
 import { asJsonDataSchema } from "../dataSchemas";
@@ -33,28 +28,16 @@ const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const SAR_TYPE =
   "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule";
 
-export type MeanAllowedPathForm = {
-  graphPath: GraphPath;
-  minCount: number;
-};
-
-export type KmAllowedPathForm = {
-  timeGraphPath: GraphPath;
-  eventGraphPath: GraphPath;
-  groupByGraphPaths: GraphPath[];
-  kAnonymity: number;
-};
-
-export type PolicyFormState =
+export type EditorPolicy =
   | {
       key: string;
       statisticName: "mean";
-      allowedPaths: MeanAllowedPathForm[];
+      allowedPaths: MeanAllowedPath[];
     }
   | {
       key: string;
       statisticName: "kaplan-meier";
-      allowedPaths: KmAllowedPathForm[];
+      allowedPaths: KaplanMeierAllowedPath[];
     };
 
 function toArray<T>(value: Iterable<T> | undefined): T[] {
@@ -62,296 +45,163 @@ function toArray<T>(value: Iterable<T> | undefined): T[] {
   return Array.from(value);
 }
 
+function createId(prefix: string): string {
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function createLocalNodeId(prefix: string): string {
+  return `#${createId(prefix)}`;
+}
+
 export function createEmptyGraphPath(): GraphPath {
-  return { start: {} as GraphNodeFilter } as GraphPath;
-}
-
-function uid(): string {
-  return Math.random().toString(36).slice(2, 10);
-}
-
-function makeNodeId(baseUri: string, prefix: string): string {
-  return `${baseUri}#${prefix}-${uid()}`;
-}
-
-function ensureGraphPathId(
-  baseUri: string,
-  graphPath: GraphPath,
-  prefix: string,
-): GraphPath {
-  if (graphPath["@id"]) return graphPath;
-  return { ...graphPath, "@id": makeNodeId(baseUri, prefix) };
+  return ensureGraphPathIds({
+    "@id": createLocalNodeId("graph-path"),
+    start: {
+      "@id": createLocalNodeId("graph-node-filter"),
+    } as GraphNodeFilter,
+  } as GraphPath);
 }
 
 function ensureGraphLiteralFilterIds(
-  baseUri: string,
   filter: GraphLiteralFilter,
-  prefix: string,
 ): GraphLiteralFilter {
-  return filter["@id"]
-    ? filter
-    : { ...filter, "@id": makeNodeId(baseUri, prefix) };
+  filter["@id"] = filter["@id"] ?? createLocalNodeId("graph-literal-filter");
+  return filter;
 }
 
 function ensureGraphValueSelectorIds(
-  baseUri: string,
   selector: GraphValueSelector,
-  prefix: string,
 ): GraphValueSelector {
-  const selectorWithId = selector["@id"]
-    ? selector
-    : { ...selector, "@id": makeNodeId(baseUri, prefix) };
-  const record = selectorWithId as GraphValueSelector & {
+  const record = selector as GraphValueSelector & {
     node?: GraphNodeFilter;
     literal?: GraphLiteralFilter;
   };
 
-  if (record.node) {
-    record.node = ensureGraphNodeFilterIds(
-      baseUri,
-      record.node,
-      `${prefix}-node`,
-    );
-  }
-  if (record.literal) {
-    record.literal = ensureGraphLiteralFilterIds(
-      baseUri,
-      record.literal,
-      `${prefix}-literal`,
-    );
-  }
-
-  return record;
+  record["@id"] = record["@id"] ?? createLocalNodeId("graph-value-selector");
+  if (record.node) ensureGraphNodeFilterIds(record.node);
+  if (record.literal) ensureGraphLiteralFilterIds(record.literal);
+  return selector;
 }
 
 function ensureGraphPredicateFilterIds(
-  baseUri: string,
   filter: GraphPredicateFilter,
-  prefix: string,
 ): GraphPredicateFilter {
-  const filterWithId = filter["@id"]
-    ? filter
-    : { ...filter, "@id": makeNodeId(baseUri, prefix) };
-  const record = filterWithId as GraphPredicateFilter & {
-    some?: GraphValueSelector;
-    every?: GraphValueSelector;
-    none?: GraphValueSelector;
-  };
-
-  if (record.some) {
-    record.some = ensureGraphValueSelectorIds(
-      baseUri,
-      record.some,
-      `${prefix}-some`,
-    );
-  }
-  if (record.every) {
-    record.every = ensureGraphValueSelectorIds(
-      baseUri,
-      record.every,
-      `${prefix}-every`,
-    );
-  }
-  if (record.none) {
-    record.none = ensureGraphValueSelectorIds(
-      baseUri,
-      record.none,
-      `${prefix}-none`,
-    );
-  }
-
-  return record;
+  filter["@id"] = filter["@id"] ?? createLocalNodeId("graph-predicate-filter");
+  if (filter.some) ensureGraphValueSelectorIds(filter.some);
+  if (filter.every) ensureGraphValueSelectorIds(filter.every);
+  if (filter.none) ensureGraphValueSelectorIds(filter.none);
+  return filter;
 }
 
 function ensureGraphNodeFilterIds(
-  baseUri: string,
   nodeFilter: GraphNodeFilter,
-  prefix: string,
 ): GraphNodeFilter {
-  const nodeFilterWithId = nodeFilter["@id"]
-    ? nodeFilter
-    : { ...nodeFilter, "@id": makeNodeId(baseUri, prefix) };
-  const predicates = toArray(nodeFilterWithId.predicates);
-
-  return {
-    ...nodeFilterWithId,
-    predicates:
-      predicates.length > 0
-        ? set(
-            ...predicates.map((predicate, index) =>
-              ensureGraphPredicateFilterIds(
-                baseUri,
-                predicate,
-                `${prefix}-predicate-${index}`,
-              ),
-            ),
-          )
-        : nodeFilterWithId.predicates,
-  };
+  nodeFilter["@id"] = nodeFilter["@id"] ?? createLocalNodeId("graph-node-filter");
+  for (const predicate of toArray(nodeFilter.predicates)) {
+    ensureGraphPredicateFilterIds(predicate);
+  }
+  return nodeFilter;
 }
 
 function ensureGraphTraversalStepIds(
-  baseUri: string,
   step: GraphTraversalStep,
-  prefix: string,
 ): GraphTraversalStep {
-  const stepWithId = step["@id"]
-    ? step
-    : { ...step, "@id": makeNodeId(baseUri, prefix) };
+  step["@id"] = step["@id"] ?? createLocalNodeId("graph-traversal-step");
+  if (step.where) ensureGraphNodeFilterIds(step.where);
+  return step;
+}
 
+export function ensureGraphPathIds(graphPath: GraphPath): GraphPath {
+  graphPath["@id"] = graphPath["@id"] ?? createLocalNodeId("graph-path");
+  ensureGraphNodeFilterIds(graphPath.start);
+  for (const step of toArray(graphPath.steps)) {
+    ensureGraphTraversalStepIds(step);
+  }
+  if (graphPath.target) ensureGraphValueSelectorIds(graphPath.target);
+  return graphPath;
+}
+
+function createInitialDocument(
+  rootId: string,
+  dataSchemaName: string,
+): StatisticAccessRuleDocument {
   return {
-    ...stepWithId,
-    where: stepWithId.where
-      ? ensureGraphNodeFilterIds(baseUri, stepWithId.where, `${prefix}-where`)
-      : stepWithId.where,
+    "@id": rootId,
+    type: set({ "@id": "StatisticAccessRule" }),
+    dataSchema: dataSchemaName,
+    hasStatisticPolicy: set(),
   };
 }
 
-function ensureGraphPathTreeIds(
-  baseUri: string,
-  graphPath: GraphPath,
-  prefix: string,
-): GraphPath {
-  const graphPathWithId = ensureGraphPathId(baseUri, graphPath, prefix);
-  const steps = toArray(graphPathWithId.steps);
-
+function createMeanPolicy(): LdoStatisticPolicy {
   return {
-    ...graphPathWithId,
-    start: ensureGraphNodeFilterIds(
-      baseUri,
-      graphPathWithId.start,
-      `${prefix}-start`,
-    ),
-    steps:
-      steps.length > 0
-        ? set(
-            ...steps.map((step, index) =>
-              ensureGraphTraversalStepIds(
-                baseUri,
-                step,
-                `${prefix}-step-${index}`,
-              ),
-            ),
-          )
-        : graphPathWithId.steps,
-    target: graphPathWithId.target
-      ? ensureGraphValueSelectorIds(
-          baseUri,
-          graphPathWithId.target,
-          `${prefix}-target`,
-        )
-      : graphPathWithId.target,
+    "@id": `#${createId("mean-policy")}`,
+    statisticName: "mean",
+    allowedPath: set(),
+  } as unknown as LdoStatisticPolicy;
+}
+
+function createKaplanMeierPolicy(): LdoStatisticPolicy {
+  return {
+    "@id": `#${createId("kaplan-meier-policy")}`,
+    statisticName: "kaplan-meier",
+    allowedPath: set(),
+  } as unknown as LdoStatisticPolicy;
+}
+
+function createMeanAllowedPath(): MeanAllowedPath {
+  return {
+    "@id": `#${createId("mean-allowed-path")}`,
+    graphPath: ensureGraphPathIds(createEmptyGraphPath()),
+    minCount: 1,
+  };
+}
+
+function createKaplanMeierAllowedPath(): KaplanMeierAllowedPath {
+  return {
+    "@id": `#${createId("kaplan-meier-allowed-path")}`,
+    timeGraphPath: ensureGraphPathIds(createEmptyGraphPath()),
+    eventGraphPath: ensureGraphPathIds(createEmptyGraphPath()),
+    groupByGraphPath: set(),
+    kAnonymity: 1,
   };
 }
 
 function readPoliciesFromLdo(
   document: StatisticAccessRuleDocument | undefined,
-  meanMap: Map<string, MeanStatisticAccessRule>,
-  kmMap: Map<string, KaplanMeierStatisticAccessRule>,
-): PolicyFormState[] {
+): EditorPolicy[] {
   if (!document?.hasStatisticPolicy) return [];
-  return toArray(document.hasStatisticPolicy)
-    .map((policy): PolicyFormState | null => {
-      const id = policy["@id"] ?? uid();
-      const name = policy.statisticName;
 
-      if (name === "mean") {
-        const mean = meanMap.get(id);
+  return toArray(document.hasStatisticPolicy)
+    .map((policy): EditorPolicy | null => {
+      const key = policy["@id"];
+      if (!key) return null;
+
+      if (policy.statisticName === "mean") {
+        const meanPolicy = policy as unknown as {
+          allowedPath?: Iterable<MeanAllowedPath>;
+        };
         return {
-          key: id,
+          key,
           statisticName: "mean",
-          allowedPaths: mean
-            ? toArray(mean.allowedPath).map((p) => ({
-                graphPath: p.graphPath ?? createEmptyGraphPath(),
-                minCount: p.minCount ?? 1,
-              }))
-            : [],
+          allowedPaths: toArray(meanPolicy.allowedPath),
         };
       }
 
-      if (name === "kaplan-meier") {
-        const km = kmMap.get(id);
+      if (policy.statisticName === "kaplan-meier") {
+        const kmPolicy = policy as unknown as {
+          allowedPath?: Iterable<KaplanMeierAllowedPath>;
+        };
         return {
-          key: id,
+          key,
           statisticName: "kaplan-meier",
-          allowedPaths: km
-            ? toArray(km.allowedPath).map((p) => ({
-                timeGraphPath: p.timeGraphPath ?? createEmptyGraphPath(),
-                eventGraphPath: p.eventGraphPath ?? createEmptyGraphPath(),
-                groupByGraphPaths: p.groupByGraphPath
-                  ? toArray(p.groupByGraphPath)
-                  : [],
-                kAnonymity: p.kAnonymity ?? 1,
-              }))
-            : [],
+          allowedPaths: toArray(kmPolicy.allowedPath),
         };
       }
 
       return null;
     })
-    .filter((p): p is PolicyFormState => p !== null);
-}
-
-function buildPoliciesForWrite(
-  baseUri: string,
-  policies: PolicyFormState[],
-): LdoStatisticPolicy[] {
-  return policies.map((policy) => {
-    const policyId = policy.key.startsWith("http")
-      ? policy.key
-      : `${baseUri}#${policy.key}`;
-
-    if (policy.statisticName === "mean") {
-      return {
-        "@id": policyId,
-        statisticName: "mean",
-        allowedPath: set(
-          ...policy.allowedPaths.map((p) => ({
-            "@id": makeNodeId(baseUri, "mean-allowed-path"),
-            graphPath: ensureGraphPathTreeIds(
-              baseUri,
-              p.graphPath,
-              "mean-allowed-path-graph-path",
-            ),
-            minCount: p.minCount,
-          })),
-        ),
-      } as unknown as LdoStatisticPolicy;
-    }
-
-    return {
-      "@id": policyId,
-      statisticName: "kaplan-meier",
-      allowedPath: set(
-        ...policy.allowedPaths.map((p) => ({
-          "@id": makeNodeId(baseUri, "km-allowed-path"),
-          timeGraphPath: ensureGraphPathTreeIds(
-            baseUri,
-            p.timeGraphPath,
-            "km-time-graph-path",
-          ),
-          eventGraphPath: ensureGraphPathTreeIds(
-            baseUri,
-            p.eventGraphPath,
-            "km-event-graph-path",
-          ),
-          groupByGraphPath:
-            p.groupByGraphPaths.length > 0
-              ? set(
-                  ...p.groupByGraphPaths.map((groupByPath) =>
-                    ensureGraphPathTreeIds(
-                      baseUri,
-                      groupByPath,
-                      "km-group-by-graph-path",
-                    ),
-                  ),
-                )
-              : undefined,
-          kAnonymity: p.kAnonymity,
-        })),
-      ),
-    } as unknown as LdoStatisticPolicy;
-  });
+    .filter((policy): policy is EditorPolicy => Boolean(policy));
 }
 
 export function useStatisticAccessRuleEditorData(
@@ -360,53 +210,29 @@ export function useStatisticAccessRuleEditorData(
   const resource = useResource(targetUri);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [policies, setPolicies] = useState<PolicyFormState[]>([]);
-  const [initialJson, setInitialJson] = useState<string | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+
+  const fallbackRootId = useMemo(
+    () => (targetUri ? `${targetUri}#policy` : undefined),
+    [targetUri],
+  );
 
   const matchedDocs = useMatchSubject(
     StatisticAccessRuleDocumentShapeType,
     RDF_TYPE,
     SAR_TYPE,
   );
-  const document = useMemo(
-    () => toArray(matchedDocs as Iterable<StatisticAccessRuleDocument>)[0],
-    [matchedDocs],
-  );
+  const matchedDocument = useMemo(() => {
+    const docs = toArray(matchedDocs as Iterable<StatisticAccessRuleDocument>);
+    if (!fallbackRootId) return docs[0];
+    return docs.find((doc) => doc["@id"] === fallbackRootId) ?? docs[0];
+  }, [fallbackRootId, matchedDocs]);
 
-  const rootId = useMemo(
-    () =>
-      document?.["@id"] ?? (targetUri ? `${targetUri}#policy` : undefined),
-    [document, targetUri],
+  const rootId = matchedDocument?.["@id"] ?? fallbackRootId;
+  const [draftDocument, setDoc, commitDoc] = useChangeSubject(
+    StatisticAccessRuleDocumentShapeType,
+    rootId,
   );
-
-  const meanSubjects = useMatchSubject(
-    MeanStatisticAccessRuleShapeType,
-    undefined,
-    undefined,
-  );
-  const kmSubjects = useMatchSubject(
-    KaplanMeierStatisticAccessRuleShapeType,
-    undefined,
-    undefined,
-  );
-
-  const meanMap = useMemo(() => {
-    const map = new Map<string, MeanStatisticAccessRule>();
-    for (const s of meanSubjects) if (s["@id"]) map.set(s["@id"], s);
-    return map;
-  }, [meanSubjects]);
-
-  const kmMap = useMemo(() => {
-    const map = new Map<string, KaplanMeierStatisticAccessRule>();
-    for (const s of kmSubjects) if (s["@id"]) map.set(s["@id"], s);
-    return map;
-  }, [kmSubjects]);
-
-  const loadedPolicies = useMemo(
-    () => readPoliciesFromLdo(document, meanMap, kmMap),
-    [document, meanMap, kmMap],
-  );
+  const document = draftDocument ?? matchedDocument;
 
   const dataSchemaName = document?.dataSchema ?? null;
   const dataSchema = useMemo<DataSchemaJsonView | null>(() => {
@@ -415,18 +241,10 @@ export function useStatisticAccessRuleEditorData(
     return raw ? asJsonDataSchema(dataSchemaName, raw) : null;
   }, [dataSchemaName]);
 
-  useEffect(() => {
-    if (!targetUri) return;
-    const snapshot = JSON.stringify(loadedPolicies);
-    if (isHydrated && initialJson === snapshot) return;
-    setPolicies(loadedPolicies);
-    setInitialJson(snapshot);
-    setIsHydrated(true);
-  }, [initialJson, isHydrated, loadedPolicies, targetUri]);
-
-  const isLoading = !isHydrated;
-  const isDirty =
-    initialJson !== null && JSON.stringify(policies) !== initialJson;
+  const policies = useMemo(
+    () => readPoliciesFromLdo(document),
+    [document],
+  );
 
   const predicateOptions = useMemo(
     () => extractPredicateOptions(dataSchema),
@@ -441,6 +259,7 @@ export function useStatisticAccessRuleEditorData(
     [],
   );
   const [graphPathGetters, setGraphPathGetters] = useState(emptyGetters);
+
   useEffect(() => {
     let cancelled = false;
     setGraphPathGetters(emptyGetters);
@@ -457,70 +276,192 @@ export function useStatisticAccessRuleEditorData(
   }, [dataSchema, emptyGetters]);
 
   const statisticNames = useMemo(
-    () => statisticPlugins.map((p) => p.name).sort(),
+    () => statisticPlugins.map((plugin) => plugin.name).sort(),
     [],
   );
 
-  const [, setDoc, commitDoc] = useChangeSubject(
-    StatisticAccessRuleDocumentShapeType,
-    rootId,
-  );
+  const applyDocumentChange = (
+    change: (doc: StatisticAccessRuleDocument) => void,
+  ) => {
+    if (!resource || !rootId) return;
+
+    setError(null);
+    setDoc(
+      resource,
+      (doc: StatisticAccessRuleDocument) => {
+        doc.type = set({ "@id": "StatisticAccessRule" });
+        doc.dataSchema = doc.dataSchema ?? dataSchemaName ?? "nemaline";
+        if (!doc.hasStatisticPolicy) doc.hasStatisticPolicy = set();
+        change(doc);
+      },
+      document ?? createInitialDocument(rootId, dataSchemaName ?? "nemaline"),
+    );
+  };
+
+  const updatePolicy = (
+    policyId: string,
+    change: (policy: LdoStatisticPolicy) => LdoStatisticPolicy,
+  ) => {
+    applyDocumentChange((doc) => {
+      const policiesToWrite = toArray(doc.hasStatisticPolicy).map((policy) =>
+        policy["@id"] === policyId ? change(policy as unknown as LdoStatisticPolicy) : policy,
+      );
+      doc.hasStatisticPolicy = set(...policiesToWrite);
+    });
+  };
 
   const addPolicy = (name: string) => {
-    if (name === "mean") {
-      setPolicies((prev) => [
-        ...prev,
-        { key: uid(), statisticName: "mean", allowedPaths: [] },
-      ]);
-    } else if (name === "kaplan-meier") {
-      setPolicies((prev) => [
-        ...prev,
-        { key: uid(), statisticName: "kaplan-meier", allowedPaths: [] },
-      ]);
-    }
+    applyDocumentChange((doc) => {
+      const existingPolicies = toArray(doc.hasStatisticPolicy);
+      const nextPolicy =
+        name === "mean"
+          ? createMeanPolicy()
+          : name === "kaplan-meier"
+            ? createKaplanMeierPolicy()
+            : null;
+      if (!nextPolicy) return;
+      doc.hasStatisticPolicy = set(...existingPolicies, nextPolicy);
+    });
+  };
+
+  const removePolicy = (policyId: string) => {
+    applyDocumentChange((doc) => {
+      doc.hasStatisticPolicy = set(
+        ...toArray(doc.hasStatisticPolicy).filter(
+          (policy) => policy["@id"] !== policyId,
+        ),
+      );
+    });
+  };
+
+  const addMeanAllowedPath = (policyId: string) => {
+    updatePolicy(policyId, (policy) => {
+      const meanPolicy = policy as unknown as {
+        allowedPath?: Iterable<MeanAllowedPath>;
+      } & LdoStatisticPolicy;
+      return {
+        ...meanPolicy,
+        allowedPath: set(...toArray(meanPolicy.allowedPath), createMeanAllowedPath()),
+      } as unknown as LdoStatisticPolicy;
+    });
+  };
+
+  const updateMeanAllowedPath = (
+    policyId: string,
+    pathIndex: number,
+    nextPath: MeanAllowedPath,
+  ) => {
+    updatePolicy(policyId, (policy) => {
+      const meanPolicy = policy as unknown as {
+        allowedPath?: Iterable<MeanAllowedPath>;
+      } & LdoStatisticPolicy;
+      return {
+        ...meanPolicy,
+        allowedPath: set(
+          ...toArray(meanPolicy.allowedPath).map((path, index) =>
+            index === pathIndex ? nextPath : path,
+          ),
+        ),
+      } as unknown as LdoStatisticPolicy;
+    });
+  };
+
+  const removeMeanAllowedPath = (policyId: string, pathIndex: number) => {
+    updatePolicy(policyId, (policy) => {
+      const meanPolicy = policy as unknown as {
+        allowedPath?: Iterable<MeanAllowedPath>;
+      } & LdoStatisticPolicy;
+      return {
+        ...meanPolicy,
+        allowedPath: set(
+          ...toArray(meanPolicy.allowedPath).filter((_, index) => index !== pathIndex),
+        ),
+      } as unknown as LdoStatisticPolicy;
+    });
+  };
+
+  const addKaplanMeierAllowedPath = (policyId: string) => {
+    updatePolicy(policyId, (policy) => {
+      const kmPolicy = policy as unknown as {
+        allowedPath?: Iterable<KaplanMeierAllowedPath>;
+      } & LdoStatisticPolicy;
+      return {
+        ...kmPolicy,
+        allowedPath: set(
+          ...toArray(kmPolicy.allowedPath),
+          createKaplanMeierAllowedPath(),
+        ),
+      } as unknown as LdoStatisticPolicy;
+    });
+  };
+
+  const updateKaplanMeierAllowedPath = (
+    policyId: string,
+    pathIndex: number,
+    nextPath: KaplanMeierAllowedPath,
+  ) => {
+    updatePolicy(policyId, (policy) => {
+      const kmPolicy = policy as unknown as {
+        allowedPath?: Iterable<KaplanMeierAllowedPath>;
+      } & LdoStatisticPolicy;
+      return {
+        ...kmPolicy,
+        allowedPath: set(
+          ...toArray(kmPolicy.allowedPath).map((path, index) =>
+            index === pathIndex ? nextPath : path,
+          ),
+        ),
+      } as unknown as LdoStatisticPolicy;
+    });
+  };
+
+  const removeKaplanMeierAllowedPath = (
+    policyId: string,
+    pathIndex: number,
+  ) => {
+    updatePolicy(policyId, (policy) => {
+      const kmPolicy = policy as unknown as {
+        allowedPath?: Iterable<KaplanMeierAllowedPath>;
+      } & LdoStatisticPolicy;
+      return {
+        ...kmPolicy,
+        allowedPath: set(
+          ...toArray(kmPolicy.allowedPath).filter((_, index) => index !== pathIndex),
+        ),
+      } as unknown as LdoStatisticPolicy;
+    });
   };
 
   const save = async () => {
-    if (!targetUri || !rootId || !resource) return;
+    if (!resource || !rootId) return;
+
     setIsSaving(true);
     setError(null);
     try {
-      const policyData = buildPoliciesForWrite(targetUri, policies);
-      setDoc(
-        resource,
-        (doc: StatisticAccessRuleDocument) => {
-          doc.type = set({ "@id": "StatisticAccessRule" });
-          doc.dataSchema = dataSchemaName ?? "nemaline";
-          doc.hasStatisticPolicy = set(...policyData);
-        },
-        document ??
-          ({
-            "@id": rootId,
-            type: set({ "@id": "StatisticAccessRule" }),
-            dataSchema: dataSchemaName ?? "nemaline",
-          } as StatisticAccessRuleDocument),
-      );
-
       const result = await commitDoc();
       if (result.isError) throw new Error(result.message);
-      setInitialJson(JSON.stringify(policies));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : String(nextError));
     } finally {
       setIsSaving(false);
     }
   };
 
   return {
-    isLoading,
+    isLoading: false,
     isSaving,
     error,
-    isDirty,
     dataSchemaName,
     policies,
-    setPolicies,
     statisticNames,
     addPolicy,
+    removePolicy,
+    addMeanAllowedPath,
+    updateMeanAllowedPath,
+    removeMeanAllowedPath,
+    addKaplanMeierAllowedPath,
+    updateKaplanMeierAllowedPath,
+    removeKaplanMeierAllowedPath,
     save,
     predicateOptions,
     graphPathShortcuts,
