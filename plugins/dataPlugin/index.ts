@@ -25,7 +25,10 @@ export function getGraphPathShortcutsForDataSchema(
   dataSchemaName: string | null | undefined,
 ): GraphPathShortcut[] {
   const shortcutMap = getGraphPathShortcutMapForDataSchema(dataSchemaName);
-  return Object.entries(shortcutMap).map(([name, graphPath]) => ({ name, graphPath }));
+  return Object.entries(shortcutMap).map(([name, createGraphPath]) => ({
+    name,
+    graphPath: createGraphPath(),
+  }));
 }
 
 export function findGraphPathShortcutByName(
@@ -33,8 +36,10 @@ export function findGraphPathShortcutByName(
   shortcutName: string,
 ): GraphPathShortcut | null {
   const shortcutMap = getGraphPathShortcutMapForDataSchema(dataSchemaName);
-  const graphPath = shortcutMap[shortcutName];
-  return graphPath ? { name: shortcutName, graphPath } : null;
+  const createGraphPath = shortcutMap[shortcutName];
+  return createGraphPath
+    ? { name: shortcutName, graphPath: createGraphPath() }
+    : null;
 }
 
 export * from "./nemaline";
