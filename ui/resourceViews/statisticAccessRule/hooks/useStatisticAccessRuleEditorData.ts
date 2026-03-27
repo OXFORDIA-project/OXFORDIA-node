@@ -5,8 +5,12 @@ import {
   KaplanMeierStatisticAccessRuleShapeType,
   MeanStatisticAccessRuleShapeType,
   StatisticAccessRuleDocumentShapeType,
+  type GraphLiteralFilter,
   type GraphPath,
+  type GraphPredicateFilter,
   type GraphNodeFilter,
+  type GraphTraversalStep,
+  type GraphValueSelector,
   type KaplanMeierStatisticAccessRule,
   type MeanStatisticAccessRule,
   type StatisticAccessRuleDocument,
@@ -79,6 +83,167 @@ function ensureGraphPathId(
   return { ...graphPath, "@id": makeNodeId(baseUri, prefix) };
 }
 
+function ensureGraphLiteralFilterIds(
+  baseUri: string,
+  filter: GraphLiteralFilter,
+  prefix: string,
+): GraphLiteralFilter {
+  return filter["@id"]
+    ? filter
+    : { ...filter, "@id": makeNodeId(baseUri, prefix) };
+}
+
+function ensureGraphValueSelectorIds(
+  baseUri: string,
+  selector: GraphValueSelector,
+  prefix: string,
+): GraphValueSelector {
+  const selectorWithId = selector["@id"]
+    ? selector
+    : { ...selector, "@id": makeNodeId(baseUri, prefix) };
+  const record = selectorWithId as GraphValueSelector & {
+    node?: GraphNodeFilter;
+    literal?: GraphLiteralFilter;
+  };
+
+  if (record.node) {
+    record.node = ensureGraphNodeFilterIds(
+      baseUri,
+      record.node,
+      `${prefix}-node`,
+    );
+  }
+  if (record.literal) {
+    record.literal = ensureGraphLiteralFilterIds(
+      baseUri,
+      record.literal,
+      `${prefix}-literal`,
+    );
+  }
+
+  return record;
+}
+
+function ensureGraphPredicateFilterIds(
+  baseUri: string,
+  filter: GraphPredicateFilter,
+  prefix: string,
+): GraphPredicateFilter {
+  const filterWithId = filter["@id"]
+    ? filter
+    : { ...filter, "@id": makeNodeId(baseUri, prefix) };
+  const record = filterWithId as GraphPredicateFilter & {
+    some?: GraphValueSelector;
+    every?: GraphValueSelector;
+    none?: GraphValueSelector;
+  };
+
+  if (record.some) {
+    record.some = ensureGraphValueSelectorIds(
+      baseUri,
+      record.some,
+      `${prefix}-some`,
+    );
+  }
+  if (record.every) {
+    record.every = ensureGraphValueSelectorIds(
+      baseUri,
+      record.every,
+      `${prefix}-every`,
+    );
+  }
+  if (record.none) {
+    record.none = ensureGraphValueSelectorIds(
+      baseUri,
+      record.none,
+      `${prefix}-none`,
+    );
+  }
+
+  return record;
+}
+
+function ensureGraphNodeFilterIds(
+  baseUri: string,
+  nodeFilter: GraphNodeFilter,
+  prefix: string,
+): GraphNodeFilter {
+  const nodeFilterWithId = nodeFilter["@id"]
+    ? nodeFilter
+    : { ...nodeFilter, "@id": makeNodeId(baseUri, prefix) };
+  const predicates = toArray(nodeFilterWithId.predicates);
+
+  return {
+    ...nodeFilterWithId,
+    predicates:
+      predicates.length > 0
+        ? set(
+            ...predicates.map((predicate, index) =>
+              ensureGraphPredicateFilterIds(
+                baseUri,
+                predicate,
+                `${prefix}-predicate-${index}`,
+              ),
+            ),
+          )
+        : nodeFilterWithId.predicates,
+  };
+}
+
+function ensureGraphTraversalStepIds(
+  baseUri: string,
+  step: GraphTraversalStep,
+  prefix: string,
+): GraphTraversalStep {
+  const stepWithId = step["@id"]
+    ? step
+    : { ...step, "@id": makeNodeId(baseUri, prefix) };
+
+  return {
+    ...stepWithId,
+    where: stepWithId.where
+      ? ensureGraphNodeFilterIds(baseUri, stepWithId.where, `${prefix}-where`)
+      : stepWithId.where,
+  };
+}
+
+function ensureGraphPathTreeIds(
+  baseUri: string,
+  graphPath: GraphPath,
+  prefix: string,
+): GraphPath {
+  const graphPathWithId = ensureGraphPathId(baseUri, graphPath, prefix);
+  const steps = toArray(graphPathWithId.steps);
+
+  return {
+    ...graphPathWithId,
+    start: ensureGraphNodeFilterIds(
+      baseUri,
+      graphPathWithId.start,
+      `${prefix}-start`,
+    ),
+    steps:
+      steps.length > 0
+        ? set(
+            ...steps.map((step, index) =>
+              ensureGraphTraversalStepIds(
+                baseUri,
+                step,
+                `${prefix}-step-${index}`,
+              ),
+            ),
+          )
+        : graphPathWithId.steps,
+    target: graphPathWithId.target
+      ? ensureGraphValueSelectorIds(
+          baseUri,
+          graphPathWithId.target,
+          `${prefix}-target`,
+        )
+      : graphPathWithId.target,
+  };
+}
+
 function readPoliciesFromLdo(
   document: StatisticAccessRuleDocument | undefined,
   meanMap: Map<string, MeanStatisticAccessRule>,
@@ -143,7 +308,7 @@ function buildPoliciesForWrite(
         allowedPath: set(
           ...policy.allowedPaths.map((p) => ({
             "@id": makeNodeId(baseUri, "mean-allowed-path"),
-            graphPath: ensureGraphPathId(
+            graphPath: ensureGraphPathTreeIds(
               baseUri,
               p.graphPath,
               "mean-allowed-path-graph-path",
@@ -160,12 +325,12 @@ function buildPoliciesForWrite(
       allowedPath: set(
         ...policy.allowedPaths.map((p) => ({
           "@id": makeNodeId(baseUri, "km-allowed-path"),
-          timeGraphPath: ensureGraphPathId(
+          timeGraphPath: ensureGraphPathTreeIds(
             baseUri,
             p.timeGraphPath,
             "km-time-graph-path",
           ),
-          eventGraphPath: ensureGraphPathId(
+          eventGraphPath: ensureGraphPathTreeIds(
             baseUri,
             p.eventGraphPath,
             "km-event-graph-path",
@@ -174,7 +339,7 @@ function buildPoliciesForWrite(
             p.groupByGraphPaths.length > 0
               ? set(
                   ...p.groupByGraphPaths.map((groupByPath) =>
-                    ensureGraphPathId(
+                    ensureGraphPathTreeIds(
                       baseUri,
                       groupByPath,
                       "km-group-by-graph-path",
@@ -203,7 +368,6 @@ export function useStatisticAccessRuleEditorData(
     StatisticAccessRuleDocumentShapeType,
     RDF_TYPE,
     SAR_TYPE,
-    targetUri,
   );
   const document = useMemo(
     () => toArray(matchedDocs as Iterable<StatisticAccessRuleDocument>)[0],
@@ -220,13 +384,11 @@ export function useStatisticAccessRuleEditorData(
     MeanStatisticAccessRuleShapeType,
     undefined,
     undefined,
-    targetUri,
   );
   const kmSubjects = useMatchSubject(
     KaplanMeierStatisticAccessRuleShapeType,
     undefined,
     undefined,
-    targetUri,
   );
 
   const meanMap = useMemo(() => {
