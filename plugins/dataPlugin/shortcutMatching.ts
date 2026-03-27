@@ -149,6 +149,14 @@ export function resolveGraphPathShortcut(
   dataSchemaName: string | null | undefined,
   graphPath: GraphPath,
 ): GraphPathShortcut | null {
+  if (graphPath.name) {
+    return (
+      getGraphPathShortcutsForDataSchema(dataSchemaName).find(
+        (shortcut) => shortcut.name === graphPath.name,
+      ) ?? null
+    );
+  }
+
   const normalizedPath = JSON.stringify(toComparableGraphPath(graphPath));
   return (
     getGraphPathShortcutsForDataSchema(dataSchemaName).find((shortcut) => {

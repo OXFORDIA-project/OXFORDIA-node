@@ -145,45 +145,69 @@ function assessmentMagnitudePath(params: {
 export const nemalineGraphPathShortcuts: GraphPathShortcutMap = {
   PersonId: () =>
     graphPath({
+      name: "PersonId",
       start: personStartSelector(),
       steps: [
         traversalStep({ via: GIST_IS_IDENTIFIED_BY }),
         traversalStep({ via: GIST_UNIQUE_TEXT }),
       ],
     }),
-  ClusterCategory: () => categorizedTargetPath([NM_CLUSTER_1, NM_CLUSTER_2, NM_CLUSTER_3]),
+  ClusterCategory: () =>
+    ({ ...categorizedTargetPath([NM_CLUSTER_1, NM_CLUSTER_2, NM_CLUSTER_3]), name: "ClusterCategory" }),
   GeneticGroup: () =>
-    categorizedTargetPath([
-      NM_GENETIC_VARIANT_1,
-      NM_GENETIC_VARIANT_2,
-      NM_GENETIC_VARIANT_3,
-    ]),
+    ({
+      ...categorizedTargetPath([
+        NM_GENETIC_VARIANT_1,
+        NM_GENETIC_VARIANT_2,
+        NM_GENETIC_VARIANT_3,
+      ]),
+      name: "GeneticGroup",
+    }),
   AmbulationStatus: () =>
-    categorizedTargetPath([NM_STATUS_AMBULANT, NM_STATUS_NON_AMBULANT]),
-  DominantHand: () => categorizedTargetPath([OX_LEFT_HANDED, OX_RIGHT_HANDED]),
-  BelowAverageFlag: () => categorizedTargetPath([NM_PERFORMANCE_BELOW_AVERAGE]),
-  BaselineAge: () => magnitudePath(GIST_ASPECT_AGE),
-  LoAAge: () => magnitudePath(NM_ASPECT_AGE_AT_LOSS_OF_AMBULATION),
-  TotalMFM: () => magnitudePath(NM_ASPECT_MFM32_AGGREGATE_SCORE),
+    ({
+      ...categorizedTargetPath([NM_STATUS_AMBULANT, NM_STATUS_NON_AMBULANT]),
+      name: "AmbulationStatus",
+    }),
+  DominantHand: () =>
+    ({ ...categorizedTargetPath([OX_LEFT_HANDED, OX_RIGHT_HANDED]), name: "DominantHand" }),
+  BelowAverageFlag: () =>
+    ({ ...categorizedTargetPath([NM_PERFORMANCE_BELOW_AVERAGE]), name: "BelowAverageFlag" }),
+  BaselineAge: () => ({ ...magnitudePath(GIST_ASPECT_AGE), name: "BaselineAge" }),
+  LoAAge: () =>
+    ({ ...magnitudePath(NM_ASPECT_AGE_AT_LOSS_OF_AMBULATION), name: "LoAAge" }),
+  TotalMFM: () =>
+    ({ ...magnitudePath(NM_ASPECT_MFM32_AGGREGATE_SCORE), name: "TotalMFM" }),
   KaplanMeierEvent: () =>
-    assessmentMagnitudePath({
-      assessmentTypeIri: NM_ASSESSMENT_TYPE_KAPLAN_MEIER,
-      aspectIri: NM_ASPECT_KAPLAN_MEIER_EVENT_INDICATOR,
+    ({
+      ...assessmentMagnitudePath({
+        assessmentTypeIri: NM_ASSESSMENT_TYPE_KAPLAN_MEIER,
+        aspectIri: NM_ASPECT_KAPLAN_MEIER_EVENT_INDICATOR,
+      }),
+      name: "KaplanMeierEvent",
     }),
   KaplanMeierTime: () =>
-    assessmentMagnitudePath({
-      assessmentTypeIri: NM_ASSESSMENT_TYPE_KAPLAN_MEIER,
-      aspectIri: NM_ASPECT_KAPLAN_MEIER_TIME_TO_EVENT,
+    ({
+      ...assessmentMagnitudePath({
+        assessmentTypeIri: NM_ASSESSMENT_TYPE_KAPLAN_MEIER,
+        aspectIri: NM_ASPECT_KAPLAN_MEIER_TIME_TO_EVENT,
+      }),
+      name: "KaplanMeierTime",
     }),
   MFMVisitTimeFromBaseline: () =>
-    assessmentMagnitudePath({
-      assessmentTypeIri: NM_ASSESSMENT_TYPE_MFM32,
-      aspectIri: NM_ASPECT_DURATION_SINCE_STUDY_ENROLLMENT,
+    ({
+      ...assessmentMagnitudePath({
+        assessmentTypeIri: NM_ASSESSMENT_TYPE_MFM32,
+        aspectIri: NM_ASPECT_DURATION_SINCE_STUDY_ENROLLMENT,
+      }),
+      name: "MFMVisitTimeFromBaseline",
     }),
   MFMVisitScore: () =>
-    assessmentMagnitudePath({
-      assessmentTypeIri: NM_ASSESSMENT_TYPE_MFM32,
-      aspectIri: NM_ASPECT_MFM32_VISIT_SCORE,
-      includeProduces: true,
+    ({
+      ...assessmentMagnitudePath({
+        assessmentTypeIri: NM_ASSESSMENT_TYPE_MFM32,
+        aspectIri: NM_ASPECT_MFM32_VISIT_SCORE,
+        includeProduces: true,
+      }),
+      name: "MFMVisitScore",
     }),
 };

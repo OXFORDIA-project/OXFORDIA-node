@@ -11,15 +11,19 @@ import {
   Text,
 } from "linked-data-browser";
 import { Trash2 } from "lucide-react-native";
-import type { GraphPath } from "@oxfordia/plugins";
+import { set } from "@ldo/ldo";
+import type {
+  GraphPath,
+  KaplanMeierAllowedPath,
+  MeanAllowedPath,
+} from "@oxfordia/plugins";
 import type { GraphPathShortcut } from "@oxfordia/plugins/dataPlugin";
 import { resolveGraphPathShortcut } from "@oxfordia/plugins/dataPlugin";
-import type {
-  PolicyFormState,
-  MeanAllowedPathForm,
-  KmAllowedPathForm,
+import type { EditorPolicy } from "../hooks/useStatisticAccessRuleEditorData";
+import {
+  createEmptyGraphPath,
+  ensureGraphPathIds,
 } from "../hooks/useStatisticAccessRuleEditorData";
-import { createEmptyGraphPath } from "../hooks/useStatisticAccessRuleEditorData";
 import type {
   StartPredicateOptionGetter,
   StartValueOptionGetter,
@@ -44,10 +48,24 @@ type GraphPathOptions = {
 
 type Props = {
   error: string | null;
-  policies: PolicyFormState[];
-  setPolicies: React.Dispatch<React.SetStateAction<PolicyFormState[]>>;
+  policies: EditorPolicy[];
   statisticNames: string[];
   addPolicy: (name: string) => void;
+  removePolicy: (policyId: string) => void;
+  addMeanAllowedPath: (policyId: string) => void;
+  updateMeanAllowedPath: (
+    policyId: string,
+    pathIndex: number,
+    nextPath: MeanAllowedPath,
+  ) => void;
+  removeMeanAllowedPath: (policyId: string, pathIndex: number) => void;
+  addKaplanMeierAllowedPath: (policyId: string) => void;
+  updateKaplanMeierAllowedPath: (
+    policyId: string,
+    pathIndex: number,
+    nextPath: KaplanMeierAllowedPath,
+  ) => void;
+  removeKaplanMeierAllowedPath: (policyId: string, pathIndex: number) => void;
   gpOptions: GraphPathOptions;
 };
 
@@ -178,6 +196,7 @@ function GraphPathFieldEditor({
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [showAdvanced, setShowAdvanced] = React.useState(false);
   const matched = resolveGraphPathShortcut(gpOptions.dataSchemaName, value);
+  const selectedName = value.name ?? matched?.name ?? "Choose path";
 
   return (
     <View style={styles.fieldWrapper}>
@@ -185,7 +204,7 @@ function GraphPathFieldEditor({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              text={matched ? matched.name : "Choose path"}
+              text={selectedName}
               variant="secondary"
               style={styles.dropdownTriggerButton}
             />
@@ -197,7 +216,7 @@ function GraphPathFieldEditor({
                   key={shortcut.name}
                   onPress={() => onChange(shortcut.graphPath)}
                 >
-                  <Text>{shortcut.name}</Text>
+                  <Text>{shortcut.graphPath.name ?? shortcut.name}</Text>
                 </DropdownMenuItem>
               ))}
             </ScrollView>
@@ -210,7 +229,7 @@ function GraphPathFieldEditor({
           onPress={() => setShowAdvanced((prev) => !prev)}
         />
       </View>
-      {showAdvanced && (
+      {showAdvanced ? (
         <View style={styles.graphPathBuilderWrap}>
           <GraphPathBuilder
             value={value}
@@ -224,37 +243,38 @@ function GraphPathFieldEditor({
             onChange={onChange}
           />
         </View>
-      )}
+      ) : null}
     </View>
   );
 }
 
 function MeanPolicyEditor({
   policy,
-  onUpdate,
   gpOptions,
   styles,
   removeColor,
+  addMeanAllowedPath,
+  updateMeanAllowedPath,
+  removeMeanAllowedPath,
 }: {
-  policy: Extract<PolicyFormState, { statisticName: "mean" }>;
-  onUpdate: (paths: MeanAllowedPathForm[]) => void;
+  policy: Extract<EditorPolicy, { statisticName: "mean" }>;
   gpOptions: GraphPathOptions;
   styles: ReturnType<typeof createStyles>;
   removeColor: string;
+  addMeanAllowedPath: (policyId: string) => void;
+  updateMeanAllowedPath: (
+    policyId: string,
+    pathIndex: number,
+    nextPath: MeanAllowedPath,
+  ) => void;
+  removeMeanAllowedPath: (policyId: string, pathIndex: number) => void;
 }) {
-  const paths = policy.allowedPaths;
-
-  const updatePath = (idx: number, patch: Partial<MeanAllowedPathForm>) =>
-    onUpdate(paths.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
-  const removePath = (idx: number) =>
-    onUpdate(paths.filter((_, i) => i !== idx));
-
   return (
     <View style={{ gap: 12 }}>
-      {paths.map((path, idx) => (
-        <View key={idx} style={styles.pathCard}>
+      {policy.allowedPaths.map((path, idx) => (
+        <View key={path["@id"] ?? idx} style={styles.pathCard}>
           <RemoveButton
-            onPress={() => removePath(idx)}
+            onPress={() => removeMeanAllowedPath(policy.key, idx)}
             styles={styles}
             color={removeColor}
             style={styles.cornerRemoveButton}
@@ -263,7 +283,12 @@ function MeanPolicyEditor({
             <Text style={styles.fieldLabel}>Graph Path</Text>
             <GraphPathFieldEditor
               value={path.graphPath}
-              onChange={(next) => updatePath(idx, { graphPath: next })}
+              onChange={(next) =>
+                updateMeanAllowedPath(policy.key, idx, {
+                  ...path,
+                  graphPath: ensureGraphPathIds(next),
+                })
+              }
               gpOptions={gpOptions}
             />
           </View>
@@ -271,9 +296,12 @@ function MeanPolicyEditor({
             <Text style={styles.fieldLabel}>Min Count</Text>
             <TextInput
               value={String(path.minCount)}
-              onChangeText={(v) => {
-                const n = Math.max(1, Number(v || "1"));
-                updatePath(idx, { minCount: Number.isFinite(n) ? n : 1 });
+              onChangeText={(value) => {
+                const minCount = Math.max(1, Number(value || "1"));
+                updateMeanAllowedPath(policy.key, idx, {
+                  ...path,
+                  minCount: Number.isFinite(minCount) ? minCount : 1,
+                });
               }}
               keyboardType="numeric"
               style={styles.input}
@@ -285,12 +313,7 @@ function MeanPolicyEditor({
         text="Add Allowed Path"
         variant="secondary"
         style={styles.addBtn}
-        onPress={() =>
-          onUpdate([
-            ...paths,
-            { graphPath: createEmptyGraphPath(), minCount: 1 },
-          ])
-        }
+        onPress={() => addMeanAllowedPath(policy.key)}
       />
     </View>
   );
@@ -298,30 +321,31 @@ function MeanPolicyEditor({
 
 function KaplanMeierPolicyEditor({
   policy,
-  onUpdate,
   gpOptions,
   styles,
   removeColor,
+  addKaplanMeierAllowedPath,
+  updateKaplanMeierAllowedPath,
+  removeKaplanMeierAllowedPath,
 }: {
-  policy: Extract<PolicyFormState, { statisticName: "kaplan-meier" }>;
-  onUpdate: (paths: KmAllowedPathForm[]) => void;
+  policy: Extract<EditorPolicy, { statisticName: "kaplan-meier" }>;
   gpOptions: GraphPathOptions;
   styles: ReturnType<typeof createStyles>;
   removeColor: string;
+  addKaplanMeierAllowedPath: (policyId: string) => void;
+  updateKaplanMeierAllowedPath: (
+    policyId: string,
+    pathIndex: number,
+    nextPath: KaplanMeierAllowedPath,
+  ) => void;
+  removeKaplanMeierAllowedPath: (policyId: string, pathIndex: number) => void;
 }) {
-  const paths = policy.allowedPaths;
-
-  const updatePath = (idx: number, patch: Partial<KmAllowedPathForm>) =>
-    onUpdate(paths.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
-  const removePath = (idx: number) =>
-    onUpdate(paths.filter((_, i) => i !== idx));
-
   return (
     <View style={{ gap: 12 }}>
-      {paths.map((path, idx) => (
-        <View key={idx} style={styles.pathCard}>
+      {policy.allowedPaths.map((path, idx) => (
+        <View key={path["@id"] ?? idx} style={styles.pathCard}>
           <RemoveButton
-            onPress={() => removePath(idx)}
+            onPress={() => removeKaplanMeierAllowedPath(policy.key, idx)}
             styles={styles}
             color={removeColor}
             style={styles.cornerRemoveButton}
@@ -331,7 +355,12 @@ function KaplanMeierPolicyEditor({
             <Text style={styles.fieldLabel}>Time Graph Path</Text>
             <GraphPathFieldEditor
               value={path.timeGraphPath}
-              onChange={(next) => updatePath(idx, { timeGraphPath: next })}
+              onChange={(next) =>
+                updateKaplanMeierAllowedPath(policy.key, idx, {
+                  ...path,
+                  timeGraphPath: ensureGraphPathIds(next),
+                })
+              }
               gpOptions={gpOptions}
             />
           </View>
@@ -340,50 +369,75 @@ function KaplanMeierPolicyEditor({
             <Text style={styles.fieldLabel}>Event Graph Path</Text>
             <GraphPathFieldEditor
               value={path.eventGraphPath}
-              onChange={(next) => updatePath(idx, { eventGraphPath: next })}
+              onChange={(next) =>
+                updateKaplanMeierAllowedPath(policy.key, idx, {
+                  ...path,
+                  eventGraphPath: ensureGraphPathIds(next),
+                })
+              }
               gpOptions={gpOptions}
             />
           </View>
 
           <View style={{ gap: 10 }}>
             <Text style={styles.sectionLabel}>Group By Graph Paths</Text>
-            {path.groupByGraphPaths.map((gp, gpIdx) => (
-              <View key={gpIdx} style={styles.pathCard}>
-                <RemoveButton
-                  onPress={() =>
-                    updatePath(idx, {
-                      groupByGraphPaths: path.groupByGraphPaths.filter(
-                        (_, i) => i !== gpIdx,
-                      ),
-                    })
-                  }
-                  styles={styles}
-                  color={removeColor}
-                  style={styles.cornerRemoveButton}
-                />
-                <GraphPathFieldEditor
-                  value={gp}
-                  onChange={(next) =>
-                    updatePath(idx, {
-                      groupByGraphPaths: path.groupByGraphPaths.map((g, i) =>
-                        i === gpIdx ? next : g,
-                      ),
-                    })
-                  }
-                  gpOptions={gpOptions}
-                />
-              </View>
-            ))}
+            {(path.groupByGraphPath ? Array.from(path.groupByGraphPath) : []).map(
+              (groupByPath, groupByIndex) => (
+                <View
+                  key={groupByPath["@id"] ?? groupByIndex}
+                  style={styles.pathCard}
+                >
+                  <RemoveButton
+                    onPress={() =>
+                      updateKaplanMeierAllowedPath(policy.key, idx, {
+                        ...path,
+                        groupByGraphPath: set(
+                          ...(path.groupByGraphPath
+                            ? Array.from(path.groupByGraphPath).filter(
+                                (_, currentIndex) => currentIndex !== groupByIndex,
+                              )
+                            : []),
+                        ),
+                      })
+                    }
+                    styles={styles}
+                    color={removeColor}
+                    style={styles.cornerRemoveButton}
+                  />
+                  <GraphPathFieldEditor
+                    value={groupByPath}
+                    onChange={(next) =>
+                      updateKaplanMeierAllowedPath(policy.key, idx, {
+                        ...path,
+                        groupByGraphPath: set(
+                          ...(path.groupByGraphPath
+                            ? Array.from(path.groupByGraphPath).map((currentPath, currentIndex) =>
+                                currentIndex === groupByIndex
+                                  ? ensureGraphPathIds(next)
+                                  : currentPath,
+                              )
+                            : []),
+                        ),
+                      })
+                    }
+                    gpOptions={gpOptions}
+                  />
+                </View>
+              ),
+            )}
             <Button
               text="Add Group By Path"
               variant="secondary"
               style={styles.addBtn}
               onPress={() =>
-                updatePath(idx, {
-                  groupByGraphPaths: [
-                    ...path.groupByGraphPaths,
-                    createEmptyGraphPath(),
-                  ],
+                updateKaplanMeierAllowedPath(policy.key, idx, {
+                  ...path,
+                  groupByGraphPath: set(
+                    ...(path.groupByGraphPath
+                      ? Array.from(path.groupByGraphPath)
+                      : []),
+                    ensureGraphPathIds(createEmptyGraphPath()),
+                  ),
                 })
               }
             />
@@ -393,9 +447,12 @@ function KaplanMeierPolicyEditor({
             <Text style={styles.fieldLabel}>k-Anonymity</Text>
             <TextInput
               value={String(path.kAnonymity)}
-              onChangeText={(v) => {
-                const n = Math.max(1, Number(v || "1"));
-                updatePath(idx, { kAnonymity: Number.isFinite(n) ? n : 1 });
+              onChangeText={(value) => {
+                const kAnonymity = Math.max(1, Number(value || "1"));
+                updateKaplanMeierAllowedPath(policy.key, idx, {
+                  ...path,
+                  kAnonymity: Number.isFinite(kAnonymity) ? kAnonymity : 1,
+                });
               }}
               keyboardType="numeric"
               style={styles.input}
@@ -407,17 +464,7 @@ function KaplanMeierPolicyEditor({
         text="Add Allowed Path"
         variant="secondary"
         style={styles.addBtn}
-        onPress={() =>
-          onUpdate([
-            ...paths,
-            {
-              timeGraphPath: createEmptyGraphPath(),
-              eventGraphPath: createEmptyGraphPath(),
-              groupByGraphPaths: [],
-              kAnonymity: 1,
-            },
-          ])
-        }
+        onPress={() => addKaplanMeierAllowedPath(policy.key)}
       />
     </View>
   );
@@ -426,26 +473,27 @@ function KaplanMeierPolicyEditor({
 export function StatisticAccessRuleEditorForm({
   error,
   policies,
-  setPolicies,
   statisticNames,
   addPolicy,
+  removePolicy,
+  addMeanAllowedPath,
+  updateMeanAllowedPath,
+  removeMeanAllowedPath,
+  addKaplanMeierAllowedPath,
+  updateKaplanMeierAllowedPath,
+  removeKaplanMeierAllowedPath,
   gpOptions,
 }: Props) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
 
-  const updatePolicy = (key: string, updated: PolicyFormState) =>
-    setPolicies((prev) => prev.map((p) => (p.key === key ? updated : p)));
-  const removePolicy = (key: string) =>
-    setPolicies((prev) => prev.filter((p) => p.key !== key));
-
   return (
     <View style={styles.root}>
-      {error && (
+      {error ? (
         <View style={styles.banner}>
           <Text style={styles.error}>{error}</Text>
         </View>
-      )}
+      ) : null}
 
       <View style={{ gap: 14 }}>
         {policies.map((policy, idx) => (
@@ -463,28 +511,28 @@ export function StatisticAccessRuleEditorForm({
             </View>
 
             <View style={styles.policyBody}>
-              {policy.statisticName === "mean" && (
+              {policy.statisticName === "mean" ? (
                 <MeanPolicyEditor
                   policy={policy}
-                  onUpdate={(paths) =>
-                    updatePolicy(policy.key, { ...policy, allowedPaths: paths })
-                  }
                   gpOptions={gpOptions}
                   styles={styles}
                   removeColor={colors.text}
+                  addMeanAllowedPath={addMeanAllowedPath}
+                  updateMeanAllowedPath={updateMeanAllowedPath}
+                  removeMeanAllowedPath={removeMeanAllowedPath}
                 />
-              )}
-              {policy.statisticName === "kaplan-meier" && (
+              ) : null}
+              {policy.statisticName === "kaplan-meier" ? (
                 <KaplanMeierPolicyEditor
                   policy={policy}
-                  onUpdate={(paths) =>
-                    updatePolicy(policy.key, { ...policy, allowedPaths: paths })
-                  }
                   gpOptions={gpOptions}
                   styles={styles}
                   removeColor={colors.text}
+                  addKaplanMeierAllowedPath={addKaplanMeierAllowedPath}
+                  updateKaplanMeierAllowedPath={updateKaplanMeierAllowedPath}
+                  removeKaplanMeierAllowedPath={removeKaplanMeierAllowedPath}
                 />
-              )}
+              ) : null}
             </View>
           </View>
         ))}

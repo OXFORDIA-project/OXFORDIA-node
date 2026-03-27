@@ -27,7 +27,10 @@ export function getGraphPathShortcutsForDataSchema(
   const shortcutMap = getGraphPathShortcutMapForDataSchema(dataSchemaName);
   return Object.entries(shortcutMap).map(([name, createGraphPath]) => ({
     name,
-    graphPath: createGraphPath(),
+    graphPath: (() => {
+      const graphPath = createGraphPath();
+      return graphPath.name ? graphPath : { ...graphPath, name };
+    })(),
   }));
 }
 
@@ -38,7 +41,13 @@ export function findGraphPathShortcutByName(
   const shortcutMap = getGraphPathShortcutMapForDataSchema(dataSchemaName);
   const createGraphPath = shortcutMap[shortcutName];
   return createGraphPath
-    ? { name: shortcutName, graphPath: createGraphPath() }
+    ? {
+        name: shortcutName,
+        graphPath: (() => {
+          const graphPath = createGraphPath();
+          return graphPath.name ? graphPath : { ...graphPath, name: shortcutName };
+        })(),
+      }
     : null;
 }
 
