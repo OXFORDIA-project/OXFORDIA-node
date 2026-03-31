@@ -1,0 +1,72 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2021",
+      "DOM"
+    ],
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@oxfordia/data-plugin_core": [
+        "packages/data-plugin_core/src/index.ts"
+      ],
+      "@oxfordia/data-plugin_ui": [
+        "packages/data-plugin_ui/src/index.ts"
+      ],
+      "@oxfordia/data-plugin-nemaline_core": [
+        "packages/data-plugin-nemaline_core/src/index.ts"
+      ],
+      "@oxfordia/data-plugin-nemaline_ui": [
+        "packages/data-plugin-nemaline_ui/src/index.ts"
+      ],
+      "@oxfordia/pod-server-core": [
+        "packages/pod-server-core/src/index.ts"
+      ],
+      "@oxfordia/pod-server": [
+        "packages/pod-server/src/index.ts"
+      ],
+      "@oxfordia/pod-ui-core": [
+        "packages/pod-ui-core/src/index.ts"
+      ],
+      "@oxfordia/pod-ui": [
+        "packages/pod-ui/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin_core": [
+        "packages/stat-plugin_core/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin_server": [
+        "packages/stat-plugin_server/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin_ui": [
+        "packages/stat-plugin_ui/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-mean_core": [
+        "packages/stat-plugin-mean_core/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-mean_server": [
+        "packages/stat-plugin-mean_server/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-mean_ui": [
+        "packages/stat-plugin-mean_ui/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-kaplan-meier_core": [
+        "packages/stat-plugin-kaplan-meier_core/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-kaplan-meier_server": [
+        "packages/stat-plugin-kaplan-meier_server/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-kaplan-meier_ui": [
+        "packages/stat-plugin-kaplan-meier_ui/src/index.ts"
+      ]
+    }
+  }
+}

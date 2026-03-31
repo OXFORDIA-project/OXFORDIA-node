@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "OXFORDIA Pod UI",
+    "slug": "oxfordia-pod-ui",
+    "version": "1.0.0",
+    "entryPoint": "./index.js",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": []
+  }
+}

@@ -1,0 +1,14 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX sar: <https://oxfordia.setmeld.com/statistic-access-rule#>
+
+start = @sar:StatisticAccessRuleDocumentShape
+
+sar:StatisticAccessRuleDocumentShape {
+  a [sar:StatisticAccessRule] ;
+  sar:dataSchema xsd:string ;
+  sar:hasStatisticPolicy @sar:StatisticPolicyShape *
+}
+
+sar:StatisticPolicyShape {
+  sar:statisticName xsd:string
+}
