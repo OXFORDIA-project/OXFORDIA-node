@@ -1,0 +1,57 @@
+{
+  "name": "@oxfordia/pod-ui",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "clean": "rm -rf .expo dist-server dist-standalone",
+    "dev:web": "expo start -c --web",
+    "build:standalone": "expo export -p web --output-dir dist-standalone && node scripts/adjust-standalone-paths.js",
+    "build:server": "EXPO_PUBLIC_IS_SERVER_HOSTED=true expo export -p web --output-dir dist-server && node scripts/adjust-server-paths.js",
+    "build:server:watch": "npm run build:server && npx chokidar 'app/**/*' 'src/**/*' 'index.js' 'global.css' 'app.json' 'babel.config.js' 'metro.config.js' '../*/dist/**/*' -i 'dist-standalone/**' -i 'dist-server/**' -i 'node_modules/**' -c 'npm run build:server'"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~5.0.5",
+    "@ldo/connected-solid": "^1.0.0-alpha.46",
+    "@ldo/ldo": "^1.0.0-alpha.46",
+    "@ldo/rdf-utils": "^1.0.0-alpha.46",
+    "@ldo/solid-react": "^1.0.0-alpha.46",
+    "@react-navigation/native": "^7.1.17",
+    "@oxfordia/data-plugin-nemaline_ui": "*",
+    "@oxfordia/pod-ui-core": "*",
+    "@oxfordia/stat-plugin-kaplan-meier_ui": "*",
+    "@oxfordia/stat-plugin-mean_ui": "*",
+    "expo": "^53.0.9",
+    "json-schema": "^0.4.0",
+    "jsonld": "^8.3.3",
+    "jsonld2graphobject": "^0.0.5",
+    "linked-data-browser": "^0.0.8-alpha.6",
+    "lucide-react-native": "^0.511.0",
+    "nativewind": "^4.1.23",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.2",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "~4.10.0",
+    "react-native-svg": "15.11.2",
+    "react-native-web": "~0.20.0",
+    "react-router": "^7.6.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@types/jsonld": "^1.5.15",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/shexj": "^2.1.7",
+    "chokidar-cli": "^3.0.0"
+  }
+}

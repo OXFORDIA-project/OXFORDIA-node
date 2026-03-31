@@ -1,0 +1,93 @@
+import { ShapeType } from "@ldo/ldo";
+import { mean_statisticAccessRuleSchemaSchema } from "./mean_statisticAccessRuleSchema.schema";
+import { mean_statisticAccessRuleSchemaContext } from "./mean_statisticAccessRuleSchema.context";
+import {
+  MeanStatisticAccessRule,
+  MeanAllowedPath,
+  GraphPath,
+  GraphNodeFilter,
+  GraphPredicateFilter,
+  GraphTraversalStep,
+  GraphValueSelector,
+  GraphLiteralFilter,
+} from "./mean_statisticAccessRuleSchema.typings";
+
+/**
+ * =============================================================================
+ * LDO ShapeTypes mean_statisticAccessRuleSchema
+ * =============================================================================
+ */
+
+/**
+ * MeanStatisticAccessRule ShapeType
+ */
+export const MeanStatisticAccessRuleShapeType: ShapeType<MeanStatisticAccessRule> =
+  {
+    schema: mean_statisticAccessRuleSchemaSchema,
+    shape:
+      "https://oxfordia.setmeld.com/statistics#MeanStatisticAccessRuleShape",
+    context: mean_statisticAccessRuleSchemaContext,
+  };
+
+/**
+ * MeanAllowedPath ShapeType
+ */
+export const MeanAllowedPathShapeType: ShapeType<MeanAllowedPath> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#MeanAllowedPathShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};
+
+/**
+ * GraphPath ShapeType
+ */
+export const GraphPathShapeType: ShapeType<GraphPath> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};
+
+/**
+ * GraphNodeFilter ShapeType
+ */
+export const GraphNodeFilterShapeType: ShapeType<GraphNodeFilter> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#GraphNodeFilterShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};
+
+/**
+ * GraphPredicateFilter ShapeType
+ */
+export const GraphPredicateFilterShapeType: ShapeType<GraphPredicateFilter> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#GraphPredicateFilterShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};
+
+/**
+ * GraphTraversalStep ShapeType
+ */
+export const GraphTraversalStepShapeType: ShapeType<GraphTraversalStep> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#GraphTraversalStepShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};
+
+/**
+ * GraphValueSelector ShapeType
+ */
+export const GraphValueSelectorShapeType: ShapeType<GraphValueSelector> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#GraphValueSelectorShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};
+
+/**
+ * GraphLiteralFilter ShapeType
+ */
+export const GraphLiteralFilterShapeType: ShapeType<GraphLiteralFilter> = {
+  schema: mean_statisticAccessRuleSchemaSchema,
+  shape: "https://oxfordia.setmeld.com/statistics#GraphLiteralFilterShape",
+  context: mean_statisticAccessRuleSchemaContext,
+};

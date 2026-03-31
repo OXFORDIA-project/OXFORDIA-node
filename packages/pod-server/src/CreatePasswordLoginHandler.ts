@@ -1,0 +1,73 @@
+import { boolean, object, string } from "yup";
+import {
+  assertOidcInteraction,
+  finishInteraction,
+  type JsonRepresentation,
+  JsonInteractionHandler,
+  type JsonInteractionHandlerInput,
+  JsonView,
+  parseSchema,
+  validateWithError,
+  CreatePasswordHandler,
+  CreatePodHandler,
+  PasswordLoginHandler,
+  CreateAccountHandler,
+} from "@solid/community-server";
+
+const inSchema = object({
+  email: string().trim().email().lowercase().required(),
+  password: string().trim().min(1).required(),
+  name: string().trim().min(1).required(),
+  remember: boolean().default(false),
+});
+
+export interface CreatePasswordLoginHandlerArgs {
+  createAccountHandler: CreateAccountHandler;
+  createPasswordHandler: CreatePasswordHandler;
+  createPodHandler: CreatePodHandler;
+  passwordLoginHandler: PasswordLoginHandler;
+}
+
+export class CreatePasswordLoginHandler
+  extends JsonInteractionHandler
+  implements JsonView
+{
+  private readonly createAccountHandler: CreateAccountHandler;
+  private readonly createPasswordHandler: CreatePasswordHandler;
+  private readonly createPodHandler: CreatePodHandler;
+  private readonly passwordLoginHandler: PasswordLoginHandler;
+
+  public constructor(args: CreatePasswordLoginHandlerArgs) {
+    super();
+    this.createAccountHandler = args.createAccountHandler;
+    this.createPasswordHandler = args.createPasswordHandler;
+    this.createPodHandler = args.createPodHandler;
+    this.passwordLoginHandler = args.passwordLoginHandler;
+  }
+
+  public async getView(): Promise<JsonRepresentation> {
+    return { json: parseSchema(inSchema) };
+  }
+
+  public async handle(
+    input: JsonInteractionHandlerInput,
+  ): Promise<JsonRepresentation> {
+    assertOidcInteraction(input.oidcInteraction);
+    await validateWithError(inSchema, input.json);
+    const accountResponse = await this.createAccountHandler.login();
+    const newInput = { ...input, accountId: accountResponse.json.accountId };
+    await this.createPasswordHandler.handleSafe(newInput);
+    await this.createPodHandler.handleSafe(newInput);
+    const loginInfo = await this.passwordLoginHandler.login(newInput);
+    const { oidcInteraction, ...restInput } = input;
+
+    const toReturn = await this.passwordLoginHandler.handle(restInput);
+    const location = await finishInteraction(
+      input.oidcInteraction,
+      { create: true, ...loginInfo.json },
+      true,
+    );
+    toReturn.json.location = location;
+    return toReturn;
+  }
+}

@@ -1,0 +1,95 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX ox: <https://paediatrics.ox.ac.uk/terms/>
+PREFIX nm: <https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/>
+
+start = @ox:PersonShape
+
+ox:PersonShape {
+  a [gist:Person] ;
+  gist:isIdentifiedBy @ox:IDShape ;
+  gist:isCategorizedBy [nm:Cluster_1 nm:Cluster_2 nm:Cluster_3] ;
+  gist:isCategorizedBy [nm:GeneticGroup_Variant1 nm:GeneticGroup_Variant2 nm:GeneticGroup_Variant3] ;
+  gist:isCategorizedBy [ox:LeftHanded ox:RightHanded] ? ;
+  gist:isCategorizedBy [nm:Status_Ambulant nm:Status_NonAmbulant] ;
+  gist:isCategorizedBy [nm:Performance_BelowAverage] ? ;
+  gist:hasMagnitude @ox:BaselineAgeMagnitude ;
+  gist:hasMagnitude @ox:LoAAgeMagnitude ? ;
+  gist:hasMagnitude @ox:TotalMFMMagnitude ? ;
+  ^gist:hasParticipant @nm:MFMAssessmentEventShape * ;
+  ^gist:hasParticipant @nm:KaplanMeierObservationShape ? ;
+}
+
+nm:MFMAssessmentEventShape {
+  a [gist:Determination] ;
+  gist:isCategorizedBy [nm:AssessmentType_MFM32] ;
+  gist:hasMagnitude @nm:TimeFromBaselineMagnitude ;
+  gist:hasParticipant @ox:PersonShape ;
+  gist:produces @nm:AssessmentResult ;
+}
+
+nm:KaplanMeierObservationShape {
+  a [gist:Determination] ;
+  gist:isCategorizedBy [nm:AssessmentType_KaplanMeier] ;
+  gist:hasParticipant @ox:PersonShape ;
+  gist:hasMagnitude @ox:KaplanMeierEventMagnitude ;
+  gist:hasMagnitude @ox:KaplanMeierTimeMagnitude ;
+}
+
+nm:AssessmentResult {
+  a [gist:Content] ;
+  gist:isAbout [nm:Concept_MotorFunction] ;
+  gist:hasMagnitude @nm:MFMScoreMagnitude ;
+}
+
+nm:TimeFromBaselineMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_DurationSinceStudyEnrollment] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+nm:MFMScoreMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_MFM32_VisitScore] ;
+  gist:numericValue xsd:integer ;
+}
+
+ox:TotalMFMMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_MFM32_AggregateScore] ;
+  gist:numericValue xsd:integer ;
+}
+
+ox:KaplanMeierEventMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_KaplanMeierEventIndicator] ;
+  gist:numericValue xsd:integer ;
+}
+
+ox:KaplanMeierTimeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_KaplanMeierTimeToEvent] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+ox:BaselineAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [gist:Aspect_Age] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+ox:LoAAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AgeAtLossOfAmbulation] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+ox:IDShape {
+  a [gist:ID] ;
+  gist:uniqueText xsd:string ;
+}
