@@ -45,10 +45,8 @@ export function evaluateMeanStatisticAccessRulePostQuery(
   statisticAccessRule: MeanStatisticAccessRule,
   output: { count: number },
 ): true | Error {
-  const match = findMatchingAllowedPath(
-    queryGraphPath,
-    toCollectionArray(statisticAccessRule.allowedPath),
-  );
+  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
+  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
   if (!match) {
     return new Error(
       "Requested graphPath is not allowed by mean statistic policy.",

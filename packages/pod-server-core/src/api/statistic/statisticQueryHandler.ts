@@ -69,7 +69,10 @@ async function getStatisticAccessRuleFor(
   const matches = dataset
     .usingType(StatisticAccessRuleDocumentShapeType)
     .matchSubject(RDF_TYPE, STATISTIC_ACCESS_RULE_TYPE);
-  const statisticAccessRule = Array.from(matches)[0];
+  const expectedRootId = `${statisticAccessRuleUri}#policy`;
+  const statisticAccessRule =
+    Array.from(matches).find((match) => match["@id"] === expectedRootId) ??
+    Array.from(matches)[0];
 
   if (!statisticAccessRule) {
     throw new HttpError(
