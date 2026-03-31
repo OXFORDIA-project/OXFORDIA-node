@@ -31,14 +31,6 @@ function toArray<T>(value: Iterable<T> | undefined): T[] {
   return Array.from(value);
 }
 
-function createId(prefix: string): string {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function createLocalNodeId(prefix: string): string {
-  return `#${createId(prefix)}`;
-}
-
 function createInitialDocument(
   rootId: string,
   dataSchemaName: string,

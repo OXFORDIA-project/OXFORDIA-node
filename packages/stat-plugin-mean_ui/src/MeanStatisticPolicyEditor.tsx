@@ -14,11 +14,15 @@ import {
 } from "@oxfordia/stat-plugin_ui";
 
 type MeanStatisticPolicy = StatisticPolicy & {
-  allowedPath?: Iterable<MeanAllowedPath>;
+  allowedPath?: MeanAllowedPath | Iterable<MeanAllowedPath>;
 };
 
-function toArray<T>(value: Iterable<T> | undefined): T[] {
-  return value ? Array.from(value) : [];
+function toArray<T>(value: T | Iterable<T> | undefined): T[] {
+  if (value === undefined) return [];
+  if (typeof value === "object" && value !== null && Symbol.iterator in value) {
+    return Array.from(value as Iterable<T>);
+  }
+  return [value as T];
 }
 
 function createId(prefix: string): string {

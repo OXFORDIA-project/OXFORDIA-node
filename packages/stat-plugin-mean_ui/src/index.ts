@@ -6,7 +6,7 @@ import type { StatisticPluginUi } from "@oxfordia/stat-plugin_ui";
 import { MeanStatisticPolicyEditor } from "./MeanStatisticPolicyEditor";
 
 type MeanStatisticPolicy = StatisticPolicy & {
-  allowedPath?: Iterable<MeanAllowedPath>;
+  allowedPath?: MeanAllowedPath | Iterable<MeanAllowedPath>;
 };
 
 function createId(prefix: string): string {

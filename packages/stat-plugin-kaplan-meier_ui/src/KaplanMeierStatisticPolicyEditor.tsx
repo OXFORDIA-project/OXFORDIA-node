@@ -14,11 +14,15 @@ import {
 } from "@oxfordia/stat-plugin_ui";
 
 type KaplanMeierStatisticPolicy = StatisticPolicy & {
-  allowedPath?: Iterable<KaplanMeierAllowedPath>;
+  allowedPath?: KaplanMeierAllowedPath | Iterable<KaplanMeierAllowedPath>;
 };
 
-function toArray<T>(value: Iterable<T> | undefined): T[] {
-  return value ? Array.from(value) : [];
+function toArray<T>(value: T | Iterable<T> | undefined): T[] {
+  if (value === undefined) return [];
+  if (typeof value === "object" && value !== null && Symbol.iterator in value) {
+    return Array.from(value as Iterable<T>);
+  }
+  return [value as T];
 }
 
 function createId(prefix: string): string {
@@ -93,9 +97,7 @@ export function KaplanMeierStatisticPolicyEditor({
   return (
     <View style={styles.root}>
       {allowedPaths.map((path, index) => {
-        const groupByPaths = path.groupByGraphPath
-          ? Array.from(path.groupByGraphPath)
-          : [];
+        const groupByPaths = toArray(path.groupByGraphPath);
 
         return (
           <View key={path["@id"] ?? index} style={styles.pathCard}>

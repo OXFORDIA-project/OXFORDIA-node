@@ -6,7 +6,7 @@ import type { StatisticPluginUi } from "@oxfordia/stat-plugin_ui";
 import { KaplanMeierStatisticPolicyEditor } from "./KaplanMeierStatisticPolicyEditor";
 
 type KaplanMeierStatisticPolicy = StatisticPolicy & {
-  allowedPath?: Iterable<KaplanMeierAllowedPath>;
+  allowedPath?: KaplanMeierAllowedPath | Iterable<KaplanMeierAllowedPath>;
 };
 
 function createId(prefix: string): string {
