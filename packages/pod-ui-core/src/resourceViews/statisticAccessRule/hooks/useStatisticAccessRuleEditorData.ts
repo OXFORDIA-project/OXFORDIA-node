@@ -57,20 +57,34 @@ export function useStatisticAccessRuleEditorData(
     [targetUri],
   );
 
+  const editorShapeType = useMemo(
+    () => ({
+      ...StatisticAccessRuleDocumentShapeType,
+      context: statisticPlugins.reduce(
+        (context, plugin) => ({
+          ...context,
+          ...plugin.statisticAccessRuleShapeType.context,
+        }),
+        StatisticAccessRuleDocumentShapeType.context,
+      ),
+    }),
+    [statisticPlugins],
+  );
+
   const matchedDocs = useMatchSubject(
-    StatisticAccessRuleDocumentShapeType,
+    editorShapeType,
     RDF_TYPE,
     SAR_TYPE,
   );
   const matchedDocument = useMemo(() => {
     const docs = toArray(matchedDocs as Iterable<StatisticAccessRuleDocument>);
     if (!fallbackRootId) return docs[0];
-    return docs.find((doc) => doc["@id"] === fallbackRootId) ?? docs[0];
+    return docs.find((doc) => doc["@id"] === fallbackRootId);
   }, [fallbackRootId, matchedDocs]);
 
-  const rootId = matchedDocument?.["@id"] ?? fallbackRootId;
+  const rootId = fallbackRootId ?? matchedDocument?.["@id"];
   const [draftDocument, setDoc, commitDoc] = useChangeSubject(
-    StatisticAccessRuleDocumentShapeType,
+    editorShapeType,
     rootId,
   );
   const document = draftDocument ?? matchedDocument;
