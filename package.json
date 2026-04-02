@@ -16,6 +16,7 @@
     "watch:server:packages": "tsc -b packages/pod-server/tsconfig.json --watch --preserveWatchOutput",
     "watch:ui:packages": "tsc -b packages/pod-ui/tsconfig.json --watch --preserveWatchOutput",
     "dev:server": "npm run build:server:packages && concurrently -n server-types,server-host \"npm run watch:server:packages\" \"npm --prefix packages/pod-server run dev\"",
+    "dev:multiple": "npm run build:server:packages && bash ./scripts/dev-multiple.sh",
     "dev:ui": "npm run build:ui:packages && concurrently -n ui-types,ui-host \"npm run watch:ui:packages\" \"npm --prefix packages/pod-ui run build:server:watch\"",
     "dev": "npm run build:server:packages && npm run build:ui:packages && concurrently -n server-types,server-host,ui-types,ui-host \"npm run watch:server:packages\" \"npm --prefix packages/pod-server run dev\" \"npm run watch:ui:packages\" \"npm --prefix packages/pod-ui run build:server:watch\"",
     "start:server": "npm --prefix packages/pod-server run start",
