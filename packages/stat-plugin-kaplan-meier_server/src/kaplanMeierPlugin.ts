@@ -35,6 +35,16 @@ export type KaplanMeierOutput = {
   observations: KaplanMeierObservationRow[];
 };
 
+const emptyObjectJsonSchema: JSONSchema4 = {
+  type: "object",
+  additionalProperties: false,
+  maxProperties: 0,
+};
+
+const nullJsonSchema: JSONSchema4 = {
+  type: "null",
+};
+
 const kaplanMeierQuerySchema: JSONSchema4 = {
   type: "object",
   additionalProperties: false,
@@ -47,9 +57,41 @@ const kaplanMeierQuerySchema: JSONSchema4 = {
     },
     eventPath: graphPathJsonSchema,
     timePath: graphPathJsonSchema,
-    groupByPath: graphPathJsonSchema,
+    groupByPath: {
+      anyOf: [graphPathJsonSchema, emptyObjectJsonSchema, nullJsonSchema],
+    },
   },
 };
+
+function isEmptyGroupByPath(
+  value: unknown,
+): value is Record<string, never> | null {
+  if (value === null) {
+    return true;
+  }
+
+  return (
+    !!value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.keys(value).length === 0
+  );
+}
+
+function normalizeKaplanMeierQuery(query: unknown): unknown {
+  if (!query || typeof query !== "object" || Array.isArray(query)) {
+    return query;
+  }
+
+  const groupByPath = (query as Record<string, unknown>).groupByPath;
+  if (!isEmptyGroupByPath(groupByPath)) {
+    return query;
+  }
+
+  const normalizedQuery = { ...(query as Record<string, unknown>) };
+  delete normalizedQuery.groupByPath;
+  return normalizedQuery;
+}
 
 export const kaplanMeierPlugin: StatisticApiPlugin<
   KaplanMeierQuery,
@@ -59,6 +101,7 @@ export const kaplanMeierPlugin: StatisticApiPlugin<
 > = {
   ...kaplanMeierStatisticPlugin,
   querySchema: kaplanMeierQuerySchema,
+  normalizeQuery: normalizeKaplanMeierQuery,
 
   evaluateStatisticAccessRulePreQuery(
     query,

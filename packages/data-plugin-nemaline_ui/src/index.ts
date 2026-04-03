@@ -15,3 +15,4 @@ export * from "./MeanQueryTester";
 export * from "./NemalineConfig";
 export * from "./NemalineCsvResourceCreator";
 export * from "./NemalineView";
+export * from "./defaultStatisticAccessRule";
