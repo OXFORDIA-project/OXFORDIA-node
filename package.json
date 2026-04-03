@@ -9,24 +9,26 @@
   "scripts": {
     "nx": "nx",
     "graph": "nx graph",
-    "dev": "nx run-many -t dev -p server,ui --parallel=2",
-    "dev:server": "nx run server:dev",
-    "dev:ui": "nx run ui:dev",
-    "start:server": "nx run server:start",
-    "build:server": "nx run server:build",
-    "build:ui": "npm run build --workspace ui",
-    "build:plugins": "npm run build --workspace plugins",
-    "build": "nx run-many -t build -p plugins,server,ui --parallel=3",
-    "test:schema-migration": "npm run test:schema-migration --workspace server",
+    "build": "nx run-many -t build --all --parallel=3",
+    "typecheck": "tsc -b --pretty false",
+    "build:server:packages": "tsc -b packages/pod-server/tsconfig.json --pretty false",
+    "build:ui:packages": "tsc -b packages/pod-ui/tsconfig.json --pretty false",
+    "watch:server:packages": "tsc -b packages/pod-server/tsconfig.json --watch --preserveWatchOutput",
+    "watch:ui:packages": "tsc -b packages/pod-ui/tsconfig.json --watch --preserveWatchOutput",
+    "dev:server": "npm run build:server:packages && concurrently -n server-types,server-host \"npm run watch:server:packages\" \"npm --prefix packages/pod-server run dev\"",
+    "dev:multiple": "npm run build:server:packages && bash ./scripts/dev-multiple.sh",
+    "dev:ui": "npm run build:ui:packages && concurrently -n ui-types,ui-host \"npm run watch:ui:packages\" \"npm --prefix packages/pod-ui run build:server:watch\"",
+    "dev": "npm run build:server:packages && npm run build:ui:packages && concurrently -n server-types,server-host,ui-types,ui-host \"npm run watch:server:packages\" \"npm --prefix packages/pod-server run dev\" \"npm run watch:ui:packages\" \"npm --prefix packages/pod-ui run build:server:watch\"",
+    "start:server": "npm --prefix packages/pod-server run start",
+    "build:server": "npm run build:server:packages && npm --prefix packages/pod-server run build",
+    "build:ui": "npm run build:ui:packages && npm --prefix packages/pod-ui run build:server",
     "deploy:package": "npm run build && node scripts/create-deploy-package.js",
     "version:get": "bash ./scripts/version.sh get",
     "version:set": "bash ./scripts/version.sh set",
     "version:bump": "bash ./scripts/version.sh bump"
   },
   "workspaces": [
-    "server",
-    "ui",
-    "plugins"
+    "packages/*"
   ],
   "repository": {
     "type": "git",
@@ -40,10 +42,12 @@
   },
   "homepage": "https://github.com/OXFORDIA-project/OXFORDIA-node#readme",
   "devDependencies": {
+    "@ldo/cli": "^1.0.0-alpha.38",
     "@tsconfig/node18": "^18.2.4",
     "@types/express": "^5.0.1",
     "@types/json-schema": "^7.0.15",
     "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.14",
     "@typescript-eslint/eslint-plugin": "^8.30.0",
     "@typescript-eslint/parser": "^8.30.0",
     "componentsjs-generator": "^4.3.0",
@@ -57,19 +61,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },
-  "dependencies": {
-    "@oxfordia/plugins": "*",
-    "@ldo/ldo": "^1.0.0-alpha.46",
-    "@ldo/connected-solid": "^1.0.0-alpha.46",
-    "@solid/access-token-verifier": "^2.1.0",
-    "@solid/community-server": "^8.0.0-alpha.0",
-    "body-parser": "^2.2.0",
-    "componentsjs": "^6.3.0",
-    "express": "^5.1.0",
-    "express-remove-route": "^1.0.0",
-    "json-schema": "^0.4.0",
-    "multer": "^1.4.5-lts.2",
-    "yup": "^1.6.1"
-  },
-  "types": "./server/dist/index.d.ts"
+  "dependencies": {}
 }

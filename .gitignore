@@ -12,3 +12,4 @@ infra/secrets.yml
 dev/
 .cursor
 build
+*.tsbuildinfo

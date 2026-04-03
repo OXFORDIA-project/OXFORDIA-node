@@ -1,0 +1,11 @@
+{
+  "name": "@oxfordia/stat-plugin_core",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build:ldo": "ldo build --input src/shapes --output src/generated",
+    "build": "npm run build:ldo && tsc -b tsconfig.json"
+  }
+}
