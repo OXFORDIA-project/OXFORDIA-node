@@ -1,0 +1,5 @@
+^project\.json$
+^dist$
+^scripts$
+^\.gitignore$
+

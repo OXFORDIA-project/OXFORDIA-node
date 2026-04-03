@@ -1,0 +1,56 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/data-plugin_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/data-plugin_ui/tsconfig.json"
+    },
+    {
+      "path": "./packages/data-plugin-nemaline_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/data-plugin-nemaline_ui/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin_server/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin_ui/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin-mean_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin-mean_server/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin-mean_ui/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin-kaplan-meier_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin-kaplan-meier_server/tsconfig.json"
+    },
+    {
+      "path": "./packages/stat-plugin-kaplan-meier_ui/tsconfig.json"
+    },
+    {
+      "path": "./packages/pod-server-core/tsconfig.json"
+    },
+    {
+      "path": "./packages/pod-server/tsconfig.json"
+    },
+    {
+      "path": "./packages/pod-ui-core/tsconfig.json"
+    },
+    {
+      "path": "./packages/pod-ui/tsconfig.json"
+    }
+  ]
+}

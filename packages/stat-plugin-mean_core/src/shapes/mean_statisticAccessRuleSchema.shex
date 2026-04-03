@@ -1,0 +1,57 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX statp: <https://oxfordia.setmeld.com/statistics#>
+
+start = @statp:MeanStatisticAccessRuleShape
+
+statp:MeanStatisticAccessRuleShape {
+  statp:allowedPath @statp:MeanAllowedPathShape +
+}
+
+statp:MeanAllowedPathShape {
+  statp:graphPath @statp:GraphPathShape ;
+  statp:minCount xsd:integer ;
+}
+
+statp:GraphPathShape {
+  statp:name xsd:string ? ;
+  statp:start @statp:GraphNodeFilterShape ;
+  statp:steps @statp:GraphTraversalStepShape * ;
+  statp:target @statp:GraphValueSelectorShape ? ;
+}
+
+statp:GraphNodeFilterShape {
+  statp:rdfType xsd:string * ;
+  statp:iri xsd:string * ;
+  statp:categories xsd:string * ;
+  statp:predicates @statp:GraphPredicateFilterShape * ;
+}
+
+statp:GraphPredicateFilterShape {
+  statp:predicate IRI ;
+  statp:inverse xsd:boolean ? ;
+  statp:some @statp:GraphValueSelectorShape ? ;
+  statp:every @statp:GraphValueSelectorShape ? ;
+  statp:none @statp:GraphValueSelectorShape ? ;
+}
+
+statp:GraphTraversalStepShape {
+  statp:via IRI ;
+  statp:inverse xsd:boolean ? ;
+  statp:where @statp:GraphNodeFilterShape ? ;
+}
+
+statp:GraphValueSelectorShape {
+  (
+    statp:node @statp:GraphNodeFilterShape
+    | statp:literal @statp:GraphLiteralFilterShape
+  )
+}
+
+statp:GraphLiteralFilterShape {
+  statp:datatype xsd:string * ;
+  statp:lang xsd:string * ;
+  statp:equals . ? ;
+  statp:oneOf . * ;
+  statp:min xsd:decimal ? ;
+  statp:max xsd:decimal ? ;
+}

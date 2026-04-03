@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "references": [
+    {
+      "path": "../data-plugin-nemaline_core"
+    },
+    {
+      "path": "../pod-server-core"
+    },
+    {
+      "path": "../stat-plugin-mean_server"
+    },
+    {
+      "path": "../stat-plugin-kaplan-meier_server"
+    }
+  ]
+}

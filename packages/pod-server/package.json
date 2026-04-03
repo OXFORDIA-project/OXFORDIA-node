@@ -1,0 +1,45 @@
+{
+  "name": "@oxfordia/pod-server",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npm run build:ts && npm run build:components",
+    "build:ts": "tsc -b tsconfig.json",
+    "build:components": "componentsjs-generator -s src -c dist/components -r fss -i .componentsignore",
+    "start": "node ../../node_modules/@solid/community-server/bin/server.js -c ./config/config.json -m ./ -f \"${DATA_DIR:-../../data}\" -g \"${GIT_URI:-localhost:2229}\" -s \"${SPARQL_ENDPOINT:-http://localhost:8889/bigdata/sparql}\" -b \"${BASE_URL:-http://localhost:3000}\" -p \"${PORT:-3000}\"",
+    "serve": "nodemon --watch dist --watch config --watch \"../*/dist\" --ext js,json,d.ts --exec \"npm run start\"",
+    "dev": "nodemon --watch src --watch config --watch \"../*/dist\" --ext ts,js,json,d.ts --exec \"npm run build && npm run start\""
+  },
+  "dependencies": {
+    "@ldo/ldo": "^1.0.0-alpha.46",
+    "@oxfordia/data-plugin-nemaline_core": "*",
+    "@oxfordia/pod-server-core": "*",
+    "@oxfordia/stat-plugin-kaplan-meier_server": "*",
+    "@oxfordia/stat-plugin-mean_server": "*",
+    "@solid/access-token-verifier": "^2.1.0",
+    "@solid/community-server": "^8.0.0-alpha.0",
+    "@tpluscode/sparql-builder": "^3.0.1",
+    "componentsjs": "^6.3.0",
+    "express": "^5.1.0",
+    "fetch-sparql-endpoint": "^7.1.0",
+    "global-logger-factory": "^1.0.0",
+    "json-schema": "^0.4.0",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "componentsjs-generator": "^4.3.0",
+    "nodemon": "^3.1.9"
+  },
+  "lsd:module": "https://linkedsoftwaredependencies.org/bundles/npm/",
+  "lsd:components": "dist/components/components.jsonld",
+  "lsd:contexts": {
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/components/context.jsonld": "dist/components/context.jsonld"
+  },
+  "lsd:importPaths": {
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/components/": "dist/components/",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/config/": "config/",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/dist/": "dist/"
+  }
+}
