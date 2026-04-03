@@ -40,6 +40,17 @@ export const statisticAccessRuleDocumentSchema: Schema = {
             {
               type: "TripleConstraint",
               predicate:
+                "https://oxfordia.setmeld.com/statistic-access-rule#allowedAgents",
+              valueExpr: {
+                type: "NodeConstraint",
+                nodeKind: "iri",
+              },
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
+              predicate:
                 "https://oxfordia.setmeld.com/statistic-access-rule#hasStatisticPolicy",
               valueExpr:
                 "https://oxfordia.setmeld.com/statistic-access-rule#StatisticPolicyShape",
