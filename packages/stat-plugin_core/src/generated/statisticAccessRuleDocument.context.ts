@@ -22,6 +22,12 @@ export const statisticAccessRuleDocumentContext: LdoJsonldContext = {
         "@id": "https://oxfordia.setmeld.com/statistic-access-rule#dataSchema",
         "@type": "http://www.w3.org/2001/XMLSchema#string",
       },
+      allowedAgents: {
+        "@id":
+          "https://oxfordia.setmeld.com/statistic-access-rule#allowedAgents",
+        "@type": "@id",
+        "@isCollection": true,
+      },
       hasStatisticPolicy: {
         "@id":
           "https://oxfordia.setmeld.com/statistic-access-rule#hasStatisticPolicy",
@@ -33,6 +39,11 @@ export const statisticAccessRuleDocumentContext: LdoJsonldContext = {
   dataSchema: {
     "@id": "https://oxfordia.setmeld.com/statistic-access-rule#dataSchema",
     "@type": "http://www.w3.org/2001/XMLSchema#string",
+  },
+  allowedAgents: {
+    "@id": "https://oxfordia.setmeld.com/statistic-access-rule#allowedAgents",
+    "@type": "@id",
+    "@isCollection": true,
   },
   hasStatisticPolicy: {
     "@id":

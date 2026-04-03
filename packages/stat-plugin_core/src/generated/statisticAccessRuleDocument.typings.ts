@@ -16,6 +16,9 @@ export interface StatisticAccessRuleDocument {
     "@id": "StatisticAccessRule";
   }>;
   dataSchema: string;
+  allowedAgents?: LdSet<{
+    "@id": string;
+  }>;
   hasStatisticPolicy?: LdSet<StatisticPolicy>;
 }
 

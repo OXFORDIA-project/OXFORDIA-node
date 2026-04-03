@@ -39,6 +39,7 @@ function createInitialDocument(
     "@id": rootId,
     type: set({ "@id": "StatisticAccessRule" }),
     dataSchema: dataSchemaName,
+    allowedAgents: set(),
     hasStatisticPolicy: set(),
   };
 }
@@ -100,6 +101,13 @@ export function useStatisticAccessRuleEditorData(
     () => toArray(document?.hasStatisticPolicy as Iterable<StatisticPolicy> | undefined),
     [document],
   );
+  const allowedAgents = useMemo(
+    () =>
+      toArray(document?.allowedAgents as Iterable<{ "@id": string }> | undefined).map(
+        (agent) => agent["@id"],
+      ),
+    [document],
+  );
 
   const predicateOptions = useMemo(
     () => extractPredicateOptions(dataSchema),
@@ -147,11 +155,36 @@ export function useStatisticAccessRuleEditorData(
       (doc: StatisticAccessRuleDocument) => {
         doc.type = set({ "@id": "StatisticAccessRule" });
         doc.dataSchema = doc.dataSchema ?? dataSchemaName ?? "nemaline";
+        if (!doc.allowedAgents) doc.allowedAgents = set();
         if (!doc.hasStatisticPolicy) doc.hasStatisticPolicy = set();
         change(doc);
       },
       document ?? createInitialDocument(rootId, dataSchemaName ?? "nemaline"),
     );
+  };
+
+  const addAllowedAgent = (agent: string) => {
+    const normalizedAgent = agent.trim();
+    if (!normalizedAgent) return;
+
+    applyDocumentChange((doc) => {
+      const existingAgents = toArray(doc.allowedAgents).map(
+        (entry) => entry["@id"],
+      );
+      if (existingAgents.includes(normalizedAgent)) return;
+      doc.allowedAgents = set(
+        ...existingAgents.map((existingAgent) => ({ "@id": existingAgent })),
+        { "@id": normalizedAgent },
+      );
+    });
+  };
+
+  const removeAllowedAgent = (agent: string) => {
+    applyDocumentChange((doc) => {
+      doc.allowedAgents = set(
+        ...toArray(doc.allowedAgents).filter((entry) => entry["@id"] !== agent),
+      );
+    });
   };
 
   const updatePolicy = (
@@ -205,9 +238,12 @@ export function useStatisticAccessRuleEditorData(
     isSaving,
     error,
     dataSchemaName,
+    allowedAgents,
     policies,
     statisticPlugins,
     statisticNames,
+    addAllowedAgent,
+    removeAllowedAgent,
     addPolicy,
     removePolicy,
     updatePolicy,

@@ -55,21 +55,21 @@ function requireNemalineGraphPath(shortcutName: string) {
 
 function createDefaultMeanAllowedPath(
   shortcutName: (typeof DEFAULT_MEAN_SHORTCUTS)[number],
-  statisticAccessRuleUri: string,
+  statisticAccessRuleDocumentUri: string,
 ): MeanAllowedPath {
   const suffix = shortcutName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
   return {
-    "@id": `${statisticAccessRuleUri}#mean-allowed-path-${suffix}`,
+    "@id": `${statisticAccessRuleDocumentUri}#mean-allowed-path-${suffix}`,
     graphPath: requireNemalineGraphPath(shortcutName),
     minCount: DEFAULT_MIN_COUNT,
   };
 }
 
 function createDefaultKaplanMeierAllowedPath(
-  statisticAccessRuleUri: string,
+  statisticAccessRuleDocumentUri: string,
 ): KaplanMeierAllowedPath {
   return {
-    "@id": `${statisticAccessRuleUri}#kaplan-meier-allowed-path-default`,
+    "@id": `${statisticAccessRuleDocumentUri}#kaplan-meier-allowed-path-default`,
     timeGraphPath: requireNemalineGraphPath("KaplanMeierTime"),
     eventGraphPath: requireNemalineGraphPath("KaplanMeierEvent"),
     groupByGraphPath: set(
@@ -92,28 +92,36 @@ export const nemalineDefaultStatisticAccessRuleDocumentShapeType: ShapeType<Stat
   };
 
 export function createNemalineDefaultStatisticAccessRuleDocument(
-  statisticAccessRuleUri: string,
+  statisticAccessRuleDocumentUri: string,
+  allowedAgents: string[] = [],
 ): StatisticAccessRuleDocument {
   const meanPolicy: MeanStatisticPolicy = {
-    "@id": `${statisticAccessRuleUri}#mean-policy`,
+    "@id": `${statisticAccessRuleDocumentUri}#mean-policy`,
     statisticName: "mean",
     allowedPath: set(
       ...DEFAULT_MEAN_SHORTCUTS.map((shortcutName) =>
-        createDefaultMeanAllowedPath(shortcutName, statisticAccessRuleUri),
+        createDefaultMeanAllowedPath(shortcutName, statisticAccessRuleDocumentUri),
       ),
     ),
   };
 
   const kaplanMeierPolicy: KaplanMeierStatisticPolicy = {
-    "@id": `${statisticAccessRuleUri}#kaplan-meier-policy`,
+    "@id": `${statisticAccessRuleDocumentUri}#kaplan-meier-policy`,
     statisticName: "kaplan-meier",
-    allowedPath: set(createDefaultKaplanMeierAllowedPath(statisticAccessRuleUri)),
+    allowedPath: set(
+      createDefaultKaplanMeierAllowedPath(statisticAccessRuleDocumentUri),
+    ),
   };
 
   return {
-    "@id": `${statisticAccessRuleUri}#policy`,
+    "@id": `${statisticAccessRuleDocumentUri}#policy`,
     type: set({ "@id": "StatisticAccessRule" }),
     dataSchema: DATA_SCHEMA_NAME,
+    allowedAgents: set(
+      ...allowedAgents.map((agent) => ({
+        "@id": agent,
+      })),
+    ),
     hasStatisticPolicy: set<NemalineStatisticPolicy>(
       meanPolicy,
       kaplanMeierPolicy,

@@ -16,7 +16,7 @@ import type { PodServerGlobals } from "../../types";
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const STATISTIC_ACCESS_RULE_TYPE =
   "https://oxfordia.setmeld.com/statistic-access-rule#StatisticAccessRule";
-function getStatisticAccessRuleUri(resourceUri: string): string {
+function getStatisticAccessRuleDocumentUri(resourceUri: string): string {
   if (resourceUri.endsWith(".statistic-access-rule.ttl")) {
     return resourceUri;
   }
@@ -55,16 +55,23 @@ function findStatisticPlugin(
   return statisticPlugins.find((plugin) => plugin.route === route);
 }
 
+function toIdArray(value: Iterable<{ "@id": string }> | undefined): string[] {
+  if (!value) return [];
+  return Array.from(value).map((entry) => entry["@id"]);
+}
+
 async function getStatisticAccessRuleFor(
   resourceUri: string,
   globals: PodServerGlobals,
 ): Promise<{
+  statisticAccessRuleDocumentUri: string;
   dataset: ReturnType<typeof createLdoDataset>;
   statisticAccessRule: StatisticAccessRuleDocument;
 }> {
-  const statisticAccessRuleUri = getStatisticAccessRuleUri(resourceUri);
+  const statisticAccessRuleDocumentUri =
+    getStatisticAccessRuleDocumentUri(resourceUri);
   const representation = await globals.resourceStore.getRepresentation(
-    { path: statisticAccessRuleUri },
+    { path: statisticAccessRuleDocumentUri },
     {},
   );
   const quads = await readableToQuads(representation.data);
@@ -73,7 +80,7 @@ async function getStatisticAccessRuleFor(
   const matches = dataset
     .usingType(StatisticAccessRuleDocumentShapeType)
     .matchSubject(RDF_TYPE, STATISTIC_ACCESS_RULE_TYPE);
-  const expectedRootId = `${statisticAccessRuleUri}#policy`;
+  const expectedRootId = `${statisticAccessRuleDocumentUri}#policy`;
   const statisticAccessRule =
     Array.from(matches).find((match) => match["@id"] === expectedRootId) ??
     Array.from(matches)[0];
@@ -81,11 +88,12 @@ async function getStatisticAccessRuleFor(
   if (!statisticAccessRule) {
     throw new HttpError(
       403,
-      `No statistic access rule document found at '${statisticAccessRuleUri}'.`,
+      `No statistic access rule document found at '${statisticAccessRuleDocumentUri}'.`,
     );
   }
 
   return {
+    statisticAccessRuleDocumentUri,
     dataset,
     statisticAccessRule,
   };
@@ -104,10 +112,22 @@ export function createStatisticQueryHandler(globals: PodServerGlobals) {
     }
 
     const query = validatePluginQuery(plugin, req.body);
-    const { dataset, statisticAccessRule } = await getStatisticAccessRuleFor(
-      query.resourceUri,
-      globals,
-    );
+    const { statisticAccessRuleDocumentUri, dataset, statisticAccessRule } =
+      await getStatisticAccessRuleFor(query.resourceUri, globals);
+    const authenticatedAgent = res.locals.authenticatedAgent as
+      | string
+      | undefined;
+    if (!authenticatedAgent) {
+      throw new HttpError(401, "Missing authenticated agent.");
+    }
+
+    const allowedAgents = toIdArray(statisticAccessRule.allowedAgents);
+    if (!allowedAgents.includes(authenticatedAgent)) {
+      throw new HttpError(
+        403,
+        `Agent '${authenticatedAgent}' is not allowed by '${statisticAccessRuleDocumentUri}'.`,
+      );
+    }
 
     const matchingPolicies = Array.from(
       statisticAccessRule.hasStatisticPolicy ?? [],
@@ -120,7 +140,7 @@ export function createStatisticQueryHandler(globals: PodServerGlobals) {
     if (matchingPolicies.length === 0) {
       throw new HttpError(
         403,
-        `No statistic policy in '${getStatisticAccessRuleUri(query.resourceUri)}' matches '${plugin.name}'.`,
+        `No statistic policy in '${statisticAccessRuleDocumentUri}' matches '${plugin.name}'.`,
       );
     }
 
