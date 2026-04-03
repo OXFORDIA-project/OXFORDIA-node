@@ -30,7 +30,11 @@ function validatePluginQuery(
   plugin: AnyStatisticApiPlugin<PodServerGlobals>,
   query: unknown,
 ): StatisticQuery {
-  const validationResult = validate(query as object, plugin.querySchema);
+  const normalizedQuery = plugin.normalizeQuery?.(query) ?? query;
+  const validationResult = validate(
+    normalizedQuery as object,
+    plugin.querySchema,
+  );
   if (!validationResult.valid) {
     const message = validationResult.errors
       .map((error) => `${error.property || "<root>"}: ${error.message}`)
@@ -41,7 +45,7 @@ function validatePluginQuery(
     );
   }
 
-  return query as StatisticQuery;
+  return normalizedQuery as StatisticQuery;
 }
 
 function findStatisticPlugin(
