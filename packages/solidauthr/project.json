@@ -4,6 +4,13 @@
   "projectType": "library",
   "sourceRoot": "packages/solidauthr/R",
   "targets": {
+    "install-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript packages/solidauthr/scripts/install-deps.R"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "outputs": [

@@ -42,6 +42,12 @@ The session keeps one EC P-256 DPoP key pair for its lifetime and re-requests ac
 
 ## Development
 
+`DESCRIPTION` is the source of truth for R package dependencies. For local development, install them from `DESCRIPTION` into the package-local library first:
+
+```bash
+Rscript packages/solidauthr/scripts/install-deps.R
+```
+
 Build the package:
 
 ```bash
