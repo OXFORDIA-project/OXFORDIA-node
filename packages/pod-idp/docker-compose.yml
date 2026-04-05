@@ -1,0 +1,39 @@
+services:
+  idp:
+    image: ${CSS_IMAGE:-solidproject/community-server:latest}
+    restart: unless-stopped
+    environment:
+      CSS_BASE_URL: ${CSS_BASE_URL}
+      CSS_CONFIG: /config/css-idp.json
+      CSS_PORT: ${IDP_INTERNAL_PORT:-3000}
+      CSS_ROOT_FILE_PATH: /data
+      CSS_LOGGING_LEVEL: info
+    expose:
+      - "${IDP_INTERNAL_PORT:-3000}"
+    ports:
+      - "127.0.0.1:${IDP_LOCAL_PORT:-3300}:${IDP_INTERNAL_PORT:-3000}"
+    volumes:
+      - ./config/css-idp.json:/config/css-idp.json:ro
+      - idp_data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - idp
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+      IDP_INTERNAL_PORT: ${IDP_INTERNAL_PORT:-3000}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  idp_data:
+  caddy_data:
+  caddy_config:

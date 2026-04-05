@@ -13,3 +13,5 @@ dev/
 .cursor
 build
 *.tsbuildinfo
+packages/pod-idp/.env
+solidauthr_*.tar.gz
