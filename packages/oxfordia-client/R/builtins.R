@@ -219,6 +219,63 @@ ox_builtin_data_plugin <- function(name) {
   stop(sprintf("Unknown built-in data plugin '%s'.", name), call. = FALSE)
 }
 
+ox_kaplan_meier_group_label <- function(value) {
+  if (is.null(value) || !nzchar(trimws(as.character(value)))) {
+    return(NA_character_)
+  }
+
+  value <- trimws(as.character(value))
+  last <- sub("^.*[/#]", "", value)
+
+  cluster_match <- regmatches(
+    last,
+    regexec("^Cluster_?([0-9]+)$|^C([0-9]+)$", last, perl = TRUE)
+  )[[1]]
+  if (length(cluster_match) > 0) {
+    group_id <- cluster_match[[2]] %||% cluster_match[[3]]
+    return(sprintf("Group %s", group_id))
+  }
+
+  variant_match <- regmatches(
+    last,
+    regexec("GeneticGroup_?Variant([0-9]+)|Variant_?([0-9]+)", last, perl = TRUE)
+  )[[1]]
+  if (length(variant_match) > 0) {
+    variant_id <- variant_match[[2]] %||% variant_match[[3]]
+    return(sprintf("Variant %s", variant_id))
+  }
+
+  if (grepl("^Status_?NonAmbulant$|^StatusNonAmbulant$", last, perl = TRUE, ignore.case = TRUE)) {
+    return("Non Ambulant")
+  }
+
+  if (grepl("^Status_?Ambulant$|^StatusAmbulant$", last, perl = TRUE, ignore.case = TRUE)) {
+    return("Ambulant")
+  }
+
+  last <- gsub("[_-]+", " ", last)
+  last <- gsub("([a-z])([A-Z])", "\\1 \\2", last, perl = TRUE)
+  trimws(last)
+}
+
+ox_kaplan_meier_result_row <- function(time, event, group = NULL, group_label = NULL) {
+  raw_group <- if (is.null(group)) NA_character_ else as.character(group)
+  display_group <- if (is.null(group_label)) {
+    ox_kaplan_meier_group_label(raw_group)
+  } else {
+    ox_kaplan_meier_group_label(group_label)
+  }
+
+  data.frame(
+    time = as.numeric(time %||% NA_real_),
+    event = as.logical(event %||% NA),
+    group = display_group,
+    group_value = raw_group,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+}
+
 ox_builtin_stat_plugin <- function(name) {
   normalized <- ox_normalize_name(name)
 
@@ -279,18 +336,44 @@ ox_builtin_stat_plugin <- function(name) {
           )
         ),
         parse_result = function(payload, target, spec) {
+          groups <- payload$groups %||% NULL
+          if (!is.null(groups) && length(groups) > 0) {
+            rows <- list()
+
+            for (group_entry in groups) {
+              observations <- group_entry$observations %||% list()
+              if (length(observations) == 0) {
+                next
+              }
+
+              for (observation in observations) {
+                rows[[length(rows) + 1]] <- ox_kaplan_meier_result_row(
+                  time = observation$time,
+                  event = observation$event,
+                  group = group_entry$group %||% NULL,
+                  group_label = group_entry$groupLabel %||% NULL
+                )
+              }
+            }
+
+            if (length(rows) == 0) {
+              return(ox_empty_df(c("time", "event", "group", "group_value")))
+            }
+
+            return(ox_bind_rows_fill(rows))
+          }
+
           observations <- payload$observations
           if (is.null(observations) || length(observations) == 0) {
-            return(ox_empty_df(c("time", "event", "group")))
+            return(ox_empty_df(c("time", "event", "group", "group_value")))
           }
 
           rows <- lapply(observations, function(row) {
-            data.frame(
-              time = as.numeric(row$time %||% NA_real_),
-              event = as.logical(row$event %||% NA),
-              group = if (is.null(row$group)) NA_character_ else as.character(row$group),
-              stringsAsFactors = FALSE,
-              check.names = FALSE
+            ox_kaplan_meier_result_row(
+              time = row$time,
+              event = row$event,
+              group = row$group %||% NULL,
+              group_label = row$groupLabel %||% NULL
             )
           })
 

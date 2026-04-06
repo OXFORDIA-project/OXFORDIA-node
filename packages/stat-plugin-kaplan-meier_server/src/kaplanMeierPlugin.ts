@@ -29,10 +29,23 @@ export interface KaplanMeierObservationRow {
   time: number;
   event: boolean;
   group?: string;
+  groupLabel?: string;
+}
+
+export interface KaplanMeierGroupedObservationRow {
+  time: number;
+  event: boolean;
+}
+
+export interface KaplanMeierObservationGroup {
+  group: string;
+  groupLabel: string;
+  observations: KaplanMeierGroupedObservationRow[];
 }
 
 export type KaplanMeierOutput = {
   observations: KaplanMeierObservationRow[];
+  groups?: KaplanMeierObservationGroup[];
 };
 
 const emptyObjectJsonSchema: JSONSchema4 = {
@@ -124,9 +137,69 @@ export const kaplanMeierPlugin: StatisticApiPlugin<
   },
 
   async performQuery(query, globals): Promise<KaplanMeierOutput> {
-    return { observations: await executeKaplanMeierQuery(query, globals) };
+    const observations = await executeKaplanMeierQuery(query, globals);
+    return {
+      observations,
+      groups: query.groupByPath
+        ? buildKaplanMeierObservationGroups(observations)
+        : undefined,
+    };
   },
 };
+
+function kaplanMeierGroupLabel(value: string): string {
+  const last = (value.split(/[\/#]/).pop() ?? value).trim();
+  const clusterMatch = last.match(/^Cluster_?(\d+)$/i) ?? last.match(/^C(\d+)$/i);
+  if (clusterMatch) {
+    return `Group ${clusterMatch[1]}`;
+  }
+
+  const variantMatch =
+    last.match(/GeneticGroup_?Variant(\d+)/i) ??
+    last.match(/Variant_?(\d+)/i);
+  if (variantMatch) {
+    return `Variant ${variantMatch[1]}`;
+  }
+
+  if (/^Status_?NonAmbulant$/i.test(last) || /^StatusNonAmbulant$/i.test(last)) {
+    return "Non Ambulant";
+  }
+
+  if (/^Status_?Ambulant$/i.test(last) || /^StatusAmbulant$/i.test(last)) {
+    return "Ambulant";
+  }
+
+  return last
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .trim();
+}
+
+function buildKaplanMeierObservationGroups(
+  observations: KaplanMeierObservationRow[],
+): KaplanMeierObservationGroup[] {
+  const grouped = new Map<string, KaplanMeierObservationGroup>();
+
+  for (const observation of observations) {
+    const rawGroup = observation.group ?? "Ungrouped";
+    const groupLabel = observation.groupLabel ?? kaplanMeierGroupLabel(rawGroup);
+
+    if (!grouped.has(rawGroup)) {
+      grouped.set(rawGroup, {
+        group: rawGroup,
+        groupLabel,
+        observations: [],
+      });
+    }
+
+    grouped.get(rawGroup)!.observations.push({
+      time: observation.time,
+      event: observation.event,
+    });
+  }
+
+  return Array.from(grouped.values());
+}
 
 async function executeKaplanMeierQuery(
   query: KaplanMeierQuery,
@@ -193,6 +266,7 @@ async function executeKaplanMeierQuery(
       const group = parseStringBindingValue(row, "group");
       if (group !== undefined) {
         observation.group = group;
+        observation.groupLabel = kaplanMeierGroupLabel(group);
       }
     }
 
