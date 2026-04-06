@@ -35,6 +35,7 @@ ox_kaplan_meier <- function(time_path, event_path, group_by_path = NULL, data_sc
 ox_query <- function(client = default_client(), spec, targets, fail_fast = TRUE) {
   stat_plugin <- ox_resolve_stat_plugin(client, spec$statistic)
   targets <- ox_targets(targets)
+  ox_validate_query_targets(client, targets)
 
   responses <- vector("list", length(targets))
   parsed_rows <- vector("list", length(targets))
@@ -91,9 +92,10 @@ ox_query_one <- function(client, spec, target, stat_plugin) {
   server <- ox_resolve_server(client, target$server)
   data_schema <- ox_resolve_data_schema(target, spec)
   data_plugin <- if (is.null(data_schema)) NULL else ox_resolve_data_plugin(client, data_schema)
+  auth <- ox_resolve_request_auth(client, server)
 
   body <- ox_build_request_body(spec, target, stat_plugin, data_plugin)
-  response <- ox_perform_request(server, stat_plugin$route, body)
+  response <- ox_perform_request(server, target, stat_plugin$route, body, auth = auth)
   parsed <- stat_plugin$parse_result(response$body, target, spec)
   parsed <- ox_as_result_data_frame(parsed)
   parsed <- ox_add_provenance(parsed, target, spec, data_schema)
@@ -186,34 +188,49 @@ ox_resolve_graph_path <- function(value, field, data_plugin = NULL) {
   )
 }
 
-ox_perform_request <- function(server, route, body) {
+ox_validate_query_targets <- function(client, targets) {
+  grouped_targets <- split(targets, vapply(targets, function(target) target$server, character(1)))
+
+  for (server_name in names(grouped_targets)) {
+    server <- ox_resolve_server(client, server_name)
+    if (!is.null(server$base_url)) {
+      next
+    }
+
+    origins <- unique(vapply(
+      grouped_targets[[server_name]],
+      function(target) ox_url_origin(target$resource_uri, "target$resource_uri"),
+      character(1)
+    ))
+
+    if (length(origins) > 1) {
+      stop(
+        sprintf(
+          "Server '%s' maps to multiple resource origins (%s). Register that server with an explicit `base_url` or use distinct server names.",
+          server_name,
+          paste(origins, collapse = ", ")
+        ),
+        call. = FALSE
+      )
+    }
+  }
+
+  invisible(targets)
+}
+
+ox_perform_request <- function(server, target, route, body, auth = NULL) {
+  base_url <- ox_resolve_server_base_url(server, target)
   url <- paste0(
-    server$base_url,
+    base_url,
     server$api_path,
     "/",
     route
   )
 
-  headers <- ox_auth_header_values(server$auth)
-  response <- httr::POST(
-    url = url,
-    body = body,
-    encode = "json",
-    httr::accept_json(),
-    httr::content_type_json(),
-    httr::add_headers(.headers = headers)
-  )
-  status <- httr::status_code(response)
-  response_text <- httr::content(response, as = "text", encoding = "UTF-8")
+  response <- ox_post_json(url, body, auth)
+  status <- httr2::resp_status(response)
+  response_text <- httr2::resp_body_string(response)
   response_body <- ox_parse_response_body(response_text)
-
-  if (status >= 400) {
-    rendered <- if (is.character(response_body)) response_body else jsonlite::toJSON(response_body, auto_unbox = TRUE, pretty = TRUE)
-    stop(
-      sprintf("Request to '%s' failed with HTTP %s: %s", url, status, rendered),
-      call. = FALSE
-    )
-  }
 
   list(
     url = url,
@@ -223,8 +240,66 @@ ox_perform_request <- function(server, route, body) {
   )
 }
 
+ox_resolve_server_base_url <- function(server, target = NULL) {
+  if (!is.null(server$base_url)) {
+    return(server$base_url)
+  }
+
+  if (is.null(target) || !ox_is_scalar_string(target$resource_uri %||% NULL)) {
+    stop(
+      sprintf(
+        "Server '%s' does not define `base_url`, and the target does not provide a usable `resource_uri` to derive it from.",
+        server$name %||% "<unknown>"
+      ),
+      call. = FALSE
+    )
+  }
+
+  ox_url_origin(target$resource_uri, "target$resource_uri")
+}
+
+ox_post_json <- function(url, body, auth = NULL) {
+  if (!is.null(auth) && identical(auth$type, "solid")) {
+    session <- ox_resolve_solid_session(auth)
+    return(
+      session$post(
+        url,
+        body = body,
+        content_type = "application/json",
+        headers = list(Accept = "application/json")
+      )
+    )
+  }
+
+  headers <- ox_auth_header_values(auth)
+  headers$Accept <- headers$Accept %||% "application/json"
+
+  req <- httr2::request(url)
+  req <- httr2::req_method(req, "POST")
+  req <- httr2::req_body_json(req, body)
+  req <- do.call(httr2::req_headers, c(list(req), headers))
+  req <- httr2::req_error(req, is_error = function(resp) FALSE)
+
+  response <- httr2::req_perform(req)
+  status <- httr2::resp_status(response)
+  if (status >= 400) {
+    response_text <- httr2::resp_body_string(response)
+    response_body <- ox_parse_response_body(response_text)
+    rendered <- if (is.character(response_body)) response_body else jsonlite::toJSON(response_body, auto_unbox = TRUE, pretty = TRUE)
+    stop(
+      sprintf("Request to '%s' failed with HTTP %s: %s", url, status, rendered),
+      call. = FALSE
+    )
+  }
+
+  response
+}
+
 ox_auth_header_values <- function(auth) {
   if (is.null(auth) || identical(auth$type, "none")) {
+    return(list())
+  }
+  if (identical(auth$type, "solid")) {
     return(list())
   }
   if (identical(auth$type, "bearer")) {
