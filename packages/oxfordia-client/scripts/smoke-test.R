@@ -109,6 +109,48 @@ load_env_file <- function(path, override = FALSE) {
   invisible(TRUE)
 }
 
+print_error_debug <- function(errors) {
+  if (nrow(errors) == 0) {
+    return(invisible(NULL))
+  }
+
+  for (index in seq_len(nrow(errors))) {
+    row <- errors[index, , drop = FALSE]
+    cat(sprintf("  %s :: %s\n", row$server[[1]], row$resource_uri[[1]]))
+
+    if (!is.na(row$url[[1]]) && nzchar(row$url[[1]])) {
+      cat(sprintf("    URL: %s\n", row$url[[1]]))
+    }
+    if (!is.na(row$status[[1]])) {
+      cat(sprintf("    Status: %s\n", row$status[[1]]))
+    }
+    if (!is.na(row$auth_type[[1]]) && nzchar(row$auth_type[[1]])) {
+      cat(sprintf("    Auth: %s\n", row$auth_type[[1]]))
+    }
+    if (!is.na(row$response_content_type[[1]]) && nzchar(row$response_content_type[[1]])) {
+      cat(sprintf("    Content-Type: %s\n", row$response_content_type[[1]]))
+    }
+    if (!is.na(row$response_body_error[[1]]) && nzchar(row$response_body_error[[1]])) {
+      cat(sprintf("    Body read error: %s\n", row$response_body_error[[1]]))
+    }
+    if (!is.na(row$request_body[[1]]) && nzchar(row$request_body[[1]])) {
+      cat("    Request body:\n")
+      cat(paste0("      ", gsub("\n", "\n      ", row$request_body[[1]], fixed = TRUE), "\n"))
+    }
+    if (!is.na(row$response_preview[[1]])) {
+      cat("    Response preview:\n")
+      preview <- if (nzchar(row$response_preview[[1]])) row$response_preview[[1]] else "<empty>"
+      cat(paste0("      ", gsub("\n", "\n      ", preview, fixed = TRUE), "\n"))
+    }
+    if (!is.na(row$response_headers[[1]]) && nzchar(row$response_headers[[1]])) {
+      cat("    Response headers:\n")
+      cat(paste0("      ", gsub("\n", "\n      ", row$response_headers[[1]], fixed = TRUE), "\n"))
+    }
+  }
+
+  invisible(NULL)
+}
+
 indexed_env_name <- function(prefix, index, suffix) {
   sprintf("OX_%s_%d_%s", prefix, index, suffix)
 }
@@ -348,7 +390,10 @@ result <- ox_query(client, spec, targets = targets, fail_fast = FALSE)
 
 if (nrow(result$errors) > 0) {
   cat("Errors\n")
-  print(result$errors)
+  summary_columns <- intersect(c("server", "resource_uri", "status", "url", "error"), names(result$errors))
+  print(result$errors[, summary_columns, drop = FALSE])
+  cat("\nDebug\n")
+  print_error_debug(result$errors)
   quit(status = 1)
 }
 

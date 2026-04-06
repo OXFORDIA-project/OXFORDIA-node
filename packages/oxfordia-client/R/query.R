@@ -53,15 +53,7 @@ ox_query <- function(client = default_client(), spec, targets, fail_fast = TRUE)
         stop(result)
       }
 
-      errors[[length(errors) + 1]] <- data.frame(
-        server = target$server,
-        resource_uri = target$resource_uri,
-        data_schema = ox_resolve_data_schema(target, spec),
-        statistic = spec$statistic,
-        error = conditionMessage(result),
-        stringsAsFactors = FALSE,
-        check.names = FALSE
-      )
+      errors[[length(errors) + 1]] <- ox_error_row(target, spec, result)
       next
     }
 
@@ -96,7 +88,24 @@ ox_query_one <- function(client, spec, target, stat_plugin) {
 
   body <- ox_build_request_body(spec, target, stat_plugin, data_plugin)
   response <- ox_perform_request(server, target, stat_plugin$route, body, auth = auth)
-  parsed <- stat_plugin$parse_result(response$body, target, spec)
+  parsed <- tryCatch(
+    stat_plugin$parse_result(response$body, target, spec),
+    error = function(error) {
+      ox_stop_context(
+        sprintf("Failed to parse response from '%s': %s", response$url, conditionMessage(error)),
+        context = list(
+          url = response$url,
+          status = response$status,
+          auth_type = response$auth_type,
+          request_body = body,
+          response_headers = response$headers,
+          response_content_type = ox_header_value(response$headers, "content-type"),
+          response_preview = ox_render_debug_value(response$text, max_chars = 1200L)
+        ),
+        class = "ox_parse_error"
+      )
+    }
+  )
   parsed <- ox_as_result_data_frame(parsed)
   parsed <- ox_add_provenance(parsed, target, spec, data_schema)
 
@@ -227,14 +236,71 @@ ox_perform_request <- function(server, target, route, body, auth = NULL) {
     route
   )
 
+  auth_type <- auth$type %||% "none"
+  ox_debug_log("POST ", url)
+  ox_debug_log("  auth: ", auth_type)
+  ox_debug_log("  body: ", ox_render_debug_value(body, max_chars = 1200L))
+
   response <- ox_post_json(url, body, auth)
   status <- httr2::resp_status(response)
-  response_text <- httr2::resp_body_string(response)
+  response_headers <- ox_response_headers(response)
+  response_text_result <- ox_response_text(response)
+  if (!is.null(response_text_result$error)) {
+    ox_debug_log("  status: ", status)
+    ox_debug_log("  response headers: ", ox_render_debug_value(response_headers, max_chars = 1200L))
+    ox_debug_log("  body read error: ", response_text_result$error)
+
+    ox_stop_context(
+      sprintf(
+        "Request to '%s' returned HTTP %s, but the response body could not be read: %s",
+        url,
+        status,
+        response_text_result$error
+      ),
+      context = list(
+        url = url,
+        status = status,
+        auth_type = auth_type,
+        request_body = body,
+        response_headers = response_headers,
+        response_content_type = ox_header_value(response_headers, "content-type"),
+        response_body_error = response_text_result$error
+      ),
+      class = "ox_http_error"
+    )
+  }
+
+  response_text <- response_text_result$text %||% ""
+  if (!nzchar(response_text)) {
+    ox_debug_log("  status: ", status)
+    ox_debug_log("  response headers: ", ox_render_debug_value(response_headers, max_chars = 1200L))
+    ox_debug_log("  response body: <empty>")
+
+    ox_stop_context(
+      sprintf("Request to '%s' returned HTTP %s with an empty response body.", url, status),
+      context = list(
+        url = url,
+        status = status,
+        auth_type = auth_type,
+        request_body = body,
+        response_headers = response_headers,
+        response_content_type = ox_header_value(response_headers, "content-type"),
+        response_preview = ""
+      ),
+      class = "ox_http_error"
+    )
+  }
+
   response_body <- ox_parse_response_body(response_text)
+  ox_debug_log("  status: ", status)
+  ox_debug_log("  response headers: ", ox_render_debug_value(response_headers, max_chars = 1200L))
+  ox_debug_log("  response body: ", ox_render_debug_value(response_text, max_chars = 1200L))
 
   list(
     url = url,
     status = status,
+    auth_type = auth_type,
+    headers = response_headers,
     body = response_body,
     text = response_text
   )
@@ -259,40 +325,76 @@ ox_resolve_server_base_url <- function(server, target = NULL) {
 }
 
 ox_post_json <- function(url, body, auth = NULL) {
-  if (!is.null(auth) && identical(auth$type, "solid")) {
-    session <- ox_resolve_solid_session(auth)
-    return(
-      session$post(
-        url,
-        body = body,
-        content_type = "application/json",
-        headers = list(Accept = "application/json")
+  tryCatch(
+    {
+      if (!is.null(auth) && identical(auth$type, "solid")) {
+        session <- ox_resolve_solid_session(auth)
+        return(
+          session$post(
+            url,
+            body = body,
+            content_type = "application/json",
+            headers = list(Accept = "application/json")
+          )
+        )
+      }
+
+      headers <- ox_auth_header_values(auth)
+      headers$Accept <- headers$Accept %||% "application/json"
+
+      req <- httr2::request(url)
+      req <- httr2::req_method(req, "POST")
+      req <- httr2::req_body_json(req, body)
+      req <- do.call(httr2::req_headers, c(list(req), headers))
+      req <- httr2::req_error(req, is_error = function(resp) FALSE)
+
+      response <- httr2::req_perform(req)
+      status <- httr2::resp_status(response)
+      if (status >= 400) {
+        response_headers <- ox_response_headers(response)
+        response_text_result <- ox_response_text(response)
+        response_text <- response_text_result$text %||% ""
+        response_body <- ox_parse_response_body(response_text)
+        rendered <- if (is.character(response_body)) response_body else jsonlite::toJSON(response_body, auto_unbox = TRUE, pretty = TRUE)
+
+        ox_debug_log("  status: ", status)
+        ox_debug_log("  response headers: ", ox_render_debug_value(response_headers, max_chars = 1200L))
+        ox_debug_log("  response body: ", ox_render_debug_value(response_text, max_chars = 1200L))
+
+        ox_stop_context(
+          sprintf("Request to '%s' failed with HTTP %s: %s", url, status, rendered),
+          context = list(
+            url = url,
+            status = status,
+            auth_type = auth$type %||% "none",
+            request_body = body,
+            response_headers = response_headers,
+            response_content_type = ox_header_value(response_headers, "content-type"),
+            response_preview = ox_render_debug_value(response_text, max_chars = 1200L),
+            response_body_error = response_text_result$error %||% NULL
+          ),
+          class = "ox_http_error"
+        )
+      }
+
+      response
+    },
+    error = function(error) {
+      if (inherits(error, "ox_http_error")) {
+        stop(error)
+      }
+
+      ox_stop_context(
+        conditionMessage(error),
+        context = list(
+          url = url,
+          auth_type = auth$type %||% "none",
+          request_body = body
+        ),
+        class = "ox_http_error"
       )
-    )
-  }
-
-  headers <- ox_auth_header_values(auth)
-  headers$Accept <- headers$Accept %||% "application/json"
-
-  req <- httr2::request(url)
-  req <- httr2::req_method(req, "POST")
-  req <- httr2::req_body_json(req, body)
-  req <- do.call(httr2::req_headers, c(list(req), headers))
-  req <- httr2::req_error(req, is_error = function(resp) FALSE)
-
-  response <- httr2::req_perform(req)
-  status <- httr2::resp_status(response)
-  if (status >= 400) {
-    response_text <- httr2::resp_body_string(response)
-    response_body <- ox_parse_response_body(response_text)
-    rendered <- if (is.character(response_body)) response_body else jsonlite::toJSON(response_body, auto_unbox = TRUE, pretty = TRUE)
-    stop(
-      sprintf("Request to '%s' failed with HTTP %s: %s", url, status, rendered),
-      call. = FALSE
-    )
-  }
-
-  response
+    }
+  )
 }
 
 ox_auth_header_values <- function(auth) {
@@ -346,6 +448,69 @@ ox_add_provenance <- function(data, target, spec, data_schema) {
 
   ordered_names <- c("server", "resource_uri", "data_schema", "statistic", setdiff(names(data), c("server", "resource_uri", "data_schema", "statistic")))
   data[, ordered_names, drop = FALSE]
+}
+
+ox_error_row <- function(target, spec, error) {
+  context <- ox_error_context(error)
+
+  data.frame(
+    server = target$server,
+    resource_uri = target$resource_uri,
+    data_schema = ox_resolve_data_schema(target, spec),
+    statistic = spec$statistic,
+    error = ox_strip_ansi(conditionMessage(error)),
+    url = context$url %||% NA_character_,
+    status = if (is.null(context$status)) NA_integer_ else as.integer(context$status),
+    auth_type = context$auth_type %||% NA_character_,
+    response_content_type = context$response_content_type %||% NA_character_,
+    response_body_error = context$response_body_error %||% NA_character_,
+    request_body = ox_render_debug_value(context$request_body, max_chars = 1200L),
+    response_preview = ox_render_debug_value(context$response_preview, max_chars = 1200L),
+    response_headers = ox_render_debug_value(context$response_headers, max_chars = 1200L),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+}
+
+ox_response_headers <- function(response) {
+  headers <- tryCatch(httr2::resp_headers(response), error = function(...) list())
+  if (length(headers) == 0) {
+    return(list())
+  }
+
+  header_values <- unclass(headers)
+  header_names <- names(headers)
+  if (!is.null(header_names)) {
+    names(header_values) <- header_names
+  }
+
+  as.list(header_values)
+}
+
+ox_response_text <- function(response) {
+  tryCatch(
+    list(text = httr2::resp_body_string(response), error = NULL),
+    error = function(error) {
+      list(
+        text = NULL,
+        error = ox_strip_ansi(conditionMessage(error))
+      )
+    }
+  )
+}
+
+ox_header_value <- function(headers, name, default = NULL) {
+  if (is.null(headers) || length(headers) == 0) {
+    return(default)
+  }
+
+  header_names <- tolower(names(headers))
+  match_index <- match(tolower(name), header_names)
+  if (is.na(match_index)) {
+    return(default)
+  }
+
+  headers[[match_index]]
 }
 
 print.ox_result_set <- function(x, ...) {

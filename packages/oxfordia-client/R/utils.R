@@ -124,6 +124,81 @@ ox_empty_df <- function(columns = character()) {
   as.data.frame(out, stringsAsFactors = FALSE, check.names = FALSE)
 }
 
+ox_strip_ansi <- function(value) {
+  if (is.null(value) || length(value) == 0) {
+    return(value)
+  }
+
+  gsub("\033\\[[0-9;]*m", "", value, perl = TRUE)
+}
+
+ox_env_flag <- function(name, default = FALSE) {
+  value <- Sys.getenv(name, unset = "")
+  if (!nzchar(trimws(value))) {
+    return(isTRUE(default))
+  }
+
+  tolower(trimws(value)) %in% c("1", "true", "yes", "y", "on")
+}
+
+ox_truncate_string <- function(value, max_chars = 1000L) {
+  if (is.null(value) || length(value) == 0) {
+    return(value)
+  }
+
+  value <- paste(value, collapse = "\n")
+  if (nchar(value, type = "chars") <= max_chars) {
+    return(value)
+  }
+
+  paste0(substr(value, 1, max_chars), "... [truncated]")
+}
+
+ox_render_debug_value <- function(value, max_chars = 1000L) {
+  if (is.null(value)) {
+    return(NA_character_)
+  }
+
+  rendered <- if (is.character(value) && length(value) == 1) {
+    value
+  } else {
+    tryCatch(
+      jsonlite::toJSON(value, auto_unbox = TRUE, pretty = TRUE, null = "null"),
+      error = function(...) paste(utils::capture.output(str(value)), collapse = "\n")
+    )
+  }
+
+  ox_truncate_string(rendered, max_chars = max_chars)
+}
+
+ox_context_error <- function(message, context = list(), class = "ox_error") {
+  err <- simpleError(ox_strip_ansi(message), call = NULL)
+  class(err) <- c(class, class(err))
+  err$ox_context <- context
+  err
+}
+
+ox_stop_context <- function(message, context = list(), class = "ox_error") {
+  stop(ox_context_error(message, context = context, class = class))
+}
+
+ox_error_context <- function(error) {
+  error$ox_context %||% list()
+}
+
+ox_debug_enabled <- function() {
+  isTRUE(getOption("oxfordia.debug")) || ox_env_flag("OX_DEBUG")
+}
+
+ox_debug_log <- function(...) {
+  if (!ox_debug_enabled()) {
+    return(invisible(FALSE))
+  }
+
+  message("[oxfordia] ", paste0(..., collapse = ""))
+  invisible(TRUE)
+}
+
 ox_script_path <- function() {
   file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
   if (length(file_arg) == 0) {

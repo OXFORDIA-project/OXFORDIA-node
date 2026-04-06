@@ -177,6 +177,8 @@ Rscript packages/oxfordia-client/scripts/install-deps.R
 
 That installs the required CRAN packages plus the local `solidauthr` package into your active R library. The smoke test itself only checks that those packages are already available.
 
+Set `OX_DEBUG=1` before running the smoke test if you want live request and response logs in addition to the final error summary.
+
 The script now supports `.env` files. It loads the first file it finds in this order:
 
 1. `OX_ENV_FILE` if you set it explicitly
