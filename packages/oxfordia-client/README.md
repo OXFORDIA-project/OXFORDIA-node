@@ -124,6 +124,8 @@ km_result <- ox_query(client, km_spec, targets = targets, fail_fast = FALSE)
 print(km_result$data)
 ```
 
+When `group_by_path` is present, Kaplan-Meier rows include a display-friendly `group` column and a raw `group_value` column. For the built-in nemaline cluster grouping, `group` is rendered as `Group 1`, `Group 2`, and `Group 3`.
+
 ## Custom Plugins
 
 You can register your own data or statistic plugins rather than relying on the built-ins.

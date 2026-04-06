@@ -151,6 +151,76 @@ print_error_debug <- function(errors) {
   invisible(NULL)
 }
 
+order_data_frame <- function(data, columns) {
+  columns <- intersect(columns, names(data))
+  if (nrow(data) == 0 || length(columns) == 0) {
+    return(data)
+  }
+
+  order_inputs <- lapply(columns, function(column) data[[column]])
+  ordering <- do.call(order, c(order_inputs, list(na.last = TRUE)))
+  ordered <- data[ordering, , drop = FALSE]
+  rownames(ordered) <- NULL
+  ordered
+}
+
+print_kaplan_meier_result <- function(data) {
+  required_columns <- c("time", "event")
+  if (nrow(data) == 0 || !all(required_columns %in% names(data))) {
+    print(data)
+    return(invisible(NULL))
+  }
+
+  group_values <- if ("group_value" %in% names(data)) as.character(data$group_value) else rep(NA_character_, nrow(data))
+  group_labels <- if ("group" %in% names(data)) as.character(data$group) else rep(NA_character_, nrow(data))
+
+  missing_group_values <- is.na(group_values) | !nzchar(trimws(group_values))
+  group_values[missing_group_values] <- group_labels[missing_group_values]
+
+  if (all(is.na(group_values) | !nzchar(trimws(group_values)))) {
+    print(data)
+    return(invisible(NULL))
+  }
+
+  group_values[is.na(group_values) | !nzchar(trimws(group_values))] <- "<ungrouped>"
+  data$group_value <- group_values
+  if ("group" %in% names(data)) {
+    data$group <- group_labels
+  }
+
+  data <- order_data_frame(
+    data,
+    columns = c("group_value", "time", "event", "server")
+  )
+
+  has_server_column <- "server" %in% names(data)
+  multiple_servers <- has_server_column && length(unique(stats::na.omit(data$server))) > 1
+
+  for (group_value in unique(data$group_value)) {
+    group_data <- data[data$group_value == group_value, , drop = FALSE]
+    group_label <- NA_character_
+    if ("group" %in% names(group_data)) {
+      labels <- unique(stats::na.omit(group_data$group))
+      if (length(labels) > 0) {
+        group_label <- labels[[1]]
+      }
+    }
+
+    if (!is.na(group_label) && nzchar(trimws(group_label))) {
+      cat(sprintf("Group: %s\n", group_label))
+    }
+    cat(sprintf("Group Value: %s\n", group_value))
+
+    display_columns <- c(if (multiple_servers) "server", "time", "event")
+    display_data <- group_data[, display_columns, drop = FALSE]
+    rownames(display_data) <- NULL
+    print(display_data, row.names = FALSE)
+    cat("\n")
+  }
+
+  invisible(NULL)
+}
+
 indexed_env_name <- function(prefix, index, suffix) {
   sprintf("OX_%s_%d_%s", prefix, index, suffix)
 }
@@ -398,4 +468,12 @@ if (nrow(result$errors) > 0) {
 }
 
 cat("Result\n")
-print(result$data)
+is_grouped_kaplan_meier <- ox_normalize_name(stat_name) == "kaplan-meier" &&
+  "group_value" %in% names(result$data) &&
+  any(!is.na(result$data$group_value) & nzchar(trimws(as.character(result$data$group_value))))
+
+if (is_grouped_kaplan_meier) {
+  print_kaplan_meier_result(result$data)
+} else {
+  print(result$data)
+}
