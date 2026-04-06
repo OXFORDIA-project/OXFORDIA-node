@@ -3,8 +3,9 @@ Type: Package
 Title: Federated Oxfordia Client
 Version: 0.0.0.9000
 Description: Federated R client for Oxfordia statistic queries across
-    multiple servers using pluggable data-plugin shortcut catalogs and
-    statistic-plugin query descriptors.
+    multiple servers using pluggable data-plugin shortcut catalogs,
+    statistic-plugin query descriptors, and solidauthr-backed Solid
+    authentication.
 Authors@R: person(
     "OXFORDIA Project",
     email = "opensource@oxfordia.invalid",
@@ -15,5 +16,6 @@ Encoding: UTF-8
 Depends:
     R (>= 4.1.0)
 Imports:
-    httr,
-    jsonlite
+    httr2,
+    jsonlite,
+    solidauthr

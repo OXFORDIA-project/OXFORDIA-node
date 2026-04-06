@@ -14,5 +14,8 @@ dev/
 build
 *.tsbuildinfo
 packages/pod-idp/.env
+packages/oxfordia-client/.env
+packages/oxfordia-client/.env.local
 packages/*/.rlib/
+oxfordiaClient_*.tar.gz
 solidauthr_*.tar.gz

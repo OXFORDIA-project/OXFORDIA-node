@@ -36,6 +36,24 @@ ox_trim_trailing_slash <- function(value) {
   sub("/+$", "", value)
 }
 
+ox_url_origin <- function(value, arg = "value") {
+  ox_assert_scalar_string(value, arg)
+
+  parts <- regmatches(
+    value,
+    regexec("^([A-Za-z][A-Za-z0-9+.-]*://[^/?#]+)", value, perl = TRUE)
+  )[[1]]
+
+  if (length(parts) == 0) {
+    stop(
+      sprintf("`%s` must be an absolute URL with a scheme and authority.", arg),
+      call. = FALSE
+    )
+  }
+
+  parts[[2]]
+}
+
 ox_compact_list <- function(value) {
   value[!vapply(value, is.null, logical(1))]
 }
