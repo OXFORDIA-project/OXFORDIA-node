@@ -11,7 +11,7 @@ import type { PodServerGlobals } from "../types";
 const solidOidcAccessTokenVerifier: SolidTokenVerifierFunction =
   createSolidTokenVerifier();
 
-export function createValidateWebId(_globals: PodServerGlobals) {
+export function createValidateWebId(globals: PodServerGlobals) {
   const validateWebId: RequestHandler = async (
     request: Request,
     response: Response,
@@ -37,6 +37,14 @@ export function createValidateWebId(_globals: PodServerGlobals) {
         throw new HttpError(401, "Access token did not contain a WebID.");
       }
       response.locals.authenticatedAgent = webId;
+      globals.logger.info(
+        `Validated API WebID '${webId}' for ${request.method} ${request.originalUrl}`,
+        {
+          webId,
+          method: request.method,
+          url: request.originalUrl,
+        },
+      );
       next();
     } catch (error: unknown) {
       if (error instanceof HttpError) {
