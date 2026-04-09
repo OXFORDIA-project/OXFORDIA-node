@@ -22,7 +22,7 @@ ox_kaplan_meier <- function(
     group_by <- ox_kaplan_meier_path(group_by, "group_by")
   }
 
-  oxfordiar::ox_query(
+  result <- oxfordiar::ox_query(
     route = "kaplan-meier",
     statistic = "kaplan-meier",
     targets = targets,
@@ -35,6 +35,12 @@ ox_kaplan_meier <- function(
     parse_result = ox_kaplan_meier_parse_result,
     fail_fast = fail_fast
   )
+
+  if (!is.null(group_by)) {
+    result$grouped <- ox_kaplan_meier_split_groups(result$data)
+  }
+
+  result
 }
 
 ox_kaplan_meier_parse_result <- function(payload, target = NULL) {
@@ -220,6 +226,28 @@ ox_kaplan_meier_bind_rows <- function(rows) {
 ox_kaplan_meier_empty_df <- function(columns = character()) {
   out <- stats::setNames(vector("list", length(columns)), columns)
   as.data.frame(out, stringsAsFactors = FALSE, check.names = FALSE)
+}
+
+ox_kaplan_meier_split_groups <- function(data) {
+  if (
+    !is.data.frame(data) ||
+      nrow(data) == 0 ||
+      !"group_value" %in% names(data)
+  ) {
+    return(list())
+  }
+
+  group_keys <- as.character(data$group)
+  missing_keys <- is.na(group_keys) | !nzchar(trimws(group_keys))
+  group_keys[missing_keys] <- as.character(data$group_value[missing_keys])
+  missing_keys <- is.na(group_keys) | !nzchar(trimws(group_keys))
+  group_keys[missing_keys] <- "<ungrouped>"
+
+  split_data <- split(data, group_keys, drop = TRUE)
+  lapply(split_data, function(group_data) {
+    rownames(group_data) <- NULL
+    group_data
+  })
 }
 
 `%||%` <- function(x, y) {

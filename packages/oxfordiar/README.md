@@ -275,6 +275,7 @@ result <- ox_query(
 `ox_query()` returns an `ox_result_set` list with:
 
 - `data`: data frame of successful rows
+- `by_target`: named list of successful per-target data frames
 - `errors`: data frame of per-target errors
 - `responses`: raw successful request/response payloads
 - `route`: route used for the query
@@ -282,7 +283,8 @@ result <- ox_query(
 - `fields`: request fields
 - `targets`: targets that were queried
 
-`result$data` is the part most end users will work with.
+`result$data` is the combined result. `result$by_target` keeps the successful
+per-target data frames before any statistic-specific combining.
 
 ## Development
 

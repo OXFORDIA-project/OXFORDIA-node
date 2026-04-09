@@ -34,7 +34,8 @@ result <- ox_mean(
 result$data
 ```
 
-`ox_mean()` returns an `ox_result_set`. The mean rows are in `result$data`.
+`ox_mean()` returns an `ox_result_set`. `result$data` contains the overall mean,
+and `result$by_target` keeps the individual per-target mean/count data frames.
 
 ## API
 
@@ -59,12 +60,18 @@ Behavior:
 
 `ox_mean()` returns an `ox_result_set` list with:
 
-- `data`: data frame of successful mean rows
+- `data`: one-row data frame containing the overall federated mean and count
+- `by_target`: named list of successful per-target mean/count data frames
 - `errors`: data frame of target errors when `fail_fast = FALSE`
 - `responses`: raw successful request/response entries
 - `route`, `statistic`, `fields`, `targets`: query metadata
 
 `result$data` is a data frame with these columns:
+
+- `mean`
+- `count`
+
+Each entry in `result$by_target` is a data frame with these columns:
 
 - `target`
 - `resource_uri`
@@ -92,6 +99,7 @@ result <- ox_mean(
 )
 
 result$data
+result$by_target
 ```
 
 ### Mean Over a Manual Graph Path
