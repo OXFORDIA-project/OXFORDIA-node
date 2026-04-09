@@ -11,7 +11,6 @@ SolidSession <- R6::R6Class(
     safety_margin = NULL,
     token_nonce = NULL,
     resource_nonces = NULL,
-
     initialize = function(
       issuer,
       client_id,
@@ -32,7 +31,6 @@ SolidSession <- R6::R6Class(
 
       invisible(private$discover())
     },
-
     print = function(...) {
       expiry <- if (is.null(self$access_token_expires_at)) {
         "none"
@@ -51,12 +49,10 @@ SolidSession <- R6::R6Class(
 
       invisible(self)
     },
-
     token = function(force_refresh = FALSE) {
       private$ensure_token(force_refresh = force_refresh)
       self$access_token
     },
-
     fetch = function(
       url,
       method = "GET",
@@ -104,21 +100,30 @@ SolidSession <- R6::R6Class(
       resp <- private$perform_with_nonce_retry(
         perform_once = perform_once,
         get_nonce = function() private$get_resource_nonce(origin_key),
-        set_nonce = function(value) private$set_resource_nonce(origin_key, value)
+        set_nonce = function(value) {
+          private$set_resource_nonce(origin_key, value)
+        }
       )
 
       if (httr2::resp_status(resp) >= 400) {
-        solid_stop_for_response(resp, sprintf("%s %s", request_method, target_url))
+        solid_stop_for_response(
+          resp,
+          sprintf("%s %s", request_method, target_url)
+        )
       }
 
       resp
     },
-
     get = function(url, headers = NULL, query = NULL) {
       self$fetch(url = url, method = "GET", headers = headers, query = query)
     },
-
-    put = function(url, body = NULL, content_type = NULL, headers = NULL, query = NULL) {
+    put = function(
+      url,
+      body = NULL,
+      content_type = NULL,
+      headers = NULL,
+      query = NULL
+    ) {
       self$fetch(
         url = url,
         method = "PUT",
@@ -128,8 +133,13 @@ SolidSession <- R6::R6Class(
         query = query
       )
     },
-
-    post = function(url, body = NULL, content_type = NULL, headers = NULL, query = NULL) {
+    post = function(
+      url,
+      body = NULL,
+      content_type = NULL,
+      headers = NULL,
+      query = NULL
+    ) {
       self$fetch(
         url = url,
         method = "POST",
@@ -139,8 +149,13 @@ SolidSession <- R6::R6Class(
         query = query
       )
     },
-
-    patch = function(url, body = NULL, content_type = NULL, headers = NULL, query = NULL) {
+    patch = function(
+      url,
+      body = NULL,
+      content_type = NULL,
+      headers = NULL,
+      query = NULL
+    ) {
       self$fetch(
         url = url,
         method = "PATCH",
@@ -150,14 +165,12 @@ SolidSession <- R6::R6Class(
         query = query
       )
     },
-
     delete = function(url, headers = NULL, query = NULL) {
       self$fetch(url = url, method = "DELETE", headers = headers, query = query)
     }
   ),
   private = list(
     client_secret = NULL,
-
     discover = function(force = FALSE) {
       if (!force && !is.null(self$oidc_configuration)) {
         return(self$oidc_configuration)
@@ -171,7 +184,10 @@ SolidSession <- R6::R6Class(
       }
 
       configuration <- solid_resp_json(resp)
-      scopes <- unlist(configuration$scopes_supported %||% list(), use.names = FALSE)
+      scopes <- unlist(
+        configuration$scopes_supported %||% list(),
+        use.names = FALSE
+      )
       auth_methods <- unlist(
         configuration$token_endpoint_auth_methods_supported %||% list(),
         use.names = FALSE
@@ -182,26 +198,39 @@ SolidSession <- R6::R6Class(
       )
 
       if (!("webid" %in% scopes)) {
-        stop("The issuer does not advertise support for the `webid` scope.", call. = FALSE)
+        stop(
+          "The issuer does not advertise support for the `webid` scope.",
+          call. = FALSE
+        )
       }
 
       if (!solid_is_scalar_string(configuration$token_endpoint %||% NULL)) {
-        stop("The issuer response did not include a usable `token_endpoint`.", call. = FALSE)
+        stop(
+          "The issuer response did not include a usable `token_endpoint`.",
+          call. = FALSE
+        )
       }
 
-      if (length(auth_methods) > 0 && !("client_secret_basic" %in% auth_methods)) {
-        stop("The issuer does not advertise `client_secret_basic` token authentication.", call. = FALSE)
+      if (
+        length(auth_methods) > 0 && !("client_secret_basic" %in% auth_methods)
+      ) {
+        stop(
+          "The issuer does not advertise `client_secret_basic` token authentication.",
+          call. = FALSE
+        )
       }
 
       if (length(dpop_algs) > 0 && !("ES256" %in% dpop_algs)) {
-        stop("The issuer does not advertise ES256 for DPoP signing.", call. = FALSE)
+        stop(
+          "The issuer does not advertise ES256 for DPoP signing.",
+          call. = FALSE
+        )
       }
 
       self$oidc_configuration <- configuration
       self$token_endpoint <- configuration$token_endpoint
       configuration
     },
-
     ensure_token = function(force_refresh = FALSE) {
       if (
         force_refresh ||
@@ -213,7 +242,6 @@ SolidSession <- R6::R6Class(
 
       invisible(self$access_token)
     },
-
     token_is_stale = function() {
       if (is.null(self$access_token_expires_at)) {
         return(TRUE)
@@ -227,7 +255,6 @@ SolidSession <- R6::R6Class(
 
       remaining <= self$safety_margin
     },
-
     request_token = function() {
       private$discover()
 
@@ -273,12 +300,14 @@ SolidSession <- R6::R6Class(
       self$access_token_expires_at <- Sys.time() + expires_in
 
       if (!solid_is_scalar_string(self$access_token)) {
-        stop("The token endpoint response did not include an `access_token`.", call. = FALSE)
+        stop(
+          "The token endpoint response did not include an `access_token`.",
+          call. = FALSE
+        )
       }
 
       invisible(payload)
     },
-
     perform_with_nonce_retry = function(perform_once, get_nonce, set_nonce) {
       retried <- FALSE
 
@@ -299,11 +328,9 @@ SolidSession <- R6::R6Class(
         return(resp)
       }
     },
-
     get_resource_nonce = function(origin_key) {
       self$resource_nonces[[origin_key]] %||% NULL
     },
-
     set_resource_nonce = function(origin_key, value) {
       self$resource_nonces[[origin_key]] <- value
       invisible(value)

@@ -28,6 +28,13 @@
         "command": "Rscript scripts/test.R"
       }
     },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript scripts/lint-r.R packages/solidauthr"
+      }
+    },
     "integration-test": {
       "executor": "nx:run-commands",
       "options": {

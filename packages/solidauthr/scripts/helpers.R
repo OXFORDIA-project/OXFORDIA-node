@@ -25,7 +25,10 @@ package_root <- function() {
   candidate_roots <- c(
     script_candidate,
     normalizePath(getwd(), mustWork = FALSE),
-    normalizePath(file.path(getwd(), "packages", "solidauthr"), mustWork = FALSE)
+    normalizePath(
+      file.path(getwd(), "packages", "solidauthr"),
+      mustWork = FALSE
+    )
   )
 
   for (candidate in unique(candidate_roots)) {
@@ -52,7 +55,9 @@ source_package_files <- function() {
 }
 
 require_packages <- function(packages) {
-  missing <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TRUE)]
+  missing <- packages[
+    !vapply(packages, requireNamespace, logical(1), quietly = TRUE)
+  ]
   if (length(missing) > 0) {
     stop(
       sprintf(
