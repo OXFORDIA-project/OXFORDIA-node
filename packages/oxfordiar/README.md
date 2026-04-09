@@ -416,3 +416,28 @@ Recommended release workflow:
 4. Build the source tarball with `R CMD build` or the Nx `build` target.
 5. Run `R CMD check --as-cran` on the built tarball.
 6. Submit the packages to CRAN in dependency order.
+
+To update and tag all Oxfordia R package versions together, use:
+
+```sh
+bash scripts/release-r.sh get
+bash scripts/release-r.sh set 0.1.0
+bash scripts/release-r.sh tag
+```
+
+Or do the version update and tag creation in one step:
+
+```sh
+bash scripts/release-r.sh release 0.1.0
+```
+
+The script treats these packages as one release unit:
+
+- `oxfordiar`
+- `oxfordiar.data.nemaline`
+- `oxfordiar.stat.mean`
+- `oxfordiar.stat.kaplanmeier`
+
+It updates every `DESCRIPTION` version, rewrites dependent package imports to
+`oxfordiar (>= <version>)`, and creates an annotated git tag named
+`r-v<version>`.
