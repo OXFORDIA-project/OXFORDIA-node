@@ -27,7 +27,10 @@ run_command <- function(command, args, wait = TRUE, fail_message = NULL) {
     if (length(output) > 0) {
       cat(paste(output, collapse = "\n"), "\n")
     }
-    stop(fail_message %||% sprintf("Command failed: %s", command), call. = FALSE)
+    stop(
+      fail_message %||% sprintf("Command failed: %s", command),
+      call. = FALSE
+    )
   }
 
   list(output = output, status = status %||% 0L)
@@ -171,21 +174,33 @@ find_available_port <- function(start_port = 3300L, attempts = 200L) {
     }
   }
 
-  stop("Unable to find a free local port for the integration CSS server.", call. = FALSE)
+  stop(
+    "Unable to find a free local port for the integration CSS server.",
+    call. = FALSE
+  )
 }
 
 main <- function() {
   docker_bin <- find_binary(c("docker"))
 
   if (!nzchar(docker_bin)) {
-    stop("`docker` must be installed to run the integration script.", call. = FALSE)
+    stop(
+      "`docker` must be installed to run the integration script.",
+      call. = FALSE
+    )
   }
 
-  workspace_root <- normalizePath(file.path(package_root(), "..", ".."), mustWork = TRUE)
+  workspace_root <- normalizePath(
+    file.path(package_root(), "..", ".."),
+    mustWork = TRUE
+  )
   pod_idp_root <- file.path(workspace_root, "packages", "pod-idp")
 
   project_name <- sprintf("solidauthr-it-%s", Sys.getpid())
-  keep_stack <- tolower(Sys.getenv("SOLIDAUTHR_KEEP_STACK", unset = "false")) %in%
+  keep_stack <- tolower(Sys.getenv(
+    "SOLIDAUTHR_KEEP_STACK",
+    unset = "false"
+  )) %in%
     c("1", "true", "yes")
   requested_port <- Sys.getenv("SOLIDAUTHR_IDP_PORT", unset = "")
   idp_port <- if (nzchar(requested_port)) {
@@ -224,7 +239,11 @@ main <- function() {
     )
   }
 
-  cat(sprintf("Using CSS integration issuer %s (project %s)\n", issuer, project_name))
+  cat(sprintf(
+    "Using CSS integration issuer %s (project %s)\n",
+    issuer,
+    project_name
+  ))
 
   on.exit(
     {
@@ -272,9 +291,14 @@ main <- function() {
     stop("CSS did not return an account authorization token.", call. = FALSE)
   }
 
-  auth_headers <- list(Authorization = paste("CSS-Account-Token", account_token))
+  auth_headers <- list(
+    Authorization = paste("CSS-Account-Token", account_token)
+  )
 
-  authorized_index <- http_request(sprintf("%s.account/", issuer), headers = auth_headers)
+  authorized_index <- http_request(
+    sprintf("%s.account/", issuer),
+    headers = auth_headers
+  )
   if (authorized_index$status >= 400) {
     stop(
       sprintf(
@@ -390,7 +414,11 @@ main <- function() {
   resource_resp <- session$get(resource_url)
   resource_body <- httr2::resp_body_string(resource_resp)
   resp <- session$get(sprintf("%s.well-known/openid-configuration", issuer))
-  discovery <- httr2::resp_body_json(resp, check_type = FALSE, simplifyVector = FALSE)
+  discovery <- httr2::resp_body_json(
+    resp,
+    check_type = FALSE,
+    simplifyVector = FALSE
+  )
 
   cat("solidauthr integration succeeded\n")
   cat(sprintf("  Issuer:      %s\n", issuer))

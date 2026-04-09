@@ -1,0 +1,46 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "oxfordiar",
+  "projectType": "library",
+  "sourceRoot": "packages/oxfordiar/R",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "mkdir -p dist && R CMD build . --no-build-vignettes --no-manual && mv oxfordiar_*.tar.gz dist/"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "Rscript scripts/test.R"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript scripts/lint-r.R packages/oxfordiar"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript scripts/format-r.R packages/oxfordiar"
+      }
+    },
+    "smoke-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript packages/oxfordiar/scripts/smoke-test.R"
+      }
+    }
+  }
+}

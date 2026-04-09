@@ -1,0 +1,23 @@
+Package: oxfordiar.data.nemaline
+Type: Package
+Title: Nemaline Shortcut Catalog for Oxfordia R
+Version: 0.0.0.9000
+Description: Nemaline dataset shortcuts for Oxfordia R. Provides
+    shortcut objects that resolve named nemaline variables into
+    graph-path definitions.
+Authors@R: person(
+    "OXFORDIA Project",
+    email = "opensource@oxfordia.invalid",
+    role = c("aut", "cre")
+  )
+License: MIT
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    oxfordiar
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

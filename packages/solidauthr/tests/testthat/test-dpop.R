@@ -31,7 +31,10 @@ test_that("DPoP proofs carry the required header and claims", {
   expect_setequal(names(parts$header$jwk), c("crv", "kty", "x", "y"))
   expect_false("d" %in% names(parts$header$jwk))
   expect_identical(parts$payload$htm, "GET")
-  expect_identical(parts$payload$htu, "https://pod.example.org/private/data.ttl")
+  expect_identical(
+    parts$payload$htu,
+    "https://pod.example.org/private/data.ttl"
+  )
   expect_identical(
     parts$payload$ath,
     solidauthr:::solid_access_token_hash("example-access-token")

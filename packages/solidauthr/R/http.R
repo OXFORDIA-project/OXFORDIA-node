@@ -27,11 +27,17 @@ solid_apply_body <- function(req, body, content_type = NULL) {
 
   normalized_type <- tolower(sub(";.*$", "", content_type %||% ""))
 
-  if (is.list(body) && identical(normalized_type, "application/x-www-form-urlencoded")) {
+  if (
+    is.list(body) &&
+      identical(normalized_type, "application/x-www-form-urlencoded")
+  ) {
     return(do.call(httr2::req_body_form, c(list(req), body)))
   }
 
-  if (is.list(body) && (is.null(content_type) || identical(normalized_type, "application/json"))) {
+  if (
+    is.list(body) &&
+      (is.null(content_type) || identical(normalized_type, "application/json"))
+  ) {
     return(httr2::req_body_json(req, body))
   }
 

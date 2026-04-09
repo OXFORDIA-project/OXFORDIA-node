@@ -73,7 +73,11 @@ solid_build_dpop_proof <- function(
     htm = method,
     htu = htu,
     iat = as.integer(Sys.time()),
-    ath = if (is.null(access_token)) NULL else solid_access_token_hash(access_token),
+    ath = if (is.null(access_token)) {
+      NULL
+    } else {
+      solid_access_token_hash(access_token)
+    },
     nonce = nonce
   )
 
@@ -108,7 +112,10 @@ solid_prepare_token_request <- function(
   nonce = NULL
 ) {
   list(
-    authorization = solid_client_credentials_authorization(client_id, client_secret),
+    authorization = solid_client_credentials_authorization(
+      client_id,
+      client_secret
+    ),
     dpop = solid_build_dpop_proof(
       dpop_key = dpop_key,
       method = "POST",

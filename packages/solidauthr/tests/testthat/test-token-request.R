@@ -7,7 +7,11 @@ test_that("token requests use client_secret_basic plus DPoP", {
     dpop_key = key
   )
 
-  auth_raw <- rawToChar(openssl::base64_decode(sub("^Basic ", "", prepared$authorization)))
+  auth_raw <- rawToChar(openssl::base64_decode(sub(
+    "^Basic ",
+    "",
+    prepared$authorization
+  )))
   proof <- solidauthr:::solid_parse_jwt(prepared$dpop)
 
   expect_identical(

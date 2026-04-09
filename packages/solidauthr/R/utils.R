@@ -124,11 +124,18 @@ solid_normalize_htu <- function(url) {
   without_query <- sub("\\?.*$", "", without_fragment)
   parts <- regmatches(
     without_query,
-    regexec("^([A-Za-z][A-Za-z0-9+.-]*://[^/]+)(/.*)?$", without_query, perl = TRUE)
+    regexec(
+      "^([A-Za-z][A-Za-z0-9+.-]*://[^/]+)(/.*)?$",
+      without_query,
+      perl = TRUE
+    )
   )[[1]]
 
   if (length(parts) == 0) {
-    stop(sprintf("Unable to normalize URL for DPoP proof: %s", url), call. = FALSE)
+    stop(
+      sprintf("Unable to normalize URL for DPoP proof: %s", url),
+      call. = FALSE
+    )
   }
 
   path <- if (length(parts) >= 3 && nzchar(parts[[3]])) parts[[3]] else "/"
