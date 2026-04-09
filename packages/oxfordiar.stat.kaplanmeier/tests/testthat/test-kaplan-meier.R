@@ -63,6 +63,8 @@ test_that("kaplan-meier query parses grouped observations", {
   expect_true(result$data$event[[1]])
   expect_equal(result$data$group[[1]], "Group 1")
   expect_equal(result$data$group_value[[1]], "https://example.org/Cluster_1")
+  expect_equal(names(result$grouped), "Group 1")
+  expect_equal(result$grouped[[1]]$time[[1]], 10)
 })
 
 test_that("kaplan-meier query rejects string shortcut names", {

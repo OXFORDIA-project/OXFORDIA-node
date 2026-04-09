@@ -142,4 +142,6 @@ test_that("query keeps provenance columns on parsed rows", {
   )
   expect_equal(result$data$target[[1]], "site_a")
   expect_equal(result$data$statistic[[1]], "mean")
+  expect_equal(names(result$by_target), "site_a")
+  expect_equal(result$by_target[[1]]$target[[1]], "site_a")
 })

@@ -37,7 +37,8 @@ result$data
 ```
 
 `ox_kaplan_meier()` returns an `ox_result_set`. The Kaplan-Meier rows are in
-`result$data`.
+`result$data`. When `group_by` is supplied, `result$grouped` also contains data
+frames split by group across all successful targets.
 
 ## API
 
@@ -64,6 +65,8 @@ Behavior:
 `ox_kaplan_meier()` returns an `ox_result_set` list with:
 
 - `data`: data frame of successful Kaplan-Meier rows
+- `by_target`: named list of successful per-target Kaplan-Meier data frames
+- `grouped`: when `group_by` is supplied, a named list of grouped data frames
 - `errors`: data frame of target errors when `fail_fast = FALSE`
 - `responses`: raw successful request/response entries
 - `route`, `statistic`, `fields`, `targets`: query metadata
@@ -80,6 +83,9 @@ Behavior:
 
 `group` is the display label. `group_value` is the raw group identifier returned
 by the server. For ungrouped queries, both are typically `NA`.
+
+When `group_by` is supplied, `result$grouped` is a named list of data frames
+split by group label across all successful targets.
 
 ## Examples
 
@@ -100,6 +106,7 @@ result <- ox_kaplan_meier(
 )
 
 result$data
+result$grouped
 ```
 
 ### Ungrouped Kaplan-Meier Query

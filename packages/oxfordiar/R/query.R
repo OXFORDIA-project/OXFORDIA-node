@@ -47,7 +47,7 @@ ox_query <- function(
   }
 
   responses <- vector("list", length(targets))
-  parsed_rows <- vector("list", length(targets))
+  by_target <- vector("list", length(targets))
   errors <- list()
 
   for (index in seq_along(targets)) {
@@ -77,10 +77,16 @@ ox_query <- function(
     }
 
     responses[[index]] <- result
-    parsed_rows[[index]] <- result$data
+    by_target[[index]] <- result$data
   }
 
-  data <- combine_results(parsed_rows)
+  names(by_target) <- vapply(
+    targets,
+    function(target) target$name,
+    character(1)
+  )
+  by_target <- Filter(Negate(is.null), by_target)
+  data <- combine_results(by_target)
   error_columns <- c(
     "target",
     "resource_uri",
@@ -104,6 +110,7 @@ ox_query <- function(
   structure(
     list(
       data = data,
+      by_target = by_target,
       errors = error_df,
       responses = Filter(
         Negate(is.null),
@@ -523,15 +530,16 @@ ox_header_value <- function(headers, name, default = NULL) {
 
 #' @export
 print.ox_result_set <- function(x, ...) {
+  data_rows <- if (is.data.frame(x$data)) nrow(x$data) else length(x$data)
   cat(
     sprintf(
       "<ox_result_set> %d row(s), %d error(s), %d response(s)\n",
-      nrow(x$data),
+      data_rows,
       nrow(x$errors),
       length(x$responses)
     )
   )
-  if (nrow(x$data) > 0) {
+  if (is.data.frame(x$data) && nrow(x$data) > 0) {
     print(utils::head(x$data, 10))
   }
   if (nrow(x$errors) > 0) {
