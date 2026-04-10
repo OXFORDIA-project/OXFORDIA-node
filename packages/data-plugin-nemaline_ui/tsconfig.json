@@ -17,6 +17,15 @@
       "path": "../data-plugin_ui"
     },
     {
+      "path": "../stat-plugin_core"
+    },
+    {
+      "path": "../stat-plugin-mean_core"
+    },
+    {
+      "path": "../stat-plugin-kaplan-meier_core"
+    },
+    {
       "path": "../data-plugin-nemaline_core"
     }
   ]

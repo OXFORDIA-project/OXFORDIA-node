@@ -1,14 +1,30 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { useSolidAuth } from '@ldo/solid-react';
+import { CircleAlert } from 'lucide-react-native';
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Code,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Input,
+  Separator,
   Text,
 } from 'linked-data-browser';
-import { useSolidAuth } from '@ldo/solid-react';
 import type { GraphPath } from '@oxfordia/stat-plugin_core';
 import {
   findGraphPathShortcutByName,
@@ -16,9 +32,11 @@ import {
   resolveGraphPathShortcut,
 } from '@oxfordia/data-plugin_core';
 import { nemalineDataPlugin } from '@oxfordia/data-plugin-nemaline_core';
+import { QueryTextEditor, QueryTextOutput } from './QueryTextSurface';
 
 const DEFAULT_RESOURCE_URI = 'http://localhost:3000/admin/FakeData2.ttl';
 const DATA_SCHEMA_NAME = 'nemaline';
+const MEAN_ENDPOINT = '/.api/stat/mean';
 
 type MeanQueryDraft = {
   resourceUri: string;
@@ -123,8 +141,12 @@ export function MeanQueryTester() {
     () => getGraphPathShortcutsForDataSchema([nemalineDataPlugin], DATA_SCHEMA_NAME),
     [],
   );
-  const [lastValidDraft, setLastValidDraft] = useState<MeanQueryDraft>(createDefaultMeanQueryDraft);
-  const [meanQueryText, setMeanQueryText] = useState<string>(() => stringifyQuery(createDefaultMeanQueryDraft()));
+  const [lastValidDraft, setLastValidDraft] = useState<MeanQueryDraft>(
+    createDefaultMeanQueryDraft,
+  );
+  const [meanQueryText, setMeanQueryText] = useState<string>(() =>
+    stringifyQuery(createDefaultMeanQueryDraft()),
+  );
   const [advancedQueryError, setAdvancedQueryError] = useState<string | null>(null);
   const [meanQueryResult, setMeanQueryResult] = useState<string>('');
   const [meanQueryError, setMeanQueryError] = useState<string>('');
@@ -136,7 +158,7 @@ export function MeanQueryTester() {
     DATA_SCHEMA_NAME,
     lastValidDraft.graphPath,
   );
-  const shortcutLabel = selectedShortcut ? selectedShortcut.name : 'Choose path';
+  const shortcutLabel = selectedShortcut ? selectedShortcut.name : 'Custom path';
 
   const updateDraft = useCallback((nextDraft: MeanQueryDraft) => {
     setLastValidDraft(nextDraft);
@@ -188,8 +210,8 @@ export function MeanQueryTester() {
     setMeanQueryError('');
     setMeanQueryResult('');
     try {
-      const response = await fetch(`${window.location.origin}/.api/stat/mean`, {
-        method: "POST",
+      const response = await fetch(`${window.location.origin}${MEAN_ENDPOINT}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
@@ -225,124 +247,193 @@ export function MeanQueryTester() {
   }, [fetch, isSendingMeanQuery, meanQueryText]);
 
   return (
-    <View style={styles.section}>
-      <Text variant="h3" style={styles.title}>
-        Mean Query Tester
-      </Text>
-      <Text style={styles.subtitle}>
-        Select a nemaline graph path shortcut and data resource URI, then send an authenticated request to
-        {' '}`/.api/stat/mean`.
-      </Text>
-      <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Resource URI</Text>
-        <TextInput
-          value={lastValidDraft.resourceUri}
-          onChangeText={onResourceUriChange}
-          autoCapitalize="none"
-          autoCorrect={false}
-          spellCheck={false}
-          style={styles.resourceInput}
-        />
-      </View>
-      <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Graph path shortcut</Text>
-        <View style={styles.shortcutRow}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button text={shortcutLabel} variant="secondary" style={styles.shortcutTrigger} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent style={styles.dropdownContent}>
-              {graphPathShortcuts.map((shortcut) => (
-                <DropdownMenuItem
-                  key={shortcut.name}
-                  onPress={() => onSelectShortcut(shortcut.name)}
-                >
-                  <Text>{shortcut.name}</Text>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            text={isAdvancedOpen ? 'Hide advanced' : 'Advanced'}
-            variant="secondary"
-            style={styles.advancedButton}
-            onPress={() => setIsAdvancedOpen((prev) => !prev)}
-          />
+    <Card style={styles.card}>
+      <CardHeader style={styles.header}>
+        <View style={styles.headerRow}>
+          <View style={styles.headerCopy}>
+            <CardTitle>Mean Query Tester</CardTitle>
+            <CardDescription>
+              Send an authenticated request to <Code>{MEAN_ENDPOINT}</Code> using a
+              nemaline shortcut or a hand-edited graph path.
+            </CardDescription>
+          </View>
+          <View style={styles.badgeRow}>
+            <Badge variant="secondary">
+              <Text>{graphPathShortcuts.length} shortcuts</Text>
+            </Badge>
+            <Badge variant="outline">
+              <Text>{shortcutLabel}</Text>
+            </Badge>
+          </View>
         </View>
-      </View>
-      {isAdvancedOpen ? (
+      </CardHeader>
+      <CardContent style={styles.content}>
         <View style={styles.field}>
-          <Text style={styles.fieldLabel}>Raw query JSON</Text>
-          <TextInput
-            value={meanQueryText}
-            onChangeText={onAdvancedJsonChange}
-            multiline
+          <Text size="sm" bold>
+            Resource URI
+          </Text>
+          <Input
+            value={lastValidDraft.resourceUri}
+            onChangeText={onResourceUriChange}
             autoCapitalize="none"
             autoCorrect={false}
             spellCheck={false}
-            style={styles.input}
           />
+          <Text size="xs" muted style={styles.helperText}>
+            Target the uploaded nemaline RDF document you want to query.
+          </Text>
         </View>
-      ) : null}
-      {!!advancedQueryError && (
-        <View style={styles.errorBox}>
-          <Text style={styles.codeText}>{advancedQueryError}</Text>
+
+        <View style={styles.field}>
+          <View style={styles.fieldHeader}>
+            <Text size="sm" bold>
+              Graph path shortcut
+            </Text>
+            <Badge variant="outline">
+              <Text>{shortcutLabel}</Text>
+            </Badge>
+          </View>
+          <View style={styles.shortcutRow}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button text={shortcutLabel} variant="secondary" style={styles.shortcutTrigger} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent style={styles.dropdownContent}>
+                <DropdownMenuLabel>Nemaline shortcuts</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {graphPathShortcuts.map((shortcut) => (
+                  <DropdownMenuItem
+                    key={shortcut.name}
+                    onPress={() => onSelectShortcut(shortcut.name)}
+                  >
+                    <Text>{shortcut.name}</Text>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              text={isAdvancedOpen ? 'Hide advanced JSON' : 'Edit JSON'}
+              variant="outline"
+              style={styles.advancedButton}
+              onPress={() => setIsAdvancedOpen((prev) => !prev)}
+            />
+          </View>
+          <Text size="xs" muted style={styles.helperText}>
+            Shortcut selection keeps the request aligned with the built-in nemaline paths.
+          </Text>
         </View>
-      )}
-      <View style={styles.actions}>
+
+        {isAdvancedOpen ? (
+          <>
+            <Separator style={styles.separator} />
+            <View style={styles.field}>
+              <View style={styles.fieldHeader}>
+                <Text size="sm" bold>
+                  Raw query JSON
+                </Text>
+                <Badge variant={advancedQueryError ? 'destructive' : 'outline'}>
+                  <Text>{advancedQueryError ? 'Invalid JSON' : 'In sync'}</Text>
+                </Badge>
+              </View>
+              <QueryTextEditor
+                value={meanQueryText}
+                onChangeText={onAdvancedJsonChange}
+                autoCapitalize="none"
+                autoCorrect={false}
+                spellCheck={false}
+                style={styles.codeInput}
+              />
+              <Text size="xs" muted style={styles.helperText}>
+                Edit <Code>resourceUri</Code> and <Code>graphPath</Code> directly when a
+                shortcut is not enough.
+              </Text>
+            </View>
+          </>
+        ) : null}
+
+        {!!advancedQueryError && (
+          <Alert icon={CircleAlert} variant="destructive">
+            <AlertTitle>Advanced JSON is invalid</AlertTitle>
+            <AlertDescription>{advancedQueryError}</AlertDescription>
+          </Alert>
+        )}
+
+        <Separator style={styles.separator} />
+
+        {!!meanQueryError && (
+          <Alert icon={CircleAlert} variant="destructive">
+            <AlertTitle>Mean query failed</AlertTitle>
+            <AlertDescription>{meanQueryError}</AlertDescription>
+          </Alert>
+        )}
+
+        {!!meanQueryResult && (
+          <View style={styles.field}>
+            <View style={styles.fieldHeader}>
+              <Text size="sm" bold>
+                Raw response
+              </Text>
+              <Badge variant="outline">
+                <Text>JSON</Text>
+              </Badge>
+            </View>
+            <QueryTextOutput
+              value={meanQueryResult}
+              style={styles.outputInput}
+              textStyle={styles.codeText}
+            />
+          </View>
+        )}
+      </CardContent>
+      <CardFooter style={styles.footer}>
         <Button
-          text={isSendingMeanQuery ? 'Sending...' : 'Send'}
+          text={isSendingMeanQuery ? 'Sending…' : 'Send mean query'}
           variant="secondary"
           onPress={sendMeanQuery}
         />
-      </View>
-      {!!meanQueryError && (
-        <View style={styles.errorBox}>
-          <Text style={styles.codeText}>{meanQueryError}</Text>
-        </View>
-      )}
-      {!!meanQueryResult && (
-        <View style={styles.resultBox}>
-          <Text style={styles.codeText}>{meanQueryResult}</Text>
-        </View>
-      )}
-    </View>
+      </CardFooter>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
+  card: {
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'hsl(var(--border))',
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: 'hsl(var(--card))',
   },
-  title: {
-    marginBottom: 4,
+  header: {
+    gap: 10,
   },
-  subtitle: {
-    marginBottom: 10,
-    color: 'hsl(var(--muted-foreground))',
-    fontSize: 13,
+  headerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  headerCopy: {
+    flexGrow: 1,
+    flexShrink: 1,
+    gap: 6,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
+  },
+  content: {
+    gap: 14,
   },
   field: {
-    marginBottom: 10,
+    gap: 8,
   },
-  fieldLabel: {
-    marginBottom: 6,
-    fontWeight: '600',
-    fontSize: 13,
+  fieldHeader: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
   },
-  resourceInput: {
-    minHeight: 40,
-    borderWidth: 1,
-    borderColor: 'hsl(var(--border))',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    backgroundColor: 'hsl(var(--background))',
+  helperText: {
     fontSize: 12,
   },
   shortcutRow: {
@@ -356,7 +447,7 @@ const styles = StyleSheet.create({
     maxWidth: 460,
   },
   advancedButton: {
-    minWidth: 120,
+    minWidth: 148,
   },
   dropdownContent: {
     maxHeight: 320,
@@ -364,39 +455,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 6,
   },
-  input: {
-    minHeight: 150,
-    borderWidth: 1,
-    borderColor: 'hsl(var(--border))',
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: 'hsl(var(--background))',
+  codeInput: {
+    minHeight: 180,
     fontFamily: 'monospace',
     fontSize: 12,
+    lineHeight: 18,
     textAlignVertical: 'top',
-  },
-  actions: {
-    marginTop: 10,
-    alignSelf: 'flex-start',
-  },
-  errorBox: {
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: 'hsl(0 75% 60%)',
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: 'hsl(0 75% 60% / 0.12)',
-  },
-  resultBox: {
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: 'hsl(var(--border))',
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: 'hsl(var(--muted) / 0.35)',
   },
   codeText: {
     fontFamily: 'monospace',
     fontSize: 12,
+    lineHeight: 18,
+  },
+  separator: {},
+  outputInput: {
+    minHeight: 160,
+  },
+  footer: {
+    justifyContent: 'flex-start',
+    paddingTop: 0,
   },
 });

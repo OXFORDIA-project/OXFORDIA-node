@@ -22,6 +22,10 @@ import type {
   TimeFromBaselineMagnitude,
   MFMScoreMagnitude,
 } from '@oxfordia/data-plugin-nemaline_core';
+import {
+  createNemalineDefaultStatisticAccessRuleDocument,
+  nemalineDefaultStatisticAccessRuleDocumentShapeType,
+} from './defaultStatisticAccessRule';
 
 /** Container with context exposed so we can get the dataset for createData/commitToRemote. */
 type ContainerWithContext = SolidContainer & {
@@ -302,23 +306,49 @@ export const NemalineCsvResourceCreator: ResourceCreatorConfig = {
     if (commitResult.isError) {
       createUtils.toast(commitResult.message, { title: 'Error' });
     } else {
-      createUtils.loadingMessage(`Initializing ${statisticAccessRuleSlug}…`);
       const statisticAccessRuleResource = container.child(statisticAccessRuleSlug);
-      const initialStatisticAccessRuleContent = [
-        '@prefix sar: <https://oxfordia.setmeld.com/statistic-access-rule#> .',
-        '',
-        '<#policy> a sar:StatisticAccessRule ;',
-        '  sar:dataSchema "nemaline" .',
-        '',
-      ].join('\n');
-      const uploadResult = await statisticAccessRuleResource.uploadAndOverwrite(
-        new Blob([initialStatisticAccessRuleContent], { type: 'text/turtle' }),
-        'text/turtle',
-      );
-      if (uploadResult.isError) {
+      let defaultStatisticAccessRule;
+      try {
+        defaultStatisticAccessRule =
+          createNemalineDefaultStatisticAccessRuleDocument(
+            statisticAccessRuleResource.uri,
+          );
+      } catch (error) {
+        createUtils.toast(
+          `${slug} created (${dataRows.length} persons), but failed to build the default statistic access rule: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+          { title: 'Error' },
+        );
+        return;
+      }
+
+      createUtils.loadingMessage(`Initializing ${statisticAccessRuleSlug}…`);
+      const createStatisticAccessRuleResult =
+        await container.createChildAndOverwrite(statisticAccessRuleSlug);
+      if (createStatisticAccessRuleResult.isError) {
         createUtils.toast(
           `${slug} created (${dataRows.length} persons), but failed to initialize ${statisticAccessRuleSlug}: ${
-            uploadResult.message
+            createStatisticAccessRuleResult.message
+          }`,
+          { title: 'Error' },
+        );
+        return;
+      }
+
+      const statisticAccessRuleTransaction = dataset.startTransaction();
+      statisticAccessRuleTransaction
+        .usingType(nemalineDefaultStatisticAccessRuleDocumentShapeType)
+        .write(createStatisticAccessRuleResult.resource.uri)
+        .fromJson(defaultStatisticAccessRule);
+
+      const statisticAccessRuleCommitResult = await (
+        statisticAccessRuleTransaction as ConnectedLdoTransactionDataset<SolidConnectedPlugin[]>
+      ).commitToRemote();
+      if (statisticAccessRuleCommitResult.isError) {
+        createUtils.toast(
+          `${slug} created (${dataRows.length} persons), but failed to initialize ${statisticAccessRuleSlug}: ${
+            statisticAccessRuleCommitResult.message
           }`,
           { title: 'Error' },
         );

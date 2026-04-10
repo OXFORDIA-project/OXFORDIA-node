@@ -1,0 +1,26 @@
+Package: oxfordiar
+Type: Package
+Title: Common Oxfordia R Runtime
+Version: 0.0.0.9000
+Description: Common runtime for Oxfordia R packages. Provides
+    authentication helpers, target definitions, graph-path builders,
+    data shortcut types, and low-level federated query execution used
+    by statistic-specific packages.
+Authors@R: person(
+    "OXFORDIA Project",
+    email = "opensource@oxfordia.invalid",
+    role = c("aut", "cre")
+  )
+License: MIT
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    httr2,
+    jsonlite,
+    solidauthr
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

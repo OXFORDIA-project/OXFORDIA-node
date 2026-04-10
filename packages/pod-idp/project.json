@@ -1,0 +1,22 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "pod-idp",
+  "projectType": "application",
+  "sourceRoot": "packages/pod-idp",
+  "targets": {
+    "up": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "docker compose up -d"
+      }
+    },
+    "down": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "docker compose down -v --remove-orphans"
+      }
+    }
+  }
+}

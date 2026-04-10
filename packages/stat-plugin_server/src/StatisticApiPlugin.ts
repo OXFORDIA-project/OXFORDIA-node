@@ -13,6 +13,7 @@ export interface StatisticApiPlugin<
   Globals = unknown,
 > extends StatisticPlugin<StatisticAccessRule> {
   querySchema: JSONSchema4;
+  normalizeQuery?(query: unknown): unknown;
   evaluateStatisticAccessRulePreQuery(
     query: Query,
     statisticAccessRule: StatisticAccessRule,
