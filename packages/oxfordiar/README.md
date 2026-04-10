@@ -294,7 +294,7 @@ Install the R-side development tools:
 
 ```r
 install.packages(
-  c("remotes", "testthat", "lintr", "roxygen2"),
+  c("remotes", "testthat", "lintr", "roxygen2", "devtools", "usethis", "urlchecker"),
   repos = "https://cloud.r-project.org"
 )
 ```
@@ -410,12 +410,48 @@ Recommended release order:
 
 Recommended release workflow:
 
-1. Update `DESCRIPTION` metadata and the package version.
-2. Regenerate Rd docs and `NAMESPACE` with `roxygen2::roxygenise()`.
-3. Run the relevant package tests and `npm run lint:r`.
-4. Build the source tarball with `R CMD build` or the Nx `build` target.
-5. Run `R CMD check --as-cran` on the built tarball.
-6. Submit the packages to CRAN in dependency order.
+1. Decide the release type and create a release checklist issue for each R package:
+
+```sh
+Rscript scripts/release-r-checklist.R 0.1.0
+```
+
+2. Freshen package metadata and docs, especially `README.md`, `DESCRIPTION`, and `cran-comments.md`.
+
+3. Run the local preflight checks across all Oxfordia R packages:
+
+```sh
+Rscript scripts/release-r-preflight.R
+npm run lint:r
+```
+
+4. Run remote Windows checks:
+
+```sh
+Rscript scripts/release-r-winbuilder.R
+```
+
+5. When you are ready to submit, update all package versions together:
+
+```sh
+bash scripts/release-r.sh set 0.1.0
+```
+
+6. Regenerate Rd docs and `NAMESPACE` with `roxygen2::roxygenise()`, then re-run the local and remote checks if needed.
+
+7. Submit the packages to CRAN in dependency order with `devtools::submit_cran()` from each package directory.
+
+8. After CRAN acceptance, create the shared git tag:
+
+```sh
+bash scripts/release-r.sh tag
+```
+
+9. Prepare for the next development cycle:
+
+```sh
+bash scripts/release-r.sh bump dev
+```
 
 To update and tag all Oxfordia R package versions together, use:
 
@@ -441,3 +477,6 @@ The script treats these packages as one release unit:
 It updates every `DESCRIPTION` version, rewrites dependent package imports to
 `oxfordiar (>= <version>)`, and creates an annotated git tag named
 `r-v<version>`.
+
+This release flow is based on the process described in the R Packages release
+chapter: https://r-pkgs.org/release.html
