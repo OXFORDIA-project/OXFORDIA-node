@@ -1,0 +1,46 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "solidauthr",
+  "projectType": "library",
+  "sourceRoot": "packages/solidauthr/R",
+  "targets": {
+    "install-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript packages/solidauthr/scripts/install-deps.R"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "mkdir -p dist && R CMD build . --no-build-vignettes --no-manual && mv solidauthr_*.tar.gz dist/"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "Rscript scripts/test.R"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript scripts/lint-r.R packages/solidauthr"
+      }
+    },
+    "integration-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "Rscript packages/solidauthr/scripts/pod-idp-integration.R"
+      }
+    }
+  }
+}

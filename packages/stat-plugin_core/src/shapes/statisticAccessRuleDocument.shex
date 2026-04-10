@@ -6,6 +6,7 @@ start = @sar:StatisticAccessRuleDocumentShape
 sar:StatisticAccessRuleDocumentShape {
   a [sar:StatisticAccessRule] ;
   sar:dataSchema xsd:string ;
+  sar:allowedAgents IRI * ;
   sar:hasStatisticPolicy @sar:StatisticPolicyShape *
 }
 

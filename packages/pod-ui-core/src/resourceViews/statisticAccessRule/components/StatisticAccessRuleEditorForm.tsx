@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import {
   Button,
@@ -17,6 +17,9 @@ import type { StatisticPolicy } from "@oxfordia/stat-plugin_core";
 
 type Props = {
   error: string | null;
+  allowedAgents: string[];
+  addAllowedAgent: (agent: string) => void;
+  removeAllowedAgent: (agent: string) => void;
   policies: StatisticPolicy[];
   statisticPlugins: StatisticPluginUi[];
   addPolicy: (name: string) => void;
@@ -36,6 +39,51 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
       paddingVertical: 12,
       backgroundColor: colors.card,
     },
+    sectionCard: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      padding: 16,
+      backgroundColor: colors.card,
+      gap: 12,
+    },
+    sectionTitle: { fontWeight: "700", fontSize: 16 },
+    helperText: { opacity: 0.72, lineHeight: 20 },
+    agentInputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      flexWrap: "wrap",
+    },
+    agentInput: {
+      flexGrow: 1,
+      flexShrink: 1,
+      minWidth: 280,
+      minHeight: 40,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      backgroundColor: colors.background,
+      color: colors.text,
+      fontSize: 14,
+    },
+    agentList: { gap: 10 },
+    agentRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      backgroundColor: colors.background,
+    },
+    agentValue: { flex: 1, flexShrink: 1 },
+    emptyState: { opacity: 0.72 },
     error: { color: colors.notification },
     policyCard: {
       position: "relative",
@@ -86,6 +134,9 @@ function createStyles(colors: ReturnType<typeof useTheme>["colors"]) {
 
 export function StatisticAccessRuleEditorForm({
   error,
+  allowedAgents,
+  addAllowedAgent,
+  removeAllowedAgent,
   policies,
   statisticPlugins,
   addPolicy,
@@ -95,6 +146,14 @@ export function StatisticAccessRuleEditorForm({
 }: Props) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const [draftAgent, setDraftAgent] = React.useState("");
+
+  const submitAgent = React.useCallback(() => {
+    const normalizedAgent = draftAgent.trim();
+    if (!normalizedAgent) return;
+    addAllowedAgent(normalizedAgent);
+    setDraftAgent("");
+  }, [addAllowedAgent, draftAgent]);
 
   return (
     <View style={styles.root}>
@@ -103,6 +162,46 @@ export function StatisticAccessRuleEditorForm({
           <Text style={styles.error}>{error}</Text>
         </View>
       ) : null}
+
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Allowed Agents</Text>
+        <Text style={styles.helperText}>
+          Only agent WebIDs listed here can run statistic queries for this
+          resource.
+        </Text>
+
+        <View style={styles.agentInputRow}>
+          <TextInput
+            value={draftAgent}
+            onChangeText={setDraftAgent}
+            onSubmitEditing={submitAgent}
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+            placeholder="https://example.com/profile/card#me"
+            placeholderTextColor={colors.border}
+            style={styles.agentInput}
+          />
+          <Button text="Add Agent" variant="secondary" onPress={submitAgent} />
+        </View>
+
+        <View style={styles.agentList}>
+          {allowedAgents.length === 0 ? (
+            <Text style={styles.emptyState}>No allowed agents configured.</Text>
+          ) : (
+            allowedAgents.map((agent) => (
+              <View key={agent} style={styles.agentRow}>
+                <Text style={styles.agentValue}>{agent}</Text>
+                <Button
+                  text="Remove"
+                  variant="secondary"
+                  onPress={() => removeAllowedAgent(agent)}
+                />
+              </View>
+            ))
+          )}
+        </View>
+      </View>
 
       <View style={{ gap: 14 }}>
         {policies.map((policy, idx) => (

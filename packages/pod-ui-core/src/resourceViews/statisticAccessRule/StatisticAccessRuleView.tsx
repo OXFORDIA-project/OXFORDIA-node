@@ -127,6 +127,9 @@ export const StatisticAccessRuleView: FunctionComponent<{
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <StatisticAccessRuleEditorForm
           error={editor.error}
+          allowedAgents={editor.allowedAgents}
+          addAllowedAgent={editor.addAllowedAgent}
+          removeAllowedAgent={editor.removeAllowedAgent}
           policies={editor.policies}
           statisticPlugins={editor.statisticPlugins}
           addPolicy={editor.addPolicy}

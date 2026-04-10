@@ -37,6 +37,31 @@ export interface ExecuteStatisticSparqlQueryParams {
   extraWherePatterns?: string[];
 }
 
+function truncateForLog(value: string, maxChars = 4000): string {
+  if (value.length <= maxChars) {
+    return value;
+  }
+
+  return `${value.slice(0, maxChars)}... [truncated]`;
+}
+
+function attachStatisticSparqlErrorContext(
+  error: unknown,
+  context: { endpoint: string; resourceUri: string; query: string },
+): void {
+  if (!error || typeof error !== "object") {
+    return;
+  }
+
+  Object.assign(error, {
+    oxfordiaStatisticSparqlContext: {
+      endpoint: context.endpoint,
+      resourceUri: context.resourceUri,
+      query: truncateForLog(context.query),
+    },
+  });
+}
+
 export async function executeStatisticSparqlQuery(
   params: ExecuteStatisticSparqlQueryParams,
 ): Promise<Record<string, unknown>[]> {
@@ -84,16 +109,26 @@ export async function executeStatisticSparqlQuery(
   }
 
   const query = sparqlSelect.build();
-  const bindingsStream = await params.globals.sparqlFetcher.fetchBindings(
-    params.globals.sparqlEndpoint,
-    query,
-  );
 
-  const rows: Record<string, unknown>[] = [];
-  for await (const binding of bindingsStream as AsyncIterable<
-    Record<string, unknown>
-  >) {
-    rows.push(binding);
+  try {
+    const bindingsStream = await params.globals.sparqlFetcher.fetchBindings(
+      params.globals.sparqlEndpoint,
+      query,
+    );
+
+    const rows: Record<string, unknown>[] = [];
+    for await (const binding of bindingsStream as AsyncIterable<
+      Record<string, unknown>
+    >) {
+      rows.push(binding);
+    }
+    return rows;
+  } catch (error) {
+    attachStatisticSparqlErrorContext(error, {
+      endpoint: params.globals.sparqlEndpoint,
+      resourceUri: params.resourceUri,
+      query,
+    });
+    throw error;
   }
-  return rows;
 }
