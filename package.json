@@ -29,7 +29,8 @@
     "release:r:preflight": "Rscript scripts/release-r-preflight.R",
     "release:r:winbuilder": "Rscript scripts/release-r-winbuilder.R",
     "release:r": "bash ./scripts/release-r.sh",
-    "deploy:package": "npm run build && node scripts/create-deploy-package.js",
+    "docker:build": "docker build -t oxfordia-pod-server .",
+    "build:deb": "bash deploy/deb/build-deb.sh",
     "version:get": "bash ./scripts/version.sh get",
     "version:set": "bash ./scripts/version.sh set",
     "version:bump": "bash ./scripts/version.sh bump"
