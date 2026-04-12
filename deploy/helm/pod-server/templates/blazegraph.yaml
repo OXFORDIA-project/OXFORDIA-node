@@ -1,0 +1,68 @@
+{{- if eq .Values.triplestore.mode "managed" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pod-server.blazegraphFullname" . }}
+  labels:
+    {{- include "pod-server.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: blazegraph
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: blazegraph
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: blazegraph
+          image: "{{ .Values.triplestore.managed.image.repository }}:{{ .Values.triplestore.managed.image.tag }}"
+          imagePullPolicy: {{ .Values.triplestore.managed.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.triplestore.managed.servicePort }}
+          resources:
+            {{- toYaml .Values.triplestore.managed.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "pod-server.blazegraphFullname" . }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pod-server.blazegraphFullname" . }}
+  labels:
+    {{- include "pod-server.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.triplestore.managed.servicePort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: blazegraph
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "pod-server.blazegraphFullname" . }}
+  labels:
+    {{- include "pod-server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.triplestore.managed.storageSize }}
+  {{- if .Values.triplestore.managed.storageClass }}
+  storageClassName: {{ .Values.triplestore.managed.storageClass }}
+  {{- end }}
+{{- end }}

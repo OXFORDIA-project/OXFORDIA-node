@@ -1,0 +1,10 @@
+1. Get the application URL:
+{{- if .Values.ingress.enabled }}
+  https://{{ .Values.ingress.hostname }}
+{{- else }}
+  kubectl port-forward svc/{{ include "pod-server.fullname" . }} 3000:{{ .Values.service.port }}
+  http://127.0.0.1:3000
+{{- end }}
+
+2. Check health:
+  curl {{- if .Values.ingress.enabled }} https://{{ .Values.ingress.hostname }}{{- else }} http://127.0.0.1:3000{{- end }}/healthz

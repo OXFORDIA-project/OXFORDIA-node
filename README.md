@@ -4,7 +4,99 @@ OXFORDIA (OXford Federation for Orchestrating Remote Data & International Analyt
 
 ## For Deployers
 
-// TODO: fill this in after deploying.
+OXFORDIA Pod ships in three release artifacts built from this monorepo:
+
+- Docker image in GitHub Container Registry: `ghcr.io/<org>/pod-server:<tag>`
+- Helm chart published from `deploy/helm/pod-server`
+- Debian package: `oxfordia-pod_<version>_amd64.deb`
+
+### Docker
+
+The container preserves Community Solid Server's native startup interface. Pass standard CSS flags directly to the image entrypoint.
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e CSS_BASE_URL=http://localhost:3000/ \
+  -e CSS_ROOT_FILE_PATH=/data \
+  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/bigdata/sparql \
+  -v "$PWD/data:/data" \
+  ghcr.io/<org>/pod-server:<tag> \
+  --showStackTrace
+```
+
+Notes:
+
+- the server listens on port `3000`
+- `GET /healthz` returns readiness/liveness status
+- CSS flags such as `--baseUrl`, `--workers`, `--config`, and `--rootFilePath` pass through unchanged
+- CSS environment variables such as `CSS_BASE_URL`, `CSS_CONFIG`, and `CSS_SPARQL_ENDPOINT` are supported directly
+
+### Kubernetes With Helm
+
+Add the chart repository and install with either `--set` flags or a values file:
+
+```bash
+helm repo add oxfordia https://your-org.github.io/pod-server
+helm install my-pod oxfordia/pod-server \
+  --set app.baseUrl=https://pod.example.org \
+  --set triplestore.mode=external \
+  --set triplestore.external.url=https://sparql.example.org/query \
+  --set ingress.enabled=true \
+  --set ingress.hostname=pod.example.org
+```
+
+Or:
+
+```bash
+helm install my-pod oxfordia/pod-server -f my-values.yaml
+```
+
+Important values:
+
+- `image.repository`, `image.tag`: container image to deploy
+- `app.baseUrl`: sets `CSS_BASE_URL`
+- `app.trustProxy`: configures Express trust proxy handling
+- `css.extraEnv`: pass additional CSS environment variables through directly
+- `css.extraArgs`: append native CSS CLI arguments directly
+- `triplestore.mode`: `external` or `managed`
+- `persistence.*`: PVC configuration for pod data
+- `ingress.*`: optional ingress and TLS configuration
+
+### Debian Package
+
+The Debian package installs only the application and systemd unit. It does not manage nginx, certbot, or Blazegraph.
+
+Install and configure:
+
+```bash
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod_<version>_amd64.deb
+sudo apt install ./oxfordia-pod_<version>_amd64.deb
+sudo editor /etc/default/oxfordia-pod
+sudo systemctl enable --now oxfordia-pod
+```
+
+The package installs:
+
+- application runtime in `/opt/oxfordia-pod`
+- systemd unit at `/lib/systemd/system/oxfordia-pod.service`
+- operator-managed env file at `/etc/default/oxfordia-pod`
+
+### Optional Server Init Script
+
+`oxfordia-pod-init.sh` is a separate release asset for interactive host setup after the `.deb` is installed. It can:
+
+- write `/etc/default/oxfordia-pod`
+- optionally install and configure local Blazegraph
+- optionally install and configure nginx
+- optionally invoke certbot for Let's Encrypt
+
+Usage:
+
+```bash
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-init.sh
+less oxfordia-pod-init.sh
+sudo bash oxfordia-pod-init.sh
+```
 
 ## For Maintainers
 
@@ -60,31 +152,34 @@ If you want stronger triplestore isolation without multiple containers, point `S
 - `npm run dev:multiple`
 - `npm run build`
 - `npm run build:server:packages` / `npm run build:ui:packages`
+- `npm run docker:build`
+- `npm run build:deb`
 - `npm run graph`
-- `npm run deploy:package`
 - `npm run version:get`
 - `npm run version:set <version>`
 - `npm run version:bump <major|minor|patch|prerelease>`
 
 ### Release Artifacts
 
-Pushes to `main` run `.github/workflows/release-deploy-package.yml` and publish:
+Tag pushes matching `v*` run `.github/workflows/release-deploy-package.yml` and publish:
 
-- `oxfordia-node-deploy-latest.tar.gz`
-- `oxfordia-node-deploy-<version>.tar.gz`
+- container image: `ghcr.io/<org>/pod-server:<tag>`
+- Debian package: `oxfordia-pod_<version>_amd64.deb`
+- init script: `oxfordia-pod-init.sh`
+- Helm chart from `deploy/helm/pod-server` via GitHub Pages
 
 For a specific release:
 
 ```bash
-wget https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-node-deploy-<version>.tar.gz
+wget https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod_<version>_amd64.deb
 ```
 
 ### Deployment Services
 
-- `node-app` (Community Solid Server)
-- optional `triplestore` (bundled Blazegraph)
+- `pod-server` (Community Solid Server)
+- optional external or managed triplestore
 - optional `nginx`
-- `certbot` (invoked by script for Let's Encrypt issue/renew)
+- optional `certbot`
 
 ## License
 
