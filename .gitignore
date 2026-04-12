@@ -20,4 +20,6 @@ packages/*/.rlib/
 oxfordiaClient_*.tar.gz
 solidauthr_*.tar.gz
 .env
+.secrets
+.act.secrets
 smoke-output
