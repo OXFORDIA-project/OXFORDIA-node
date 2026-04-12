@@ -1,0 +1,11 @@
+.git
+.github
+node_modules
+build
+coverage
+dist
+.DS_Store
+
+packages/*/dist
+packages/*/dist-server
+packages/*/tsconfig.tsbuildinfo

@@ -1,0 +1,19 @@
+[Unit]
+Description=Oxfordia Pod Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=oxfordia-pod
+Group=oxfordia-pod
+WorkingDirectory=/opt/oxfordia-pod
+EnvironmentFile=-/etc/default/oxfordia-pod
+ExecStart=/opt/oxfordia-pod/bin/node /opt/oxfordia-pod/node_modules/@solid/community-server/bin/server.js $OXFORDIA_POD_ARGS
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

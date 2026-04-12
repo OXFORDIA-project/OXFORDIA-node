@@ -1,0 +1,70 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/oxfordia-project/pod-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+app:
+  baseUrl: https://pod.example.org
+  trustProxy: true
+  dataPath: /var/lib/oxfordia-pod/data
+
+css:
+  extraEnv: {}
+    # CSS_LOGGING_LEVEL: info
+    # CSS_WORKERS: "2"
+  secretEnv: {}
+  extraArgs: []
+    # - --showStackTrace
+
+triplestore:
+  mode: external
+  external:
+    url: ""
+  managed:
+    image:
+      repository: lyrasis/blazegraph
+      tag: 2.1.6-RC
+      pullPolicy: IfNotPresent
+    storageSize: 20Gi
+    storageClass: ""
+    servicePort: 9999
+    resources: {}
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+
+ingress:
+  enabled: false
+  className: ""
+  hostname: pod.example.org
+  annotations: {}
+  tls:
+    enabled: false
+    secretName: ""
+    clusterIssuer: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

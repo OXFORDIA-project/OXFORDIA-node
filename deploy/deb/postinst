@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+if ! id -u oxfordia-pod >/dev/null 2>&1; then
+  useradd --system --home-dir /var/lib/oxfordia-pod --create-home --shell /usr/sbin/nologin oxfordia-pod
+fi
+
+install -d -o oxfordia-pod -g oxfordia-pod /var/lib/oxfordia-pod /var/lib/oxfordia-pod/data
+chown -R oxfordia-pod:oxfordia-pod /opt/oxfordia-pod
+
+systemctl daemon-reload || true
+
+if [ -n "$2" ]; then
+  systemctl try-restart oxfordia-pod.service || true
+else
+  echo "Oxfordia Pod Server installed."
+  echo "Edit /etc/default/oxfordia-pod, then run: systemctl enable --now oxfordia-pod"
+  echo "For guided setup, run the separate oxfordia-pod-init.sh release asset."
+fi

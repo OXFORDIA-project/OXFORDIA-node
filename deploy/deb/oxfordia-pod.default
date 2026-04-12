@@ -1,0 +1,27 @@
+# Oxfordia Pod Server defaults.
+# Community Solid Server reads these CSS_* variables directly.
+
+# Public base URL for the pod.
+CSS_BASE_URL=http://localhost:3000/
+
+# Absolute path to the Oxfordia CSS config file.
+CSS_CONFIG=/opt/oxfordia-pod/packages/pod-server/config/config.json
+
+# Main module path so CSS can resolve Oxfordia Components.js modules.
+CSS_MAIN_MODULE_PATH=/opt/oxfordia-pod/packages/pod-server
+
+# Data directory for CSS file-backed storage.
+CSS_ROOT_FILE_PATH=/var/lib/oxfordia-pod/data
+
+# HTTP listen port.
+CSS_PORT=3000
+
+# SPARQL endpoint used by pod-server.
+CSS_SPARQL_ENDPOINT=http://localhost:8889/bigdata/sparql
+
+# Set true when running behind nginx or another reverse proxy.
+TRUST_PROXY=false
+
+# Optional native CSS CLI flags, for example:
+# OXFORDIA_POD_ARGS=--workers 4 --showStackTrace
+OXFORDIA_POD_ARGS=
