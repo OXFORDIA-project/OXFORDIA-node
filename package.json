@@ -10,7 +10,7 @@
     "nx": "nx",
     "graph": "nx graph",
     "build": "nx run-many -t build --all --parallel=3",
-    "typecheck": "tsc -b --pretty false",
+    "typecheck": "npm run build:server:packages && npm run build:ui:packages && tsc -b --pretty false",
     "build:server:packages": "tsc -b packages/pod-server/tsconfig.json --pretty false",
     "build:ui:packages": "tsc -b packages/pod-ui/tsconfig.json --pretty false",
     "watch:server:packages": "tsc -b packages/pod-server/tsconfig.json --watch --preserveWatchOutput",
