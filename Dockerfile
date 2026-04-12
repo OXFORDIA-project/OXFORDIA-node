@@ -4,7 +4,7 @@ FROM node:20-slim AS build
 
 WORKDIR /workspace
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json tsconfig.json tsconfig.base.json ./
 COPY packages ./packages
 COPY docker ./docker
 COPY deploy ./deploy
