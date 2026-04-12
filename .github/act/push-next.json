@@ -1,0 +1,10 @@
+{
+  "ref": "refs/heads/next",
+  "repository": {
+    "full_name": "OXFORDIA-project/OXFORDIA-node",
+    "name": "OXFORDIA-node",
+    "owner": {
+      "login": "OXFORDIA-project"
+    }
+  }
+}
