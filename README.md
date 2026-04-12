@@ -154,10 +154,41 @@ If you want stronger triplestore isolation without multiple containers, point `S
 - `npm run build:server:packages` / `npm run build:ui:packages`
 - `npm run docker:build`
 - `npm run build:deb`
+- `npm run act:list`
+- `npm run act:validate`
+- `npm run act:next`
+- `npm run act:release`
 - `npm run graph`
 - `npm run version:get`
 - `npm run version:set <version>`
 - `npm run version:bump <major|minor|patch|prerelease>`
+
+### Testing GitHub Actions Locally
+
+[`act`](https://github.com/nektos/act) is configured for this repo with a checked-in [.actrc](/Users/jacksonmorgan/O/oxfordia-node/.actrc:1). On Apple Silicon it defaults to `linux/amd64`, which avoids the runner-architecture warning from `act`.
+
+Create a local secrets file before running jobs that interact with GHCR or releases:
+
+```bash
+cp .secrets.act.example .secrets
+editor .secrets
+```
+
+Useful commands:
+
+```bash
+npm run act:list
+npm run act:validate
+npm run act:next
+npm run act:release
+```
+
+Notes:
+
+- `act:validate` runs the `pull_request` validation job locally
+- `act:next` simulates a push to the `next` branch using `.github/act/push-next.json`
+- `act:release` simulates a tagged release push using `.github/act/push-tag.json`
+- jobs that publish images or releases need a valid `GITHUB_TOKEN` in `.secrets`
 
 ### Release Artifacts
 
