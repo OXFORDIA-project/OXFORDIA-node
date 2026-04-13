@@ -1,0 +1,45 @@
+name: CI
+on:
+  push:
+    branches: [next]
+  pull_request:
+    branches: [next]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Docker image tagged as :next for testing
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ghcr.io/your-org/pod-server:next
+
+      # Build .deb (downloadable from the workflow run)
+      - name: Build .deb
+        run: |
+          # ... fpm build steps ...
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oxfordia-pod-deb
+          path: oxfordia-pod_*.deb
+
+      # Package Helm chart (downloadable from the workflow run)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: helm-chart
+          path: deploy/helm/pod-server/

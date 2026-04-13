@@ -1,0 +1,34 @@
+name: Publish Release
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Docker image tagged with semver
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            ghcr.io/your-org/pod-server:${{ github.ref_name }}
+            ghcr.io/your-org/pod-server:latest
+
+      # Build and attach .deb to the GitHub Release
+      - name: Build .deb
+        run: |
+          # ... fpm build steps using ${GITHUB_REF_NAME#v} as version ...
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            oxfordia-pod_*.deb
+            oxfordia-pod-init.sh
+
+      # Publish Helm chart to GitHub Pages
+      - uses: helm/chart-releaser-action@v1
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
