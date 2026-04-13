@@ -1,0 +1,97 @@
+name: Publish Release
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish-release:
+    name: Build and Publish Release Assets
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+
+      - name: Derive metadata
+        id: meta
+        run: |
+          version="${GITHUB_EVENT_RELEASE_TAG_NAME#v}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_EVENT_RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build server packages
+        run: npm run build:server:packages
+
+      - name: Build UI server bundle
+        run: npm run build:ui
+
+      - name: Setup Ruby for fpm
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install fpm
+        run: gem install --no-document fpm
+
+      - name: Build Debian package
+        run: VERSION=${{ steps.meta.outputs.version }} npm run build:deb
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set release chart version
+        run: |
+          perl -0pi -e 's/^version: .*/version: $ENV{RELEASE_VERSION}/m' deploy/helm/pod-server/Chart.yaml
+          perl -0pi -e 's/^appVersion: .*/appVersion: $ENV{RELEASE_VERSION}/m' deploy/helm/pod-server/Chart.yaml
+        env:
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+
+      - name: Lint chart
+        run: helm lint deploy/helm/pod-server --set triplestore.external.url=https://sparql.example.org/query
+
+      - name: Package Helm chart
+        run: |
+          mkdir -p .cr-release-packages
+          helm package deploy/helm/pod-server \
+            --version "${{ steps.meta.outputs.version }}" \
+            --app-version "${{ steps.meta.outputs.version }}" \
+            --destination .cr-release-packages/
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            build/oxfordia-pod_${{ steps.meta.outputs.version }}_amd64.deb
+            .cr-release-packages/pod-server-${{ steps.meta.outputs.version }}.tgz
+
+      - name: Publish Helm chart
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: deploy/helm
+          packages_with_index: false
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
