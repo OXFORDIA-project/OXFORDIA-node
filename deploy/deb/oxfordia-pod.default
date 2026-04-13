@@ -17,7 +17,7 @@ CSS_ROOT_FILE_PATH=/var/lib/oxfordia-pod/data
 CSS_PORT=3000
 
 # SPARQL endpoint used by pod-server.
-CSS_SPARQL_ENDPOINT=http://localhost:8889/bigdata/sparql
+CSS_SPARQL_ENDPOINT=http://localhost:8890/sparql
 
 # Set true when running behind nginx or another reverse proxy.
 TRUST_PROXY=false

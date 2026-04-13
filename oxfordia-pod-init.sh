@@ -43,9 +43,8 @@ fi
 
 ENV_FILE="/etc/default/oxfordia-pod"
 NGINX_SITE="/etc/nginx/sites-available/oxfordia-pod"
-BLAZEGRAPH_UNIT="/lib/systemd/system/blazegraph.service"
-BLAZEGRAPH_DIR="/opt/blazegraph"
-BLAZEGRAPH_JAR="${BLAZEGRAPH_DIR}/blazegraph.jar"
+VIRTUOSO_PACKAGE="${VIRTUOSO_PACKAGE:-virtuoso-opensource}"
+VIRTUOSO_SERVICE="${VIRTUOSO_SERVICE:-virtuoso-opensource-7}"
 APT_UPDATED=0
 
 [ -f "${ENV_FILE}" ] && . "${ENV_FILE}"
@@ -97,51 +96,22 @@ log "Collected base settings for host ${host_name}."
 
 setup_nginx="$(confirm "Do you want nginx set up?" "n")"
 setup_certbot="$(confirm "Do you want SSL configured via certbot?" "n")"
-setup_blazegraph="$(confirm "Do you want Blazegraph set up?" "n")"
+setup_virtuoso="$(confirm "Do you want Virtuoso set up?" "n")"
 
 if [ "${setup_certbot}" = "yes" ] && [ "${setup_nginx}" != "yes" ]; then
   log "Certbot via nginx requires nginx. Enabling nginx setup automatically."
   setup_nginx="yes"
 fi
 
-if [ "${setup_blazegraph}" = "yes" ]; then
-  log "Configuring local Blazegraph."
-  sparql_endpoint="http://127.0.0.1:8889/bigdata/sparql"
-  ensure_apt openjdk-17-jre-headless curl
-  install -d -o oxfordia-pod -g oxfordia-pod "${BLAZEGRAPH_DIR}"
-  if [ ! -f "${BLAZEGRAPH_JAR}" ]; then
-    log "Downloading Blazegraph."
-    curl -fsSL "https://repo1.maven.org/maven2/com/blazegraph/blazegraph-jar/2.1.6/blazegraph-jar-2.1.6.jar" -o "${BLAZEGRAPH_JAR}"
-    chown oxfordia-pod:oxfordia-pod "${BLAZEGRAPH_JAR}"
-  else
-    log "Reusing existing Blazegraph jar at ${BLAZEGRAPH_JAR}."
-  fi
-  log "Writing Blazegraph systemd unit."
-  install -d /lib/systemd/system
-  cat > "${BLAZEGRAPH_UNIT}" <<EOF
-[Unit]
-Description=Blazegraph
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=oxfordia-pod
-Group=oxfordia-pod
-WorkingDirectory=${BLAZEGRAPH_DIR}
-ExecStart=/usr/bin/java -server -Xms512m -Xmx1g -jar ${BLAZEGRAPH_JAR}
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-  systemctl daemon-reload
-  systemctl enable --now blazegraph
-  log "Blazegraph is enabled and started."
+if [ "${setup_virtuoso}" = "yes" ]; then
+  log "Configuring local Virtuoso."
+  sparql_endpoint="http://127.0.0.1:8890/sparql"
+  ensure_apt "${VIRTUOSO_PACKAGE}"
+  systemctl enable --now "${VIRTUOSO_SERVICE}"
+  log "Virtuoso is enabled and started."
 else
   log "Using an external SPARQL endpoint."
-  sparql_endpoint="$(prompt "SPARQL endpoint URL" "${CSS_SPARQL_ENDPOINT:-http://localhost:8889/bigdata/sparql}")"
+  sparql_endpoint="$(prompt "SPARQL endpoint URL" "${CSS_SPARQL_ENDPOINT:-http://localhost:8890/sparql}")"
 fi
 
 trust_proxy="false"

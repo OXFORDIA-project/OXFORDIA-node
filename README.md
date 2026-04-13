@@ -8,7 +8,9 @@ OXFORDIA Pod ships in three release artifacts built from this monorepo:
 
 - Docker image in GitHub Container Registry: `ghcr.io/<org>/pod-server:<tag>`
 - Helm chart published from `deploy/helm/pod-server`
-- Debian package: `oxfordia-pod_<version>_amd64.deb`
+- Debian packages:
+  - `oxfordia-pod_<version>_amd64.deb`
+  - `oxfordia-pod_<version>_arm64.deb`
 
 ### Docker
 
@@ -18,7 +20,7 @@ The container preserves Community Solid Server's native startup interface. Pass 
 docker run --rm -p 3000:3000 \
   -e CSS_BASE_URL=http://localhost:3000/ \
   -e CSS_ROOT_FILE_PATH=/data \
-  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/bigdata/sparql \
+  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8890/sparql \
   -v "$PWD/data:/data" \
   ghcr.io/<org>/pod-server:<tag> \
   --showStackTrace
@@ -64,7 +66,9 @@ Important values:
 
 ### Debian Package
 
-The Debian package installs only the application and systemd unit. It does not manage nginx, certbot, or Blazegraph.
+The Debian package installs only the application and systemd unit. It does not manage nginx, certbot, or a triplestore.
+
+Release builds publish both `amd64` and `arm64` `.deb` artifacts.
 
 Install and configure:
 
@@ -95,7 +99,7 @@ The package installs:
 `oxfordia-pod-init.sh` is a separate release asset for interactive host setup after the `.deb` is installed. It can:
 
 - write `/etc/default/oxfordia-pod`
-- explicitly ask whether to install and configure local Blazegraph
+- explicitly ask whether to install and configure local Virtuoso
 - explicitly ask whether to install and configure nginx
 - explicitly ask whether to configure SSL with certbot
 - write a timestamped setup log to `/var/log/oxfordia-pod/init.log`
@@ -150,10 +154,10 @@ Defaults:
 - pod 1: `http://localhost:3100`
 - pod 2: `http://localhost:3101`
 - pod 3: `http://localhost:3102`
-- all three default to the same SPARQL endpoint: `http://localhost:8889/bigdata/sparql`
+- all three default to the same SPARQL endpoint: `http://localhost:8890/sparql`
 
 Override per-instance settings with env vars such as `PORT_1`, `BASE_URL_2`, `DATA_DIR_3`, or `SPARQL_ENDPOINT_1`.
-If you want stronger triplestore isolation without multiple containers, point `SPARQL_ENDPOINT_1/2/3` at different Blazegraph namespaces in the same Blazegraph instance.
+If you want stronger triplestore isolation without multiple containers, point `SPARQL_ENDPOINT_1/2/3` at different SPARQL endpoints.
 
 ### Common Scripts
 
@@ -163,6 +167,7 @@ If you want stronger triplestore isolation without multiple containers, point `S
 - `npm run build:server:types` / `npm run build:ui:types`
 - `npm run build:docker`
 - `npm run build:deb`
+  By default this emits both `build/oxfordia-pod_<version>_amd64.deb` and `build/oxfordia-pod_<version>_arm64.deb`.
 - `npm run test:deb`
 - `npm run act:list`
 - `npm run act:validate`
@@ -173,6 +178,22 @@ If you want stronger triplestore isolation without multiple containers, point `S
 - `npm run version:get`
 - `npm run version:set <version>`
 - `npm run version:bump <major|minor|patch|prerelease>`
+
+### Debian Package Test Container
+
+For manual Debian package debugging, start a systemd-capable Docker container with the local `build/` directory mounted in:
+
+```bash
+npm run test:deb
+docker exec -it oxfordia-pod-deb-dev /bin/bash
+```
+
+Inside the container:
+
+- `/workspace/debs` contains copied `.deb` files from the local `build/` directory
+- `/workspace/build` contains the local build artifacts, including the generated `.deb`
+- `/workspace/repo` contains the full checked-out repository
+- `systemd` is available, so you can install the package and manage `oxfordia-pod` with `systemctl`
 
 ### Testing GitHub Actions Locally
 
@@ -206,7 +227,9 @@ Notes:
 Tag pushes matching `v*` run `.github/workflows/release-deploy-package.yml` and publish:
 
 - container image: `ghcr.io/<org>/pod-server:<tag>`
-- Debian package: `oxfordia-pod_<version>_amd64.deb`
+- Debian packages:
+  - `oxfordia-pod_<version>_amd64.deb`
+  - `oxfordia-pod_<version>_arm64.deb`
 - init script: `oxfordia-pod-init.sh`
 - Helm chart from `deploy/helm/pod-server` via GitHub Pages
 
