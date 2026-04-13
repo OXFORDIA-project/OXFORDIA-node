@@ -1,0 +1,92 @@
+name: Publish Pre-Release
+
+on:
+  push:
+    branches:
+      - next
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-pre-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-pre-release:
+    name: Build and Publish Pre-Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive metadata
+        id: meta
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          version="0.0.0-next.${short_sha}"
+          tag_name="next-${short_sha}"
+
+          echo "short_sha=${short_sha}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${tag_name}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build server packages
+        run: npm run build:server:packages
+
+      - name: Build UI server bundle
+        run: npm run build:ui
+
+      - name: Setup Ruby for fpm
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install fpm
+        run: gem install --no-document fpm
+
+      - name: Build Debian package
+        run: VERSION=${{ steps.meta.outputs.version }} npm run build:deb
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint chart
+        run: helm lint deploy/helm/pod-server --set triplestore.external.url=https://sparql.example.org/query
+
+      - name: Package Helm chart
+        run: |
+          helm package deploy/helm/pod-server \
+            --version "${{ steps.meta.outputs.version }}" \
+            --app-version "${{ steps.meta.outputs.version }}" \
+            --destination build/
+
+      - name: Publish GitHub pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag_name }}
+          target_commitish: ${{ github.sha }}
+          name: Pre-release ${{ steps.meta.outputs.version }}
+          prerelease: true
+          make_latest: false
+          generate_release_notes: false
+          body: |
+            Automated pre-release build from `next`.
+
+            Commit: `${{ github.sha }}`
+            Version: `${{ steps.meta.outputs.version }}`
+          files: |
+            build/oxfordia-pod_${{ steps.meta.outputs.version }}_amd64.deb
+            build/pod-server-${{ steps.meta.outputs.version }}.tgz
