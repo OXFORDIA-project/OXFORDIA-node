@@ -33,8 +33,8 @@
     "build:deb": "bash deploy/deb/build-deb.sh",
     "act:list": "act -l",
     "act:validate": "act pull_request -j validate",
-    "act:next": "act push -e .github/act/push-next.json -j publish-staging-image --secret-file .secrets",
-    "act:release": "act push -e .github/act/push-tag.json -j release-artifacts --secret-file .secrets",
+    "act:next": "act push -e .github/act/push-next.json -j build --secret-file .secrets",
+    "act:release": "act push -e .github/act/push-tag.json -j build --secret-file .secrets",
     "version:get": "bash ./scripts/version.sh get",
     "version:set": "bash ./scripts/version.sh set",
     "version:bump": "bash ./scripts/version.sh bump"
