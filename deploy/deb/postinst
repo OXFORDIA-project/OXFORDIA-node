@@ -8,6 +8,25 @@ fi
 install -d -o oxfordia-pod -g oxfordia-pod /var/lib/oxfordia-pod /var/lib/oxfordia-pod/data
 chown -R oxfordia-pod:oxfordia-pod /opt/oxfordia-pod
 
+required_paths="
+/opt/oxfordia-pod/packages/pod-server/config/config.json
+/opt/oxfordia-pod/packages/pod-server/package.json
+/opt/oxfordia-pod/packages/pod-server/dist/components/context.jsonld
+/opt/oxfordia-pod/packages/pod-ui/dist-server/index.html
+"
+
+for path in $required_paths; do
+  if [ ! -f "$path" ]; then
+    echo "Missing required runtime file: $path" >&2
+    exit 1
+  fi
+done
+
+if ! su -s /bin/sh -c "test -r /opt/oxfordia-pod/packages/pod-server/dist/components/context.jsonld && test -r /opt/oxfordia-pod/packages/pod-ui/dist-server/index.html" oxfordia-pod; then
+  echo "Oxfordia package files are not readable by oxfordia-pod user." >&2
+  exit 1
+fi
+
 systemctl daemon-reload || true
 
 if [ -n "$2" ]; then
