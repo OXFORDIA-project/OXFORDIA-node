@@ -12,13 +12,13 @@ runtime_root="${package_root}/opt/oxfordia-pod"
 output_path="${repo_root}/build/oxfordia-pod_${version}_${arch}.deb"
 
 rm -rf "${build_root}"
-mkdir -p "${runtime_root}/bin" "${package_root}/lib/systemd/system" "${package_root}/etc/default"
 
 (
   cd "${repo_root}"
   bash deploy/common/stage-runtime.sh "${runtime_root}"
 )
 
+mkdir -p "${runtime_root}/bin" "${package_root}/lib/systemd/system" "${package_root}/etc/default"
 cp "$(command -v node)" "${runtime_root}/bin/node"
 install -m 0644 "${repo_root}/deploy/deb/oxfordia-pod.service" "${package_root}/lib/systemd/system/oxfordia-pod.service"
 install -m 0644 "${repo_root}/deploy/deb/oxfordia-pod.default" "${package_root}/etc/default/oxfordia-pod"
