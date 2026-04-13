@@ -71,8 +71,17 @@ Install and configure:
 ```bash
 curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod_<version>_amd64.deb
 sudo apt install ./oxfordia-pod_<version>_amd64.deb
-sudo editor /etc/default/oxfordia-pod
+sudo vim /etc/default/oxfordia-pod
 sudo systemctl enable --now oxfordia-pod
+sudo journalctl -u oxfordia-pod -f
+```
+
+Wait until the log shows `Listening to server at http://localhost:3000/` before testing the port. The unit uses `Type=simple`, so `systemctl status oxfordia-pod` can report `active (running)` a few seconds before the HTTP listener is ready.
+
+Then verify readiness:
+
+```bash
+curl http://localhost:3000/healthz
 ```
 
 The package installs:
@@ -86,15 +95,15 @@ The package installs:
 `oxfordia-pod-init.sh` is a separate release asset for interactive host setup after the `.deb` is installed. It can:
 
 - write `/etc/default/oxfordia-pod`
-- optionally install and configure local Blazegraph
-- optionally install and configure nginx
-- optionally invoke certbot for Let's Encrypt
+- explicitly ask whether to install and configure local Blazegraph
+- explicitly ask whether to install and configure nginx
+- explicitly ask whether to configure SSL with certbot
+- write a timestamped setup log to `/var/log/oxfordia-pod/init.log`
 
 Usage:
 
 ```bash
 curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-init.sh
-less oxfordia-pod-init.sh
 sudo bash oxfordia-pod-init.sh
 ```
 
@@ -133,7 +142,7 @@ npm run dev
 Run three pod servers in parallel with:
 
 ```bash
-npm run dev:multiple
+npm run dev:pods
 ```
 
 Defaults:
@@ -149,16 +158,18 @@ If you want stronger triplestore isolation without multiple containers, point `S
 ### Common Scripts
 
 - `npm run dev` / `npm run dev:server` / `npm run dev:ui`
-- `npm run dev:multiple`
+- `npm run dev:pods`
 - `npm run build`
-- `npm run build:server:packages` / `npm run build:ui:packages`
-- `npm run docker:build`
+- `npm run build:server:types` / `npm run build:ui:types`
+- `npm run build:docker`
 - `npm run build:deb`
+- `npm run test:deb`
 - `npm run act:list`
 - `npm run act:validate`
 - `npm run act:next`
 - `npm run act:release`
 - `npm run graph`
+- `npm run check:types`
 - `npm run version:get`
 - `npm run version:set <version>`
 - `npm run version:bump <major|minor|patch|prerelease>`
@@ -171,7 +182,7 @@ Create a local secrets file before running jobs that interact with GHCR or relea
 
 ```bash
 cp .secrets.act.example .secrets
-editor .secrets
+vim .secrets
 ```
 
 Useful commands:

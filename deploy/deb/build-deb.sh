@@ -15,6 +15,12 @@ rm -rf "${build_root}"
 
 (
   cd "${repo_root}"
+  npm run build:server
+  npm run build:ui
+
+  test -f "${repo_root}/packages/pod-server/dist/components/context.jsonld"
+  test -f "${repo_root}/packages/pod-ui/dist-server/index.html"
+
   bash deploy/common/stage-runtime.sh "${runtime_root}"
 )
 

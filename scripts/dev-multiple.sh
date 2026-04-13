@@ -48,7 +48,7 @@ Override with:
 EOF
 
 exec concurrently -n server-types,pod-1,pod-2,pod-3 \
-  "npm run watch:server:packages" \
+  "npm run watch:server:types" \
   "env PORT=${PORT_1} BASE_URL=${BASE_URL_1} DATA_DIR=${DATA_DIR_1} SPARQL_ENDPOINT=${SPARQL_ENDPOINT_1} GIT_URI=${GIT_URI_1} npm --prefix packages/pod-server run serve" \
   "env PORT=${PORT_2} BASE_URL=${BASE_URL_2} DATA_DIR=${DATA_DIR_2} SPARQL_ENDPOINT=${SPARQL_ENDPOINT_2} GIT_URI=${GIT_URI_2} npm --prefix packages/pod-server run serve" \
   "env PORT=${PORT_3} BASE_URL=${BASE_URL_3} DATA_DIR=${DATA_DIR_3} SPARQL_ENDPOINT=${SPARQL_ENDPOINT_3} GIT_URI=${GIT_URI_3} npm --prefix packages/pod-server run serve"
