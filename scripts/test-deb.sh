@@ -127,6 +127,11 @@ TRUST_PROXY=false
 OXFORDIA_POD_ARGS=
 EOF"
 
+echo "Checking installed runtime assets..."
+docker exec "${container_name}" test -f /opt/oxfordia-pod/packages/pod-server/dist/components/context.jsonld
+docker exec "${container_name}" test -f /opt/oxfordia-pod/packages/pod-ui/dist-server/index.html
+docker exec "${container_name}" su -s /bin/sh -c "test -r /opt/oxfordia-pod/packages/pod-server/dist/components/context.jsonld" oxfordia-pod
+
 echo "Starting oxfordia-pod service..."
 docker exec "${container_name}" systemctl enable --now oxfordia-pod
 
