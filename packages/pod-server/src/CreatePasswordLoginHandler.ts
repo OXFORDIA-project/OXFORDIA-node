@@ -1,4 +1,3 @@
-import { boolean, object, string } from "yup";
 import {
   assertOidcInteraction,
   finishInteraction,
@@ -13,6 +12,7 @@ import {
   PasswordLoginHandler,
   CreateAccountHandler,
 } from "@solid/community-server";
+import { boolean, object, string } from "yup";
 
 const inSchema = object({
   email: string().trim().email().lowercase().required(),

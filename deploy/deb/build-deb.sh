@@ -49,6 +49,7 @@ mkdir -p "${build_root}"
   npm run build:ui
 
   test -f "${repo_root}/packages/pod-server/dist/components/context.jsonld"
+  test -f "${repo_root}/packages/pod-server-core/templates/identity/password/create-login.html.ejs"
   test -f "${repo_root}/packages/pod-ui/dist-server/index.html"
 )
 
