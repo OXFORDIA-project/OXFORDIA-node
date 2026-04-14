@@ -8,7 +8,7 @@
     "build": "npm run build:ts && npm run build:components",
     "build:ts": "tsc -b tsconfig.json",
     "build:components": "componentsjs-generator -s src -c dist/components -r fss -i .componentsignore",
-    "start": "node ../../node_modules/@solid/community-server/bin/server.js -c ./config/config.json -m ./ -f \"${DATA_DIR:-../../data}\" -g \"${GIT_URI:-localhost:2229}\" -s \"${SPARQL_ENDPOINT:-http://localhost:8890/sparql}\" -b \"${BASE_URL:-http://localhost:3000}\" -p \"${PORT:-3000}\"",
+    "start": "node ../../node_modules/@solid/community-server/bin/server.js -c ./config/config.json -m ./ -f \"${DATA_DIR:-../../data}\" -g \"${GIT_URI:-localhost:2229}\" -s \"${SPARQL_ENDPOINT:-http://localhost:8889/bigdata/sparql}\" -b \"${BASE_URL:-http://localhost:3000}\" -p \"${PORT:-3000}\"",
     "serve": "nodemon --watch dist --watch config --watch \"../*/dist\" --ext js,json,d.ts --exec \"npm run start\"",
     "dev": "nodemon --watch src --watch config --watch \"../*/dist\" --ext ts,js,json,d.ts --exec \"npm run build && npm run start\""
   },

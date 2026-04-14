@@ -20,7 +20,7 @@ The container preserves Community Solid Server's native startup interface. Pass 
 docker run --rm -p 3000:3000 \
   -e CSS_BASE_URL=http://localhost:3000/ \
   -e CSS_ROOT_FILE_PATH=/data \
-  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8890/sparql \
+  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/bigdata/sparql \
   -v "$PWD/data:/data" \
   ghcr.io/<org>/pod-server:<tag> \
   --showStackTrace
@@ -99,7 +99,7 @@ The package installs:
 `oxfordia-pod-init.sh` is a separate release asset for interactive host setup after the `.deb` is installed. It can:
 
 - write `/etc/default/oxfordia-pod`
-- explicitly ask whether to install and configure local Virtuoso
+- explicitly ask whether to install and configure local Blazegraph
 - explicitly ask whether to install and configure nginx
 - explicitly ask whether to configure SSL with certbot
 - write a timestamped setup log to `/var/log/oxfordia-pod/init.log`
@@ -154,7 +154,7 @@ Defaults:
 - pod 1: `http://localhost:3100`
 - pod 2: `http://localhost:3101`
 - pod 3: `http://localhost:3102`
-- all three default to the same SPARQL endpoint: `http://localhost:8890/sparql`
+- all three default to the same SPARQL endpoint: `http://localhost:8889/bigdata/sparql`
 
 Override per-instance settings with env vars such as `PORT_1`, `BASE_URL_2`, `DATA_DIR_3`, or `SPARQL_ENDPOINT_1`.
 If you want stronger triplestore isolation without multiple containers, point `SPARQL_ENDPOINT_1/2/3` at different SPARQL endpoints.
