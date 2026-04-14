@@ -1,0 +1,24 @@
+# Oxfordia Pod IDP defaults.
+# Community Solid Server reads these CSS_* variables directly.
+
+# Public base URL for the identity provider.
+CSS_BASE_URL=http://localhost:3300/
+
+# Absolute path to the CSS config file.
+CSS_CONFIG=/opt/oxfordia-pod-idp/packages/pod-idp/config/css-idp.json
+
+# Data directory for CSS file-backed storage.
+CSS_ROOT_FILE_PATH=/var/lib/oxfordia-pod-idp/data
+
+# HTTP listen port.
+CSS_PORT=3300
+
+# Set true when running behind nginx or another reverse proxy.
+TRUST_PROXY=false
+
+# CSS logging level.
+CSS_LOGGING_LEVEL=info
+
+# Optional native CSS CLI flags, for example:
+# OXFORDIA_POD_IDP_ARGS=--workers 2 --showStackTrace
+OXFORDIA_POD_IDP_ARGS=
