@@ -101,6 +101,17 @@ require_public_certbot_host() {
   fi
 }
 
+run_certbot() {
+  certbot --nginx --force-interactive -d "${host_name}" < /dev/tty > /dev/tty 2>&1
+}
+
+show_certbot_log_hint() {
+  if [ -f /var/log/letsencrypt/letsencrypt.log ]; then
+    log "Showing the last 60 lines from /var/log/letsencrypt/letsencrypt.log."
+    tail -n 60 /var/log/letsencrypt/letsencrypt.log > /dev/tty || true
+  fi
+}
+
 ensure_apt() {
   if [ "${APT_UPDATED}" -eq 0 ]; then
     log "Refreshing apt package index."
@@ -202,7 +213,22 @@ EOF
       exit 1
     fi
     ensure_apt certbot python3-certbot-nginx
-    certbot --nginx --force-interactive -d "${host_name}" < /dev/tty > /dev/tty 2>&1
+    if ! run_certbot; then
+      log "certbot failed."
+      if grep -q "AttributeError: can't set attribute" /var/log/letsencrypt/letsencrypt.log 2>/dev/null; then
+        log "Debian 12's certbot package can hide the real ACME error behind 'AttributeError: can't set attribute'."
+        show_certbot_log_hint
+        log "Retrying certbot once."
+        run_certbot || {
+          log "certbot failed again after retry."
+          show_certbot_log_hint
+          exit 1
+        }
+      else
+        show_certbot_log_hint
+        exit 1
+      fi
+    fi
     log "certbot configuration completed."
   fi
 else

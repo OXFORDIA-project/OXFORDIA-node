@@ -105,6 +105,7 @@ The package installs:
 - write a timestamped setup log to `/var/log/oxfordia-pod/init.log`
 
 Certbot setup requires a public DNS hostname. It will not work for `localhost`, bare hostnames, or IP addresses.
+On Debian 12, the `apt`-packaged Certbot can sometimes mask the real ACME failure as `AttributeError: can't set attribute`; when that happens, the init script now prints the tail of `/var/log/letsencrypt/letsencrypt.log` and retries once.
 
 Usage:
 
