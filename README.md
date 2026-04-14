@@ -20,7 +20,7 @@ The container preserves Community Solid Server's native startup interface. Pass 
 docker run --rm -p 3000:3000 \
   -e CSS_BASE_URL=http://localhost:3000/ \
   -e CSS_ROOT_FILE_PATH=/data \
-  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/bigdata/sparql \
+  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:9999/blazegraph/sparql \
   -v "$PWD/data:/data" \
   ghcr.io/<org>/pod-server:<tag> \
   --showStackTrace
@@ -104,6 +104,8 @@ The package installs:
 - explicitly ask whether to configure SSL with certbot
 - write a timestamped setup log to `/var/log/oxfordia-pod/init.log`
 
+Certbot setup requires a public DNS hostname. It will not work for `localhost`, bare hostnames, or IP addresses.
+
 Usage:
 
 ```bash
@@ -154,7 +156,7 @@ Defaults:
 - pod 1: `http://localhost:3100`
 - pod 2: `http://localhost:3101`
 - pod 3: `http://localhost:3102`
-- all three default to the same SPARQL endpoint: `http://localhost:8889/bigdata/sparql`
+- all three default to the same SPARQL endpoint: `http://localhost:9999/blazegraph/sparql`
 
 Override per-instance settings with env vars such as `PORT_1`, `BASE_URL_2`, `DATA_DIR_3`, or `SPARQL_ENDPOINT_1`.
 If you want stronger triplestore isolation without multiple containers, point `SPARQL_ENDPOINT_1/2/3` at different SPARQL endpoints.

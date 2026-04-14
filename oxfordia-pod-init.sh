@@ -54,7 +54,9 @@ NGINX_SITE="/etc/nginx/sites-available/oxfordia-pod"
 BLAZEGRAPH_SERVICE_FILE="/etc/systemd/system/blazegraph.service"
 BLAZEGRAPH_DIR="/opt/blazegraph"
 BLAZEGRAPH_JAR="${BLAZEGRAPH_DIR}/blazegraph.jar"
-BLAZEGRAPH_URL="https://repo1.maven.org/maven2/com/blazegraph/blazegraph-jar/2.1.5/blazegraph-jar-2.1.5.jar"
+BLAZEGRAPH_VERSION="2.1.6-rc"
+BLAZEGRAPH_VERSION_FILE="${BLAZEGRAPH_DIR}/.blazegraph-version"
+BLAZEGRAPH_URL="https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/blazegraph.jar"
 APT_UPDATED=0
 
 [ -f "${ENV_FILE}" ] && . "${ENV_FILE}"
@@ -92,6 +94,13 @@ confirm() {
   done
 }
 
+require_public_certbot_host() {
+  if [[ "${host_name}" == "localhost" || "${host_name}" == "localhost.localdomain" || "${host_name}" != *.* || "${host_name}" =~ ^[0-9.]+$ || "${host_name}" == *:* ]]; then
+    log "ERROR: Certbot requires a public DNS hostname. '${host_name}' is not valid for Let's Encrypt."
+    exit 1
+  fi
+}
+
 ensure_apt() {
   if [ "${APT_UPDATED}" -eq 0 ]; then
     log "Refreshing apt package index."
@@ -120,14 +129,16 @@ fi
 
 if [ "${setup_blazegraph}" = "yes" ]; then
   log "Configuring local Blazegraph."
-  sparql_endpoint="http://127.0.0.1:8889/bigdata/sparql"
+  sparql_endpoint="http://127.0.0.1:9999/blazegraph/sparql"
   ensure_apt openjdk-17-jre-headless curl
   install -d -o oxfordia-pod -g oxfordia-pod "${BLAZEGRAPH_DIR}"
 
-  if [ ! -f "${BLAZEGRAPH_JAR}" ]; then
-    log "Downloading Blazegraph jar."
+  if [ ! -f "${BLAZEGRAPH_JAR}" ] || [ ! -f "${BLAZEGRAPH_VERSION_FILE}" ] || [ "$(cat "${BLAZEGRAPH_VERSION_FILE}")" != "${BLAZEGRAPH_VERSION}" ]; then
+    log "Downloading Blazegraph ${BLAZEGRAPH_VERSION} jar."
     curl -fsSL "${BLAZEGRAPH_URL}" -o "${BLAZEGRAPH_JAR}"
     chown oxfordia-pod:oxfordia-pod "${BLAZEGRAPH_JAR}"
+    printf '%s\n' "${BLAZEGRAPH_VERSION}" > "${BLAZEGRAPH_VERSION_FILE}"
+    chown oxfordia-pod:oxfordia-pod "${BLAZEGRAPH_VERSION_FILE}"
   fi
 
   cat > "${BLAZEGRAPH_SERVICE_FILE}" <<EOF
@@ -154,7 +165,7 @@ EOF
   log "Blazegraph is enabled and started."
 else
   log "Using an external SPARQL endpoint."
-  sparql_endpoint="$(prompt "SPARQL endpoint URL" "${CSS_SPARQL_ENDPOINT:-http://localhost:8889/bigdata/sparql}")"
+  sparql_endpoint="$(prompt "SPARQL endpoint URL" "${CSS_SPARQL_ENDPOINT:-http://localhost:9999/blazegraph/sparql}")"
 fi
 
 trust_proxy="false"
@@ -185,8 +196,13 @@ EOF
   log "nginx is enabled and reloaded."
   if [ "${setup_certbot}" = "yes" ]; then
     log "Configuring TLS with certbot for ${host_name}."
+    require_public_certbot_host
+    if [ ! -r /dev/tty ] || [ ! -w /dev/tty ]; then
+      log "ERROR: Certbot requires an interactive terminal. Re-run oxfordia-pod-init.sh from a shell."
+      exit 1
+    fi
     ensure_apt certbot python3-certbot-nginx
-    certbot --nginx -d "${host_name}"
+    certbot --nginx --force-interactive -d "${host_name}" < /dev/tty > /dev/tty 2>&1
     log "certbot configuration completed."
   fi
 else
