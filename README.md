@@ -82,12 +82,6 @@ sudo journalctl -u oxfordia-pod -f
 
 Wait until the log shows `Listening to server at http://localhost:3000/` before testing the port. The unit uses `Type=simple`, so `systemctl status oxfordia-pod` can report `active (running)` a few seconds before the HTTP listener is ready.
 
-Then verify readiness:
-
-```bash
-curl http://localhost:3000/healthz
-```
-
 The package installs:
 
 - application runtime in `/opt/oxfordia-pod`
