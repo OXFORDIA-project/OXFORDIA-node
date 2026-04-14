@@ -32,17 +32,20 @@ Release builds publish both:
 Install and configure:
 
 ```bash
-curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-idp_<version>_amd64.deb
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod-idp_<version>_amd64.deb
 sudo apt install ./oxfordia-pod-idp_<version>_amd64.deb
 sudo vim /etc/default/oxfordia-pod-idp
 sudo systemctl enable --now oxfordia-pod-idp
 sudo journalctl -u oxfordia-pod-idp -f
 ```
 
+Use the concrete release tag in the download URL, for example `v0.0.1-alpha.5`.
+GitHub's `/releases/latest/download/...` path only follows the latest non-prerelease release, so it will not resolve alpha pre-releases reliably.
+
 For guided reverse-proxy and TLS setup after the package is installed:
 
 ```bash
-curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-idp-init.sh
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod-idp-init.sh
 sudo bash oxfordia-pod-idp-init.sh
 ```
 

@@ -75,12 +75,15 @@ Release builds publish both `amd64` and `arm64` `.deb` artifacts.
 Install and configure:
 
 ```bash
-curl -LO <PATH TO RELEASE VERSION>
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod_<version>_amd64.deb
 sudo apt install ./oxfordia-pod_<version>_amd64.deb
 sudo vim /etc/default/oxfordia-pod
 sudo systemctl enable --now oxfordia-pod
 sudo journalctl -u oxfordia-pod -f
 ```
+
+Use the concrete release tag in the download URL, for example `v0.0.1-alpha.5`.
+GitHub's `/releases/latest/download/...` path only follows the latest non-prerelease release, so it will not resolve alpha pre-releases reliably.
 
 Wait until the log shows `Listening to server at http://localhost:3000/` before testing the port. The unit uses `Type=simple`, so `systemctl status oxfordia-pod` can report `active (running)` a few seconds before the HTTP listener is ready.
 
@@ -106,7 +109,7 @@ On Debian 12, the `apt`-packaged Certbot can sometimes mask the real ACME failur
 Usage:
 
 ```bash
-curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-init.sh
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod-init.sh
 sudo bash oxfordia-pod-init.sh
 ```
 
@@ -117,7 +120,7 @@ The repo also publishes a Debian package for the single-server Community Solid S
 Install and configure:
 
 ```bash
-curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-idp_<version>_amd64.deb
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod-idp_<version>_amd64.deb
 sudo apt install ./oxfordia-pod-idp_<version>_amd64.deb
 sudo vim /etc/default/oxfordia-pod-idp
 sudo systemctl enable --now oxfordia-pod-idp
@@ -140,7 +143,7 @@ The package installs:
 Usage:
 
 ```bash
-curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-idp-init.sh
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/<tag>/oxfordia-pod-idp-init.sh
 sudo bash oxfordia-pod-idp-init.sh
 ```
 
