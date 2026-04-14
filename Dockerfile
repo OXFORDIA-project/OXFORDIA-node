@@ -10,14 +10,14 @@ COPY docker ./docker
 COPY deploy ./deploy
 
 RUN npm ci
-RUN npm run build:server:packages
+RUN npm run build:server:types
 RUN npm run build:ui
 RUN npm prune --omit=dev
 RUN bash deploy/common/stage-runtime.sh /runtime
 
 FROM node:20-slim AS runtime
 
-WORKDIR /opt/oxfordia-pod
+WORKDIR /opt/oxfordia-pod/packages/pod-server
 
 RUN useradd --system --uid 10001 --gid node --home-dir /opt/oxfordia-pod --no-create-home oxfordia-pod \
   && mkdir -p /var/lib/oxfordia-pod/data /tmp \
