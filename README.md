@@ -11,6 +11,8 @@ OXFORDIA Pod ships in three release artifacts built from this monorepo:
 - Debian packages:
   - `oxfordia-pod_<version>_amd64.deb`
   - `oxfordia-pod_<version>_arm64.deb`
+  - `oxfordia-pod-idp_<version>_amd64.deb`
+  - `oxfordia-pod-idp_<version>_arm64.deb`
 
 ### Docker
 
@@ -73,7 +75,7 @@ Release builds publish both `amd64` and `arm64` `.deb` artifacts.
 Install and configure:
 
 ```bash
-curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod_<version>_amd64.deb
+curl -LO <PATH TO RELEASE VERSION>
 sudo apt install ./oxfordia-pod_<version>_amd64.deb
 sudo vim /etc/default/oxfordia-pod
 sudo systemctl enable --now oxfordia-pod
@@ -108,6 +110,40 @@ curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/downl
 sudo bash oxfordia-pod-init.sh
 ```
 
+### Identity Provider Debian Package
+
+The repo also publishes a Debian package for the single-server Community Solid Server identity provider deployment in `packages/pod-idp`.
+
+Install and configure:
+
+```bash
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-idp_<version>_amd64.deb
+sudo apt install ./oxfordia-pod-idp_<version>_amd64.deb
+sudo vim /etc/default/oxfordia-pod-idp
+sudo systemctl enable --now oxfordia-pod-idp
+sudo journalctl -u oxfordia-pod-idp -f
+```
+
+The package installs:
+
+- application runtime in `/opt/oxfordia-pod-idp`
+- systemd unit at `/lib/systemd/system/oxfordia-pod-idp.service`
+- operator-managed env file at `/etc/default/oxfordia-pod-idp`
+
+`oxfordia-pod-idp-init.sh` is a separate release asset for reverse-proxy and TLS setup after the `.deb` is installed. It:
+
+- writes `/etc/default/oxfordia-pod-idp`
+- installs and configures `nginx`
+- optionally configures SSL with certbot
+- writes a timestamped setup log to `/var/log/oxfordia-pod-idp/init.log`
+
+Usage:
+
+```bash
+curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-idp-init.sh
+sudo bash oxfordia-pod-idp-init.sh
+```
+
 ## For Maintainers
 
 ### Monorepo Layout
@@ -126,6 +162,7 @@ sudo bash oxfordia-pod-init.sh
 - `packages/pod-server`: default server bundle with nemaline, mean, and Kaplan-Meier
 - `packages/pod-ui-core`: generic UI wrapper that accepts injected plugin UIs
 - `packages/pod-ui`: default UI bundle with nemaline, mean, and Kaplan-Meier
+- `packages/pod-idp`: single-server CSS identity-provider deployment and related operator assets
 
 ### Local Development
 
@@ -165,6 +202,8 @@ If you want stronger triplestore isolation without multiple containers, point `S
 - `npm run build:docker`
 - `npm run build:deb`
   By default this emits both `build/oxfordia-pod_<version>_amd64.deb` and `build/oxfordia-pod_<version>_arm64.deb`.
+- `npm run build:deb:idp`
+  This emits both `build/oxfordia-pod-idp_<version>_amd64.deb` and `build/oxfordia-pod-idp_<version>_arm64.deb`.
 - `npm run test:deb`
 - `npm run act:list`
 - `npm run act:validate`
@@ -227,7 +266,10 @@ Tag pushes matching `v*` run `.github/workflows/release-deploy-package.yml` and 
 - Debian packages:
   - `oxfordia-pod_<version>_amd64.deb`
   - `oxfordia-pod_<version>_arm64.deb`
+  - `oxfordia-pod-idp_<version>_amd64.deb`
+  - `oxfordia-pod-idp_<version>_arm64.deb`
 - init script: `oxfordia-pod-init.sh`
+- idp init script: `oxfordia-pod-idp-init.sh`
 - Helm chart from `deploy/helm/pod-server` via GitHub Pages
 
 For a specific release:

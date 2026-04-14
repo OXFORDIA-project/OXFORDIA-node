@@ -1,0 +1,19 @@
+[Unit]
+Description=Oxfordia Pod IDP
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=oxfordia-pod-idp
+Group=oxfordia-pod-idp
+WorkingDirectory=/opt/oxfordia-pod-idp/packages/pod-idp
+EnvironmentFile=-/etc/default/oxfordia-pod-idp
+ExecStart=/opt/oxfordia-pod-idp/bin/node /opt/oxfordia-pod-idp/node_modules/@solid/community-server/bin/server.js $OXFORDIA_POD_IDP_ARGS
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

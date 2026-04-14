@@ -13,6 +13,7 @@
     "act:validate": "act pull_request -j validate",
     "build": "nx run-many -t build --all --parallel=3",
     "build:deb": "bash deploy/deb/build-deb.sh",
+    "build:deb:idp": "bash deploy/deb/build-idp-deb.sh",
     "build:docker": "docker build -t oxfordia-pod-server .",
     "build:server": "npm run build:server:types && npm --prefix packages/pod-server run build",
     "build:server:types": "tsc -b packages/pod-server/tsconfig.json --pretty false --force",

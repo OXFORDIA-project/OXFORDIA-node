@@ -1,0 +1,37 @@
+#!/bin/sh
+set -e
+
+if ! id -u oxfordia-pod-idp >/dev/null 2>&1; then
+  useradd --system --home-dir /var/lib/oxfordia-pod-idp --create-home --shell /usr/sbin/nologin oxfordia-pod-idp
+fi
+
+install -d -o oxfordia-pod-idp -g oxfordia-pod-idp /var/lib/oxfordia-pod-idp /var/lib/oxfordia-pod-idp/data
+chown -R oxfordia-pod-idp:oxfordia-pod-idp /opt/oxfordia-pod-idp
+
+required_paths="
+/opt/oxfordia-pod-idp/packages/pod-idp/config/css-idp.json
+/opt/oxfordia-pod-idp/packages/pod-idp/package.json
+/opt/oxfordia-pod-idp/node_modules/@solid/community-server/bin/server.js
+"
+
+for path in $required_paths; do
+  if [ ! -f "$path" ]; then
+    echo "Missing required runtime file: $path" >&2
+    exit 1
+  fi
+done
+
+if ! su -s /bin/sh -c "test -r /opt/oxfordia-pod-idp/packages/pod-idp/config/css-idp.json && test -r /opt/oxfordia-pod-idp/node_modules/@solid/community-server/bin/server.js" oxfordia-pod-idp; then
+  echo "Oxfordia Pod IDP package files are not readable by oxfordia-pod-idp user." >&2
+  exit 1
+fi
+
+systemctl daemon-reload || true
+
+if [ -n "$2" ]; then
+  systemctl try-restart oxfordia-pod-idp.service || true
+else
+  echo "Oxfordia Pod IDP installed."
+  echo "Edit /etc/default/oxfordia-pod-idp, then run: systemctl enable --now oxfordia-pod-idp"
+  echo "For guided nginx and TLS setup, run the separate oxfordia-pod-idp-init.sh release asset."
+fi

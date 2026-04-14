@@ -1,0 +1,8 @@
+{
+  "name": "@oxfordia/pod-idp",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ../../node_modules/@solid/community-server/bin/server.js"
+  }
+}

@@ -14,16 +14,28 @@ concurrency:
 
 jobs:
   build-deb:
-    name: Build Debian Package (${{ matrix.arch }})
+    name: Build Debian Package (${{ matrix.package_name }} / ${{ matrix.arch }})
     if: github.event.release.prerelease == false
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - arch: amd64
+          - package_name: oxfordia-pod
+            package_script: build:deb
+            arch: amd64
             runner: ubuntu-latest
-          - arch: arm64
+          - package_name: oxfordia-pod
+            package_script: build:deb
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - package_name: oxfordia-pod-idp
+            package_script: build:deb:idp
+            arch: amd64
+            runner: ubuntu-latest
+          - package_name: oxfordia-pod-idp
+            package_script: build:deb:idp
+            arch: arm64
             runner: ubuntu-24.04-arm
 
     steps:
@@ -51,9 +63,11 @@ jobs:
         run: npm ci
 
       - name: Build server packages
+        if: matrix.package_name == 'oxfordia-pod'
         run: npm run build:server:types
 
       - name: Build UI server bundle
+        if: matrix.package_name == 'oxfordia-pod'
         run: npm run build:ui
 
       - name: Setup Ruby for fpm
@@ -65,13 +79,13 @@ jobs:
         run: gem install --no-document fpm
 
       - name: Build Debian package
-        run: VERSION=${{ steps.meta.outputs.version }} ARCH=${{ matrix.arch }} npm run build:deb
+        run: VERSION=${{ steps.meta.outputs.version }} ARCH=${{ matrix.arch }} npm run ${{ matrix.package_script }}
 
       - name: Upload Debian artifact
         uses: actions/upload-artifact@v4
         with:
-          name: oxfordia-pod-deb-${{ matrix.arch }}
-          path: build/oxfordia-pod_${{ steps.meta.outputs.version }}_${{ matrix.arch }}.deb
+          name: ${{ matrix.package_name }}-deb-${{ matrix.arch }}
+          path: build/${{ matrix.package_name }}_${{ steps.meta.outputs.version }}_${{ matrix.arch }}.deb
 
   publish-release:
     name: Build and Publish Release Assets
@@ -131,6 +145,10 @@ jobs:
           files: |
             build/oxfordia-pod_${{ steps.meta.outputs.version }}_amd64.deb
             build/oxfordia-pod_${{ steps.meta.outputs.version }}_arm64.deb
+            build/oxfordia-pod-idp_${{ steps.meta.outputs.version }}_amd64.deb
+            build/oxfordia-pod-idp_${{ steps.meta.outputs.version }}_arm64.deb
+            oxfordia-pod-init.sh
+            oxfordia-pod-idp-init.sh
             .cr-release-packages/pod-server-${{ steps.meta.outputs.version }}.tgz
 
       - name: Publish Helm chart
