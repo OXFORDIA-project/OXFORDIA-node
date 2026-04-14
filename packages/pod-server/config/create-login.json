@@ -65,7 +65,7 @@
         {
           "@id": "urn:solid-server:default:CreatePasswordLoginHtml",
           "@type": "HtmlViewEntry",
-          "filePath": "templates/identity/password/create-login.html.ejs",
+          "filePath": "../pod-server-core/templates/identity/password/create-login.html.ejs",
           "route": {
             "@id": "urn:solid-server:default:CreateLoginPasswordRoute"
           }

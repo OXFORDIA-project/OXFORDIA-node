@@ -19,7 +19,7 @@ for package_dir in packages/*; do
   mkdir -p "${target_dir}"
   cp "${package_dir}/package.json" "${target_dir}/package.json"
 
-  for asset in config dist dist-server; do
+  for asset in config dist dist-server templates; do
     if [ -e "${package_dir}/${asset}" ]; then
       cp -R "${package_dir}/${asset}" "${target_dir}/${asset}"
     fi

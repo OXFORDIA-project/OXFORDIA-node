@@ -1,10 +1,48 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+LOG_DIR="/var/log/oxfordia-pod"
+LOG_FILE="${LOG_DIR}/init.log"
+
+timestamp() {
+  date +"%Y-%m-%d %H:%M:%S"
+}
+
+log() {
+  printf '[%s] %s\n' "$(timestamp)" "$*"
+}
+
+tty_prompt() {
+  local prompt_text="$1" value
+
+  if [ -r /dev/tty ] && [ -w /dev/tty ]; then
+    printf '%s' "${prompt_text}" > /dev/tty
+    IFS= read -r value < /dev/tty
+  else
+    read -r -p "${prompt_text}" value
+  fi
+
+  printf '%s\n' "${value}"
+}
+
+on_error() {
+  local exit_code=$?
+  log "ERROR: Initialization failed at line ${BASH_LINENO[0]} with exit code ${exit_code}."
+  exit "${exit_code}"
+}
+
+trap on_error ERR
+
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run this script as root."
   exit 1
 fi
+
+mkdir -p "${LOG_DIR}"
+touch "${LOG_FILE}"
+chmod 0644 "${LOG_FILE}"
+
+exec > >(tee -a "${LOG_FILE}") 2>&1
 
 if ! id -u oxfordia-pod >/dev/null 2>&1; then
   echo "Install the oxfordia-pod package before running this script."
@@ -13,57 +51,108 @@ fi
 
 ENV_FILE="/etc/default/oxfordia-pod"
 NGINX_SITE="/etc/nginx/sites-available/oxfordia-pod"
-BLAZEGRAPH_UNIT="/lib/systemd/system/blazegraph.service"
+BLAZEGRAPH_SERVICE_FILE="/etc/systemd/system/blazegraph.service"
 BLAZEGRAPH_DIR="/opt/blazegraph"
 BLAZEGRAPH_JAR="${BLAZEGRAPH_DIR}/blazegraph.jar"
+BLAZEGRAPH_VERSION="2.1.6-rc"
+BLAZEGRAPH_VERSION_FILE="${BLAZEGRAPH_DIR}/.blazegraph-version"
+BLAZEGRAPH_URL="https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/blazegraph.jar"
 APT_UPDATED=0
 
 [ -f "${ENV_FILE}" ] && . "${ENV_FILE}"
 
+log "Starting oxfordia-pod host initialization."
+log "Log file: ${LOG_FILE}"
+
 prompt() {
   local label="$1" default_value="$2" value
-  read -r -p "${label} [${default_value}]: " value
+  value="$(tty_prompt "${label} [${default_value}]: ")"
   printf '%s\n' "${value:-$default_value}"
 }
 
-choose() {
-  local label="$1" option_a="$2" option_b="$3" choice
+confirm() {
+  local label="$1" default_value="$2" reply default_hint
+  case "${default_value}" in
+    y|Y|yes|YES) default_hint="Y/n" ;;
+    *) default_hint="y/N" ;;
+  esac
+
   while :; do
-    printf '%s\n1) %s\n2) %s\n> ' "${label}" "${option_a}" "${option_b}"
-    read -r choice
-    case "${choice}" in
-      1) printf '1\n'; return ;;
-      2) printf '2\n'; return ;;
+    reply="$(tty_prompt "${label} [${default_hint}]: ")"
+    reply="${reply:-$default_value}"
+    case "${reply}" in
+      y|Y|yes|YES) printf 'yes\n'; return ;;
+      n|N|no|NO) printf 'no\n'; return ;;
+      *)
+        if [ -w /dev/tty ]; then
+          printf 'Please answer yes or no.\n' > /dev/tty
+        else
+          printf 'Please answer yes or no.\n' >&2
+        fi
+        ;;
     esac
   done
 }
 
+require_public_certbot_host() {
+  if [[ "${host_name}" == "localhost" || "${host_name}" == "localhost.localdomain" || "${host_name}" != *.* || "${host_name}" =~ ^[0-9.]+$ || "${host_name}" == *:* ]]; then
+    log "ERROR: Certbot requires a public DNS hostname. '${host_name}' is not valid for Let's Encrypt."
+    exit 1
+  fi
+}
+
+run_certbot() {
+  certbot --nginx --force-interactive -d "${host_name}" < /dev/tty > /dev/tty 2>&1
+}
+
+show_certbot_log_hint() {
+  if [ -f /var/log/letsencrypt/letsencrypt.log ]; then
+    log "Showing the last 60 lines from /var/log/letsencrypt/letsencrypt.log."
+    tail -n 60 /var/log/letsencrypt/letsencrypt.log > /dev/tty || true
+  fi
+}
+
 ensure_apt() {
   if [ "${APT_UPDATED}" -eq 0 ]; then
+    log "Refreshing apt package index."
     apt-get update
     APT_UPDATED=1
   fi
+  log "Installing apt packages: $*"
   apt-get install -y "$@"
 }
 
 base_url="$(prompt "Public base URL" "${CSS_BASE_URL:-https://pod.example.org}")"
 data_dir="$(prompt "Data directory" "${CSS_ROOT_FILE_PATH:-/var/lib/oxfordia-pod/data}")"
 port="$(prompt "HTTP port" "${CSS_PORT:-3000}")"
-workers="$(prompt "CSS workers (blank keeps CSS default)" "${CSS_WORKERS:-}")"
-config_path="$(prompt "CSS config file" "${CSS_CONFIG:-/opt/oxfordia-pod/packages/pod-server/config/config.json}")"
 host_name="$(printf '%s' "${base_url}" | sed -E 's#^[a-z]+://([^/:]+).*#\1#')"
 
-triplestore_choice="$(choose "Triplestore" "Use an existing SPARQL endpoint" "Install and configure local Blazegraph")"
-if [ "${triplestore_choice}" = "1" ]; then
-  sparql_endpoint="$(prompt "SPARQL endpoint URL" "${CSS_SPARQL_ENDPOINT:-http://localhost:8889/bigdata/sparql}")"
-else
-  sparql_endpoint="http://127.0.0.1:8889/bigdata/sparql"
+log "Collected base settings for host ${host_name}."
+
+setup_nginx="$(confirm "Do you want nginx set up?" "n")"
+setup_certbot="$(confirm "Do you want SSL configured via certbot?" "n")"
+setup_blazegraph="$(confirm "Do you want Blazegraph set up?" "n")"
+
+if [ "${setup_certbot}" = "yes" ] && [ "${setup_nginx}" != "yes" ]; then
+  log "Certbot via nginx requires nginx. Enabling nginx setup automatically."
+  setup_nginx="yes"
+fi
+
+if [ "${setup_blazegraph}" = "yes" ]; then
+  log "Configuring local Blazegraph."
+  sparql_endpoint="http://127.0.0.1:9999/blazegraph/sparql"
   ensure_apt openjdk-17-jre-headless curl
-  install -d "${BLAZEGRAPH_DIR}"
-  if [ ! -f "${BLAZEGRAPH_JAR}" ]; then
-    curl -fsSL "https://repo1.maven.org/maven2/com/blazegraph/blazegraph-jar/2.1.6/blazegraph-jar-2.1.6.jar" -o "${BLAZEGRAPH_JAR}"
+  install -d -o oxfordia-pod -g oxfordia-pod "${BLAZEGRAPH_DIR}"
+
+  if [ ! -f "${BLAZEGRAPH_JAR}" ] || [ ! -f "${BLAZEGRAPH_VERSION_FILE}" ] || [ "$(cat "${BLAZEGRAPH_VERSION_FILE}")" != "${BLAZEGRAPH_VERSION}" ]; then
+    log "Downloading Blazegraph ${BLAZEGRAPH_VERSION} jar."
+    curl -fsSL "${BLAZEGRAPH_URL}" -o "${BLAZEGRAPH_JAR}"
+    chown oxfordia-pod:oxfordia-pod "${BLAZEGRAPH_JAR}"
+    printf '%s\n' "${BLAZEGRAPH_VERSION}" > "${BLAZEGRAPH_VERSION_FILE}"
+    chown oxfordia-pod:oxfordia-pod "${BLAZEGRAPH_VERSION_FILE}"
   fi
-  cat > "${BLAZEGRAPH_UNIT}" <<EOF
+
+  cat > "${BLAZEGRAPH_SERVICE_FILE}" <<EOF
 [Unit]
 Description=Blazegraph
 After=network-online.target
@@ -81,14 +170,18 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
+
   systemctl daemon-reload
   systemctl enable --now blazegraph
+  log "Blazegraph is enabled and started."
+else
+  log "Using an external SPARQL endpoint."
+  sparql_endpoint="$(prompt "SPARQL endpoint URL" "${CSS_SPARQL_ENDPOINT:-http://localhost:9999/blazegraph/sparql}")"
 fi
 
-proxy_choice="$(choose "Reverse proxy" "I already have a reverse proxy" "Set up nginx")"
-tls_choice="1"
 trust_proxy="false"
-if [ "${proxy_choice}" = "2" ]; then
+if [ "${setup_nginx}" = "yes" ]; then
+  log "Configuring nginx reverse proxy."
   trust_proxy="true"
   ensure_apt nginx
   cat > "${NGINX_SITE}" <<EOF
@@ -111,19 +204,45 @@ EOF
   nginx -t
   systemctl enable --now nginx
   systemctl reload nginx
-  tls_choice="$(choose "TLS" "Skip TLS here" "Set up Let's Encrypt with certbot")"
-  if [ "${tls_choice}" = "2" ]; then
+  log "nginx is enabled and reloaded."
+  if [ "${setup_certbot}" = "yes" ]; then
+    log "Configuring TLS with certbot for ${host_name}."
+    require_public_certbot_host
+    if [ ! -r /dev/tty ] || [ ! -w /dev/tty ]; then
+      log "ERROR: Certbot requires an interactive terminal. Re-run oxfordia-pod-init.sh from a shell."
+      exit 1
+    fi
     ensure_apt certbot python3-certbot-nginx
-    certbot --nginx -d "${host_name}"
+    if ! run_certbot; then
+      log "certbot failed."
+      if grep -q "AttributeError: can't set attribute" /var/log/letsencrypt/letsencrypt.log 2>/dev/null; then
+        log "Debian 12's certbot package can hide the real ACME error behind 'AttributeError: can't set attribute'."
+        show_certbot_log_hint
+        log "Retrying certbot once."
+        run_certbot || {
+          log "certbot failed again after retry."
+          show_certbot_log_hint
+          exit 1
+        }
+      else
+        show_certbot_log_hint
+        exit 1
+      fi
+    fi
+    log "certbot configuration completed."
   fi
+else
+  log "Skipping nginx setup."
 fi
 
+log "Ensuring application data directory exists at ${data_dir}."
 install -d -o oxfordia-pod -g oxfordia-pod "${data_dir}"
 
+log "Writing environment configuration to ${ENV_FILE}."
 cat > "${ENV_FILE}" <<EOF
 # Managed by oxfordia-pod-init.sh. Re-run the script or edit manually.
 CSS_BASE_URL=${base_url}
-CSS_CONFIG=${config_path}
+CSS_CONFIG=/opt/oxfordia-pod/packages/pod-server/config/config.json
 CSS_MAIN_MODULE_PATH=/opt/oxfordia-pod/packages/pod-server
 CSS_ROOT_FILE_PATH=${data_dir}
 CSS_PORT=${port}
@@ -132,14 +251,10 @@ TRUST_PROXY=${trust_proxy}
 OXFORDIA_POD_ARGS=
 EOF
 
-if [ -n "${workers}" ]; then
-  printf 'CSS_WORKERS=%s\n' "${workers}" >> "${ENV_FILE}"
-fi
-
-systemctl daemon-reload
-systemctl enable --now oxfordia-pod
+log "Enabling and restarting oxfordia-pod service."
+systemctl enable oxfordia-pod
 systemctl restart oxfordia-pod
 
-echo "Oxfordia Pod Server is configured."
-echo "Base URL: ${base_url}"
-echo "Health check: ${base_url%/}/healthz"
+log "Oxfordia Pod Server is configured."
+log "Base URL: ${base_url}"
+log "Health check: ${base_url%/}/healthz"

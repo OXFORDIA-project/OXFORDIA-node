@@ -8,7 +8,9 @@ OXFORDIA Pod ships in three release artifacts built from this monorepo:
 
 - Docker image in GitHub Container Registry: `ghcr.io/<org>/pod-server:<tag>`
 - Helm chart published from `deploy/helm/pod-server`
-- Debian package: `oxfordia-pod_<version>_amd64.deb`
+- Debian packages:
+  - `oxfordia-pod_<version>_amd64.deb`
+  - `oxfordia-pod_<version>_arm64.deb`
 
 ### Docker
 
@@ -18,7 +20,7 @@ The container preserves Community Solid Server's native startup interface. Pass 
 docker run --rm -p 3000:3000 \
   -e CSS_BASE_URL=http://localhost:3000/ \
   -e CSS_ROOT_FILE_PATH=/data \
-  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/bigdata/sparql \
+  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:9999/blazegraph/sparql \
   -v "$PWD/data:/data" \
   ghcr.io/<org>/pod-server:<tag> \
   --showStackTrace
@@ -64,16 +66,21 @@ Important values:
 
 ### Debian Package
 
-The Debian package installs only the application and systemd unit. It does not manage nginx, certbot, or Blazegraph.
+The Debian package installs only the application and systemd unit. It does not manage nginx, certbot, or a triplestore.
+
+Release builds publish both `amd64` and `arm64` `.deb` artifacts.
 
 Install and configure:
 
 ```bash
 curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod_<version>_amd64.deb
 sudo apt install ./oxfordia-pod_<version>_amd64.deb
-sudo editor /etc/default/oxfordia-pod
+sudo vim /etc/default/oxfordia-pod
 sudo systemctl enable --now oxfordia-pod
+sudo journalctl -u oxfordia-pod -f
 ```
+
+Wait until the log shows `Listening to server at http://localhost:3000/` before testing the port. The unit uses `Type=simple`, so `systemctl status oxfordia-pod` can report `active (running)` a few seconds before the HTTP listener is ready.
 
 The package installs:
 
@@ -86,15 +93,18 @@ The package installs:
 `oxfordia-pod-init.sh` is a separate release asset for interactive host setup after the `.deb` is installed. It can:
 
 - write `/etc/default/oxfordia-pod`
-- optionally install and configure local Blazegraph
-- optionally install and configure nginx
-- optionally invoke certbot for Let's Encrypt
+- explicitly ask whether to install and configure local Blazegraph
+- explicitly ask whether to install and configure nginx
+- explicitly ask whether to configure SSL with certbot
+- write a timestamped setup log to `/var/log/oxfordia-pod/init.log`
+
+Certbot setup requires a public DNS hostname. It will not work for `localhost`, bare hostnames, or IP addresses.
+On Debian 12, the `apt`-packaged Certbot can sometimes mask the real ACME failure as `AttributeError: can't set attribute`; when that happens, the init script now prints the tail of `/var/log/letsencrypt/letsencrypt.log` and retries once.
 
 Usage:
 
 ```bash
 curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/oxfordia-pod-init.sh
-less oxfordia-pod-init.sh
 sudo bash oxfordia-pod-init.sh
 ```
 
@@ -133,7 +143,7 @@ npm run dev
 Run three pod servers in parallel with:
 
 ```bash
-npm run dev:multiple
+npm run dev:pods
 ```
 
 Defaults:
@@ -141,27 +151,46 @@ Defaults:
 - pod 1: `http://localhost:3100`
 - pod 2: `http://localhost:3101`
 - pod 3: `http://localhost:3102`
-- all three default to the same SPARQL endpoint: `http://localhost:8889/bigdata/sparql`
+- all three default to the same SPARQL endpoint: `http://localhost:9999/blazegraph/sparql`
 
 Override per-instance settings with env vars such as `PORT_1`, `BASE_URL_2`, `DATA_DIR_3`, or `SPARQL_ENDPOINT_1`.
-If you want stronger triplestore isolation without multiple containers, point `SPARQL_ENDPOINT_1/2/3` at different Blazegraph namespaces in the same Blazegraph instance.
+If you want stronger triplestore isolation without multiple containers, point `SPARQL_ENDPOINT_1/2/3` at different SPARQL endpoints.
 
 ### Common Scripts
 
 - `npm run dev` / `npm run dev:server` / `npm run dev:ui`
-- `npm run dev:multiple`
+- `npm run dev:pods`
 - `npm run build`
-- `npm run build:server:packages` / `npm run build:ui:packages`
-- `npm run docker:build`
+- `npm run build:server:types` / `npm run build:ui:types`
+- `npm run build:docker`
 - `npm run build:deb`
+  By default this emits both `build/oxfordia-pod_<version>_amd64.deb` and `build/oxfordia-pod_<version>_arm64.deb`.
+- `npm run test:deb`
 - `npm run act:list`
 - `npm run act:validate`
 - `npm run act:next`
 - `npm run act:release`
 - `npm run graph`
+- `npm run check:types`
 - `npm run version:get`
 - `npm run version:set <version>`
 - `npm run version:bump <major|minor|patch|prerelease>`
+
+### Debian Package Test Container
+
+For manual Debian package debugging, start a systemd-capable Docker container with the local `build/` directory mounted in:
+
+```bash
+npm run test:deb
+docker exec -it oxfordia-pod-deb-dev /bin/bash
+```
+
+Inside the container:
+
+- `/workspace/debs` contains copied `.deb` files from the local `build/` directory
+- `/workspace/build` contains the local build artifacts, including the generated `.deb`
+- `/workspace/repo` contains the full checked-out repository
+- `systemd` is available, so you can install the package and manage `oxfordia-pod` with `systemctl`
 
 ### Testing GitHub Actions Locally
 
@@ -171,7 +200,7 @@ Create a local secrets file before running jobs that interact with GHCR or relea
 
 ```bash
 cp .secrets.act.example .secrets
-editor .secrets
+vim .secrets
 ```
 
 Useful commands:
@@ -195,7 +224,9 @@ Notes:
 Tag pushes matching `v*` run `.github/workflows/release-deploy-package.yml` and publish:
 
 - container image: `ghcr.io/<org>/pod-server:<tag>`
-- Debian package: `oxfordia-pod_<version>_amd64.deb`
+- Debian packages:
+  - `oxfordia-pod_<version>_amd64.deb`
+  - `oxfordia-pod_<version>_arm64.deb`
 - init script: `oxfordia-pod-init.sh`
 - Helm chart from `deploy/helm/pod-server` via GitHub Pages
 
