@@ -96,8 +96,7 @@ cat("Per-target means\n")
 print(mean_result$by_target)
 cat("\n")
 
-# Run the federated Kaplan-Meier query and show the flat rows, the per-target
-# rows, and the rows regrouped across all targets by Kaplan-Meier group.
+# Run the federated Kaplan-Meier query and log only grouped time/event rows.
 kaplan_meier_result <- oxfordiar.stat.kaplanmeier::ox_kaplan_meier(
   time = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
     "OX_KAPLAN_MEIER_TIME_SHORTCUT"
@@ -111,14 +110,27 @@ kaplan_meier_result <- oxfordiar.stat.kaplanmeier::ox_kaplan_meier(
   targets = targets,
   auth = auth
 )
-cat("Kaplan-Meier rows\n")
-print(kaplan_meier_result$data)
-cat("\n")
-cat("Kaplan-Meier rows by target\n")
-print(kaplan_meier_result$by_target)
-cat("\n")
-cat("Kaplan-Meier rows grouped by group\n")
-print(kaplan_meier_result$grouped)
+
+print_kaplan_meier_groups <- function(result) {
+  grouped <- if (is.null(result$grouped)) list() else result$grouped
+
+  if (length(grouped) == 0 && is.data.frame(result$data) && nrow(result$data) > 0) {
+    grouped <- list("<ungrouped>" = result$data)
+  }
+
+  for (group_name in names(grouped)) {
+    group_data <- grouped[[group_name]]
+    if (!is.data.frame(group_data)) {
+      next
+    }
+
+    cat(group_name, "\n", sep = "")
+    print(group_data[, c("time", "event"), drop = FALSE])
+    cat("\n")
+  }
+}
+
+print_kaplan_meier_groups(kaplan_meier_result)
 
 # Render a survival-curve image after logging the tabular result so the smoke
 # test leaves behind an artifact that is easy to inspect manually.
@@ -171,6 +183,3 @@ save_kaplan_meier_plot <- function(result, output_path) {
   invisible(output_path)
 }
 save_kaplan_meier_plot(kaplan_meier_result, plot_path)
-cat("\n")
-cat("Kaplan-Meier survival plot\n")
-cat(plot_path, "\n")
