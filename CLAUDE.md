@@ -36,7 +36,7 @@ Default URLs:
 - Pod 1: `http://localhost:3100`
 - Pod 2: `http://localhost:3101`
 - Pod 3: `http://localhost:3102`
-- All connect to `http://localhost:9999/blazegraph/sparql` by default
+- All connect to `http://localhost:8889/blazegraph/sparql` by default
 
 Override with env vars: `PORT_1`, `BASE_URL_2`, `DATA_DIR_3`, `SPARQL_ENDPOINT_1`, etc.
 
@@ -342,7 +342,7 @@ npm run build:docker
 docker run --rm -p 3000:3000 \
   -e CSS_BASE_URL=http://localhost:3000/ \
   -e CSS_ROOT_FILE_PATH=/data \
-  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:9999/blazegraph/sparql \
+  -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/blazegraph/sparql \
   -v "$PWD/data:/data" \
   oxfordia-pod-server
 ```
