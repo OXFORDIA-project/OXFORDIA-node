@@ -34,6 +34,9 @@
     "release:r": "bash ./scripts/release-r.sh",
     "release:r:winbuilder": "Rscript scripts/release-r-winbuilder.R",
     "start:server": "npm --prefix packages/pod-server run start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:deb": "bash ./scripts/test-deb.sh",
     "watch:server:types": "tsc -b packages/pod-server/tsconfig.json --watch --preserveWatchOutput --force",
     "watch:ui:types": "tsc -b packages/pod-ui/tsconfig.json --watch --preserveWatchOutput --force",
@@ -62,18 +65,22 @@
     "@types/json-schema": "^7.0.15",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.14",
+    "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.30.0",
     "@typescript-eslint/parser": "^8.30.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "componentsjs-generator": "^4.3.0",
     "concurrently": "^9.1.2",
     "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-prettier": "^5.2.6",
     "nodemon": "^3.1.9",
-    "prettier": "^3.5.3",
     "nx": "^20.8.1",
+    "prettier": "^3.5.3",
+    "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
-  },
-  "dependencies": {}
+    "typescript": "^5.5.3",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.5"
+  }
 }
