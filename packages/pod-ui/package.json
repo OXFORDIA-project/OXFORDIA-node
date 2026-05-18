@@ -11,6 +11,7 @@
     }
   },
   "scripts": {
+    "postinstall": "ldb-copy-refresh-worker",
     "build": "tsc -b tsconfig.json",
     "clean": "rm -rf .expo dist-server dist-standalone",
     "dev:web": "expo start -c --web",
@@ -33,7 +34,7 @@
     "json-schema": "^0.4.0",
     "jsonld": "^8.3.3",
     "jsonld2graphobject": "^0.0.5",
-    "linked-data-browser": "^0.0.8-alpha.6",
+    "linked-data-browser": "^0.0.8-alpha.8",
     "lucide-react-native": "^0.511.0",
     "nativewind": "^4.1.23",
     "react": "19.1.0",

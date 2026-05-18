@@ -15,7 +15,7 @@ export interface Person {
   type: LdSet<{
     "@id": "Person";
   }>;
-  isIdentifiedBy: ID;
+  isIdentifiedBy?: ID;
   isCategorizedBy?: LdSet<
     | {
         "@id": "Cluster1";
@@ -66,12 +66,12 @@ export interface MFMAssessmentEvent {
   type: LdSet<{
     "@id": "Determination";
   }>;
-  isCategorizedBy: {
+  isCategorizedBy?: {
     "@id": "AssessmentTypeMFM32";
   };
-  hasMagnitude: TimeFromBaselineMagnitude;
-  hasParticipant: Person;
-  produces: AssessmentResult;
+  hasMagnitude?: TimeFromBaselineMagnitude;
+  hasParticipant?: Person;
+  produces?: AssessmentResult;
 }
 
 /**
@@ -83,11 +83,11 @@ export interface KaplanMeierObservation {
   type: LdSet<{
     "@id": "Determination";
   }>;
-  isCategorizedBy: {
+  isCategorizedBy?: {
     "@id": "AssessmentTypeKaplanMeier";
   };
-  hasParticipant: Person;
-  hasMagnitude: LdSet<KaplanMeierEventMagnitude | KaplanMeierTimeMagnitude>;
+  hasParticipant?: Person;
+  hasMagnitude?: LdSet<KaplanMeierEventMagnitude | KaplanMeierTimeMagnitude>;
 }
 
 /**
@@ -99,10 +99,10 @@ export interface AssessmentResult {
   type: LdSet<{
     "@id": "Content";
   }>;
-  isAbout: {
+  isAbout?: {
     "@id": "ConceptMotorFunction";
   };
-  hasMagnitude: MFMScoreMagnitude;
+  hasMagnitude?: MFMScoreMagnitude;
 }
 
 /**
@@ -114,13 +114,13 @@ export interface TimeFromBaselineMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectDurationSinceStudyEnrollment";
   };
-  hasUnitOfMeasure: {
+  hasUnitOfMeasure?: {
     "@id": "UnitYear";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -132,10 +132,10 @@ export interface MFMScoreMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectMFM32VisitScore";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -147,10 +147,10 @@ export interface TotalMFMMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectMFM32AggregateScore";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -162,10 +162,10 @@ export interface KaplanMeierEventMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectKaplanMeierEventIndicator";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -177,13 +177,13 @@ export interface KaplanMeierTimeMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectKaplanMeierTimeToEvent";
   };
-  hasUnitOfMeasure: {
+  hasUnitOfMeasure?: {
     "@id": "UnitYear";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -195,13 +195,13 @@ export interface BaselineAgeMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectAge";
   };
-  hasUnitOfMeasure: {
+  hasUnitOfMeasure?: {
     "@id": "UnitYear";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -213,13 +213,13 @@ export interface LoAAgeMagnitude {
   type: LdSet<{
     "@id": "Magnitude";
   }>;
-  hasAspect: {
+  hasAspect?: {
     "@id": "AspectAgeAtLossOfAmbulation";
   };
-  hasUnitOfMeasure: {
+  hasUnitOfMeasure?: {
     "@id": "UnitYear";
   };
-  numericValue: number;
+  numericValue?: number;
 }
 
 /**
@@ -231,5 +231,5 @@ export interface ID {
   type: LdSet<{
     "@id": "ID";
   }>;
-  uniqueText: string;
+  uniqueText?: string;
 }
