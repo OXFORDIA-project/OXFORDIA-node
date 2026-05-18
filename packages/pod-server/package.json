@@ -13,7 +13,7 @@
     "dev": "nodemon --watch src --watch config --watch \"../*/dist\" --ext ts,js,json,d.ts --exec \"npm run build && npm run start\""
   },
   "dependencies": {
-    "@ldo/ldo": "^1.0.0-alpha.46",
+    "@ldo/ldo": "^1.0.0-alpha.51",
     "@oxfordia/data-plugin-nemaline_core": "*",
     "@oxfordia/pod-server-core": "*",
     "@oxfordia/stat-plugin-kaplan-meier_server": "*",

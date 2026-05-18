@@ -147,7 +147,7 @@ export function useStatisticAccessRuleEditorData(
   const applyDocumentChange = (
     change: (doc: StatisticAccessRuleDocument) => void,
   ) => {
-    if (!resource || !rootId) return;
+    if (!resource || !rootId || resource.type === "InvalidIdentifierResource") return;
 
     setError(null);
     setDoc(
