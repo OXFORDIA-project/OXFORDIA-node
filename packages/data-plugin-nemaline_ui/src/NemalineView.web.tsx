@@ -17,8 +17,6 @@ import { namedNode } from '@ldo/rdf-utils';
 import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-react-native';
 import { PersonShapeType } from '@oxfordia/data-plugin-nemaline_core';
 import type { Person } from '@oxfordia/data-plugin-nemaline_core';
-import { MeanQueryTester } from './MeanQueryTester';
-import { KaplanMeierObservationsTester } from './KaplanMeierObservationsTester';
 
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const GIST_PERSON = 'https://w3id.org/semanticarts/ns/ontology/gist/Person';
@@ -401,8 +399,6 @@ export function NemalineView() {
         <Text style={styles.subtitle}>
           {sortedPersons.length} participant{sortedPersons.length === 1 ? '' : 's'}
         </Text>
-        <MeanQueryTester />
-        <KaplanMeierObservationsTester />
         <View style={styles.actionsRow}>
           <Button
             text="Edit Statistic Access Rule"
