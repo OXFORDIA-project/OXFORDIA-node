@@ -7,10 +7,10 @@ module.exports = function (api) {
         {
           jsxImportSource: "nativewind",
           unstable_transformProfile: "hermes-canary",
+          unstable_transformImportMeta: true,
         },
       ],
       "nativewind/babel",
     ],
-    plugins: ["@babel/plugin-syntax-import-meta"],
   };
 };

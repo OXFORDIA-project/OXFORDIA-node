@@ -32,6 +32,8 @@ export const nemaline_dataSchemaSchema: Schema = {
               predicate:
                 "https://w3id.org/semanticarts/ns/ontology/gist/isIdentifiedBy",
               valueExpr: "https://paediatrics.ox.ac.uk/terms/IDShape",
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -45,6 +47,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Cluster_3",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -58,6 +62,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GeneticGroup_Variant3",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -84,6 +90,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Status_NonAmbulant",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -104,6 +112,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude",
               valueExpr:
                 "https://paediatrics.ox.ac.uk/terms/BaselineAgeMagnitude",
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -173,6 +183,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_MFM32",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -180,12 +192,16 @@ export const nemaline_dataSchemaSchema: Schema = {
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude",
               valueExpr:
                 "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/TimeFromBaselineMagnitude",
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
               predicate:
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant",
               valueExpr: "https://paediatrics.ox.ac.uk/terms/PersonShape",
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -193,6 +209,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 "https://w3id.org/semanticarts/ns/ontology/gist/produces",
               valueExpr:
                 "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentResult",
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -226,12 +244,16 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_KaplanMeier",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
               predicate:
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant",
               valueExpr: "https://paediatrics.ox.ac.uk/terms/PersonShape",
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -239,6 +261,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude",
               valueExpr:
                 "https://paediatrics.ox.ac.uk/terms/KaplanMeierEventMagnitude",
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -246,6 +270,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude",
               valueExpr:
                 "https://paediatrics.ox.ac.uk/terms/KaplanMeierTimeMagnitude",
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -279,6 +305,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Concept_MotorFunction",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -286,6 +314,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude",
               valueExpr:
                 "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/MFMScoreMagnitude",
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -319,6 +349,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_DurationSinceStudyEnrollment",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -330,6 +362,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://w3id.org/semanticarts/ns/ontology/gist/Unit_Year",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -339,6 +373,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#decimal",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -372,6 +408,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_VisitScore",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -381,6 +419,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#integer",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -414,6 +454,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_AggregateScore",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -423,6 +465,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#integer",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -456,6 +500,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_KaplanMeierEventIndicator",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -465,6 +511,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#integer",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -498,6 +546,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_KaplanMeierTimeToEvent",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -509,6 +559,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://w3id.org/semanticarts/ns/ontology/gist/Unit_Year",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -518,6 +570,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#decimal",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -551,6 +605,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://w3id.org/semanticarts/ns/ontology/gist/Aspect_Age",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -562,6 +618,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://w3id.org/semanticarts/ns/ontology/gist/Unit_Year",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -571,6 +629,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#decimal",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -604,6 +664,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtLossOfAmbulation",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -615,6 +677,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                   "https://w3id.org/semanticarts/ns/ontology/gist/Unit_Year",
                 ],
               },
+              min: 0,
+              max: 1,
             },
             {
               type: "TripleConstraint",
@@ -624,6 +688,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#decimal",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },
@@ -653,6 +719,8 @@ export const nemaline_dataSchemaSchema: Schema = {
                 type: "NodeConstraint",
                 datatype: "http://www.w3.org/2001/XMLSchema#string",
               },
+              min: 0,
+              max: 1,
             },
           ],
         },

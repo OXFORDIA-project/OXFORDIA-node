@@ -204,7 +204,7 @@ async function getStatisticAccessRuleFor(
  */
 export function createStatisticQueryHandler(globals: PodServerGlobals) {
   return async (req: Request, res: Response, _next: NextFunction) => {
-    const { route } = req.params;
+    const route = req.params['route'] as string;
     let query: StatisticQuery | undefined;
     let authenticatedAgent: string | undefined;
     let statisticAccessRuleDocumentUri: string | undefined;

@@ -79,7 +79,7 @@ export function QueryTextOutput({
     >
       <Text
         selectable
-        style={StyleSheet.flatten([styles.outputText, textStyle])}
+        style={[styles.outputText, textStyle] as any}
       >
         {value}
       </Text>
