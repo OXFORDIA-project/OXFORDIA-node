@@ -1,11 +1,807 @@
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
-PREFIX ox: <https://paediatrics.ox.ac.uk/terms/>
-PREFIX ag: <https://paediatrics.ox.ac.uk/angelman/terms/>
+PREFIX ox:   <https://paediatrics.ox.ac.uk/terms/>
+PREFIX ag:   <https://paediatrics.ox.ac.uk/angelman/terms/>
 
 start = @ox:PersonShape
 
-ox:PersonShape {
+# ─── Person ───────────────────────────────────────────────────────────────────
+
+ox:PersonShape
+  // rdfs:label "Study Participant"
+  // rdfs:comment "A person enrolled in the Angelman HasHis-FAST UK study (REDCap form: demographics)"
+{
   a [gist:Person] ;
+  gist:isIdentifiedBy @ox:IDShape ?
+    // rdfs:label "Record ID"
+    // rdfs:comment "Unique study record identifier (REDCap: record_id)" ;
+  gist:isCategorizedBy [ag:Gender_Male ag:Gender_Female ag:Gender_Other] ?
+    // rdfs:label "Gender"
+    // rdfs:comment "Sex of the participant (REDCap: d_gender). 1=Male, 2=Female" ;
+  gist:isCategorizedBy [
+    ag:DominantHand_Right
+    ag:DominantHand_Left
+    ag:DominantHand_Mixed
+    ag:DominantHand_Unknown
+  ] ?
+    // rdfs:label "Dominant Side"
+    // rdfs:comment "Dominant hand of participant (REDCap: d_dominant). 1=Left, 2=Right, 3=Ambidextrous, 4=Not determined" ;
+  gist:hasMagnitude @ox:BaselineAgeMagnitude ?
+    // rdfs:label "Age at Screening"
+    // rdfs:comment "Age at date of screening in decimal years (REDCap: es_age, number_1dp)" ;
+  ^gist:hasParticipant @ag:StudyVisitShape *
+    // rdfs:label "Study Visits"
+    // rdfs:comment "Clinical assessment visits attended by this participant" ;
+}
+
+ox:IDShape
+  // rdfs:label "Record ID"
+  // rdfs:comment "Unique alphanumeric study identifier assigned at enrolment (REDCap: record_id)"
+{
+  a [gist:ID] ;
+  gist:uniqueText xsd:string ?
+    // rdfs:label "ID string"
+    // rdfs:comment "The record identifier text value" ;
+}
+
+ox:BaselineAgeMagnitude
+  // rdfs:label "Age at Screening"
+  // rdfs:comment "Age of the participant in decimal years recorded at the screening visit (REDCap: es_age)"
+{
+  a [gist:Magnitude] ;
+  gist:hasAspect [gist:Aspect_Age] ? ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ? ;
+  gist:numericValue xsd:decimal ?
+    // rdfs:label "Age (years, 1 d.p.)" ;
+}
+
+# ─── Study visit ──────────────────────────────────────────────────────────────
+
+ag:StudyVisitShape
+  // rdfs:label "Study Visit"
+  // rdfs:comment "A scheduled clinical assessment visit in the Angelman HasHis-FAST UK study. Date recorded in REDCap field dov (date_dmy). Visit type covers Baseline through Visit 6."
+{
+  a [gist:Determination] ;
+  gist:isCategorizedBy [
+    ag:VisitType_Baseline
+    ag:VisitType_Visit2
+    ag:VisitType_Visit3
+    ag:VisitType_Visit4
+    ag:VisitType_Visit5
+    ag:VisitType_Visit6
+  ] ?
+    // rdfs:label "Visit Type"
+    // rdfs:comment "Which numbered study visit this record represents (Baseline, Visit 2–6)" ;
+  gist:hasParticipant @ox:PersonShape ?
+    // rdfs:label "Participant"
+    // rdfs:comment "The enrolled study participant assessed at this visit" ;
+  gist:hasMagnitude @ag:VisitAgeMagnitude ?
+    // rdfs:label "Age at Visit"
+    // rdfs:comment "Participant age in decimal years at the time of this visit" ;
+  gist:produces @ag:PedsQLFIMYoungResult ?
+    // rdfs:label "PedsQL FIM — Young Child (1-month)"
+    // rdfs:comment "PedsQL Family Impact Module for carers of children under 7, referencing the past 1 month (REDCap form: pedsql_family_impact_module, sections fim_*_q* without _7_ suffix)" ;
+  gist:produces @ag:PedsQLFIM7PlusResult ?
+    // rdfs:label "PedsQL FIM — 7-day reference"
+    // rdfs:comment "PedsQL Family Impact Module referencing the past 7 days (REDCap form: pedsql_family_impact_module, sections fim_*_7_q*)" ;
+  gist:produces @ag:PedsQLAdultResult ?
+    // rdfs:label "PedsQL Adult / Child Quality of Life Inventory"
+    // rdfs:comment "PedsQL age-banded QoL Inventory (parent-reported) covering Physical, Emotional, Social, and School/Work functioning (REDCap form: pedsql_adult_quality_of_life_inventory)" ;
+}
+
+ag:VisitAgeMagnitude
+  // rdfs:label "Age at Visit"
+  // rdfs:comment "Participant age in decimal years at the time of this specific study visit"
+{
+  a [gist:Magnitude] ;
+  gist:hasAspect [ag:Aspect_AgeAtVisit] ? ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ? ;
+  gist:numericValue xsd:decimal ?
+    // rdfs:label "Age (years)" ;
+}
+
+# ─── PedsQL Family Impact Module — Young children (< 7 yrs, past 1 month) ────
+# REDCap form: pedsql_family_impact_module
+# Items scored 0–4: 0=Never, 1=Almost Never, 2=Sometimes, 3=Often, 4=Almost Always
+# Reference period: past ONE month
+
+ag:PedsQLFIMYoungResult
+  // rdfs:label "PedsQL Family Impact Module — Young Child (past 1 month)"
+  // rdfs:comment "PedsQL Family Impact Module completed by the carer, referencing the past 1 month. Covers caregiver Physical Functioning, Emotional Functioning, Social Functioning, Cognitive Functioning, Communication, Worry, Daily Activities, and Family Relationships."
+{
+  a [gist:Content] ;
+  gist:isAbout [ag:Concept_FIM_YoungChild] ?
+    // rdfs:label "Instrument concept"
+    // rdfs:comment "PedsQL FIM instrument for young children, 1-month reference period" ;
+  gist:hasMagnitude @ag:FIMYoung_Functioning_Q1 ?
+    // rdfs:label "Physical Functioning Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Functioning_Q2 ?
+    // rdfs:label "Physical Functioning Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Functioning_Q3 ?
+    // rdfs:label "Physical Functioning Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Functioning_Q4 ?
+    // rdfs:label "Physical Functioning Q4" ;
+  gist:hasMagnitude @ag:FIMYoung_Functioning_Q5 ?
+    // rdfs:label "Physical Functioning Q5" ;
+  gist:hasMagnitude @ag:FIMYoung_Functioning_Q6 ?
+    // rdfs:label "Physical Functioning Q6" ;
+  gist:hasMagnitude @ag:FIMYoung_Emotional_Q1 ?
+    // rdfs:label "Emotional Functioning Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Emotional_Q2 ?
+    // rdfs:label "Emotional Functioning Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Emotional_Q3 ?
+    // rdfs:label "Emotional Functioning Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Emotional_Q4 ?
+    // rdfs:label "Emotional Functioning Q4" ;
+  gist:hasMagnitude @ag:FIMYoung_Emotional_Q5 ?
+    // rdfs:label "Emotional Functioning Q5" ;
+  gist:hasMagnitude @ag:FIMYoung_Social_Q1 ?
+    // rdfs:label "Social Functioning Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Social_Q2 ?
+    // rdfs:label "Social Functioning Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Social_Q3 ?
+    // rdfs:label "Social Functioning Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Social_Q4 ?
+    // rdfs:label "Social Functioning Q4" ;
+  gist:hasMagnitude @ag:FIMYoung_Cognitive_Q1 ?
+    // rdfs:label "Cognitive Functioning Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Cognitive_Q2 ?
+    // rdfs:label "Cognitive Functioning Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Cognitive_Q3 ?
+    // rdfs:label "Cognitive Functioning Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Cognitive_Q4 ?
+    // rdfs:label "Cognitive Functioning Q4" ;
+  gist:hasMagnitude @ag:FIMYoung_Cognitive_Q5 ?
+    // rdfs:label "Cognitive Functioning Q5" ;
+  gist:hasMagnitude @ag:FIMYoung_Communication_Q1 ?
+    // rdfs:label "Communication Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Communication_Q2 ?
+    // rdfs:label "Communication Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Communication_Q3 ?
+    // rdfs:label "Communication Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Worry_Q1 ?
+    // rdfs:label "Worry Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Worry_Q2 ?
+    // rdfs:label "Worry Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Worry_Q3 ?
+    // rdfs:label "Worry Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Worry_Q4 ?
+    // rdfs:label "Worry Q4" ;
+  gist:hasMagnitude @ag:FIMYoung_Worry_Q5 ?
+    // rdfs:label "Worry Q5" ;
+  gist:hasMagnitude @ag:FIMYoung_Activities_Q1 ?
+    // rdfs:label "Daily Activities Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Activities_Q2 ?
+    // rdfs:label "Daily Activities Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Activities_Q3 ?
+    // rdfs:label "Daily Activities Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Relationships_Q1 ?
+    // rdfs:label "Family Relationships Q1" ;
+  gist:hasMagnitude @ag:FIMYoung_Relationships_Q2 ?
+    // rdfs:label "Family Relationships Q2" ;
+  gist:hasMagnitude @ag:FIMYoung_Relationships_Q3 ?
+    // rdfs:label "Family Relationships Q3" ;
+  gist:hasMagnitude @ag:FIMYoung_Relationships_Q4 ?
+    // rdfs:label "Family Relationships Q4" ;
+  gist:hasMagnitude @ag:FIMYoung_Relationships_Q5 ?
+    // rdfs:label "Family Relationships Q5" ;
+}
+
+# Physical Functioning (REDCap: fim_functioning_q1-6)
+ag:FIMYoung_Functioning_Q1
+  // rdfs:label "I feel tired during the day"
+  // rdfs:comment "PedsQL FIM Physical Functioning Q1 (REDCap: fim_functioning_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Functioning_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Functioning_Q2
+  // rdfs:label "I feel tired when I wake up in the morning"
+  // rdfs:comment "PedsQL FIM Physical Functioning Q2 (REDCap: fim_functioning_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Functioning_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Functioning_Q3
+  // rdfs:label "I feel too tired to do the things I like to do"
+  // rdfs:comment "PedsQL FIM Physical Functioning Q3 (REDCap: fim_functioning_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Functioning_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Functioning_Q4
+  // rdfs:label "I get headaches"
+  // rdfs:comment "PedsQL FIM Physical Functioning Q4 (REDCap: fim_functioning_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Functioning_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Functioning_Q5
+  // rdfs:label "I feel physically weak"
+  // rdfs:comment "PedsQL FIM Physical Functioning Q5 (REDCap: fim_functioning_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Functioning_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Functioning_Q6
+  // rdfs:label "I feel sick to my stomach"
+  // rdfs:comment "PedsQL FIM Physical Functioning Q6 (REDCap: fim_functioning_q6). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Functioning_Q6] ? ; gist:numericValue xsd:integer ? ; }
+
+# Emotional Functioning (REDCap: fim_meotional_q1-5)
+ag:FIMYoung_Emotional_Q1
+  // rdfs:label "I feel anxious"
+  // rdfs:comment "PedsQL FIM Emotional Functioning Q1 (REDCap: fim_meotional_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Emotional_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Emotional_Q2
+  // rdfs:label "I feel sad"
+  // rdfs:comment "PedsQL FIM Emotional Functioning Q2 (REDCap: fim_meotional_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Emotional_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Emotional_Q3
+  // rdfs:label "I feel angry"
+  // rdfs:comment "PedsQL FIM Emotional Functioning Q3 (REDCap: fim_meotional_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Emotional_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Emotional_Q4
+  // rdfs:label "I feel frustrated"
+  // rdfs:comment "PedsQL FIM Emotional Functioning Q4 (REDCap: fim_meotional_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Emotional_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Emotional_Q5
+  // rdfs:label "I feel helpless or hopeless"
+  // rdfs:comment "PedsQL FIM Emotional Functioning Q5 (REDCap: fim_meotional_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Emotional_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# Social Functioning (REDCap: fim_social_q1-4)
+ag:FIMYoung_Social_Q1
+  // rdfs:label "I feel isolated from others"
+  // rdfs:comment "PedsQL FIM Social Functioning Q1 (REDCap: fim_social_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Social_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Social_Q2
+  // rdfs:label "I have trouble getting support from others"
+  // rdfs:comment "PedsQL FIM Social Functioning Q2 (REDCap: fim_social_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Social_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Social_Q3
+  // rdfs:label "It is hard to find time for social activities"
+  // rdfs:comment "PedsQL FIM Social Functioning Q3 (REDCap: fim_social_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Social_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Social_Q4
+  // rdfs:label "I do not have enough energy for social activities"
+  // rdfs:comment "PedsQL FIM Social Functioning Q4 (REDCap: fim_social_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Social_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+# Cognitive Functioning (REDCap: fim_cognitive_q1-5)
+ag:FIMYoung_Cognitive_Q1
+  // rdfs:label "It is hard for me to keep my attention on things"
+  // rdfs:comment "PedsQL FIM Cognitive Functioning Q1 (REDCap: fim_cognitive_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Cognitive_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Cognitive_Q2
+  // rdfs:label "It is hard for me to remember what people tell me"
+  // rdfs:comment "PedsQL FIM Cognitive Functioning Q2 (REDCap: fim_cognitive_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Cognitive_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Cognitive_Q3
+  // rdfs:label "It is hard for me to remember what I just heard"
+  // rdfs:comment "PedsQL FIM Cognitive Functioning Q3 (REDCap: fim_cognitive_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Cognitive_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Cognitive_Q4
+  // rdfs:label "It is hard for me to think quickly"
+  // rdfs:comment "PedsQL FIM Cognitive Functioning Q4 (REDCap: fim_cognitive_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Cognitive_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Cognitive_Q5
+  // rdfs:label "I have trouble remembering what I was just thinking"
+  // rdfs:comment "PedsQL FIM Cognitive Functioning Q5 (REDCap: fim_cognitive_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Cognitive_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# Communication (REDCap: fim_communication_q1-3)
+ag:FIMYoung_Communication_Q1
+  // rdfs:label "I feel that others do not understand my family's situation"
+  // rdfs:comment "PedsQL FIM Communication Q1 (REDCap: fim_communication_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Communication_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Communication_Q2
+  // rdfs:label "It is hard for me to talk about my child's health with others"
+  // rdfs:comment "PedsQL FIM Communication Q2 (REDCap: fim_communication_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Communication_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Communication_Q3
+  // rdfs:label "It is hard for me to tell doctors and nurses how I feel"
+  // rdfs:comment "PedsQL FIM Communication Q3 (REDCap: fim_communication_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Communication_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+# Worry (REDCap: fim_worry_q1-5)
+ag:FIMYoung_Worry_Q1
+  // rdfs:label "I worry about whether or not my child's medical treatments are working"
+  // rdfs:comment "PedsQL FIM Worry Q1 (REDCap: fim_worry_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Worry_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Worry_Q2
+  // rdfs:label "I worry about the side effects of my child's medications/medical treatments"
+  // rdfs:comment "PedsQL FIM Worry Q2 (REDCap: fim_worry_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Worry_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Worry_Q3
+  // rdfs:label "I worry about how others will react to my child's condition"
+  // rdfs:comment "PedsQL FIM Worry Q3 (REDCap: fim_worry_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Worry_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Worry_Q4
+  // rdfs:label "I worry about how my child's illness is affecting other family members"
+  // rdfs:comment "PedsQL FIM Worry Q4 (REDCap: fim_worry_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Worry_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Worry_Q5
+  // rdfs:label "I worry about my child's future"
+  // rdfs:comment "PedsQL FIM Worry Q5 (REDCap: fim_worry_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Worry_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# Daily Activities (REDCap: fim_activities_q1-3)
+ag:FIMYoung_Activities_Q1
+  // rdfs:label "Family activities taking more time and effort"
+  // rdfs:comment "PedsQL FIM Daily Activities Q1 (REDCap: fim_activities_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Activities_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Activities_Q2
+  // rdfs:label "Difficulty finding time to finish household tasks"
+  // rdfs:comment "PedsQL FIM Daily Activities Q2 (REDCap: fim_activities_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Activities_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Activities_Q3
+  // rdfs:label "Feeling too tired to finish household tasks"
+  // rdfs:comment "PedsQL FIM Daily Activities Q3 (REDCap: fim_activities_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Activities_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+# Family Relationships (REDCap: fim_relationship_q1-5)
+ag:FIMYoung_Relationships_Q1
+  // rdfs:label "Lack of communication between family members"
+  // rdfs:comment "PedsQL FIM Family Relationships Q1 (REDCap: fim_relationship_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Relationships_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Relationships_Q2
+  // rdfs:label "Conflicts between family members"
+  // rdfs:comment "PedsQL FIM Family Relationships Q2 (REDCap: fim_relationship_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Relationships_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Relationships_Q3
+  // rdfs:label "Difficulty making decisions together as a family"
+  // rdfs:comment "PedsQL FIM Family Relationships Q3 (REDCap: fim_relationship_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Relationships_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Relationships_Q4
+  // rdfs:label "Difficulty solving family problems together"
+  // rdfs:comment "PedsQL FIM Family Relationships Q4 (REDCap: fim_relationship_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Relationships_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIMYoung_Relationships_Q5
+  // rdfs:label "Stress or tension between family members"
+  // rdfs:comment "PedsQL FIM Family Relationships Q5 (REDCap: fim_relationship_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM_Relationships_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# ─── PedsQL Family Impact Module — 7-day reference ───────────────────────────
+# REDCap form: pedsql_family_impact_module
+# Items scored 0–4: 0=Never, 1=Almost Never, 2=Sometimes, 3=Often, 4=Almost Always
+# Reference period: past 7 DAYS
+# Note: communication items continue at Q6-8 and family relationship items at Q4-8
+# per PedsQL instrument numbering (they do not restart at Q1)
+
+ag:PedsQLFIM7PlusResult
+  // rdfs:label "PedsQL Family Impact Module — 7-day reference"
+  // rdfs:comment "PedsQL Family Impact Module completed by the carer, referencing the past 7 days. Covers caregiver Physical Functioning, Emotional Functioning, Social Functioning, Cognitive Functioning, Communication, Worry, Daily Activities, and Family Relationships."
+{
+  a [gist:Content] ;
+  gist:isAbout [ag:Concept_FIM_7Plus] ?
+    // rdfs:label "Instrument concept"
+    // rdfs:comment "PedsQL FIM instrument with 7-day reference period" ;
+  gist:hasMagnitude @ag:FIM7_Physical_Q1 ?   // rdfs:label "Physical Functioning Q1" ;
+  gist:hasMagnitude @ag:FIM7_Physical_Q2 ?   // rdfs:label "Physical Functioning Q2" ;
+  gist:hasMagnitude @ag:FIM7_Physical_Q3 ?   // rdfs:label "Physical Functioning Q3" ;
+  gist:hasMagnitude @ag:FIM7_Physical_Q4 ?   // rdfs:label "Physical Functioning Q4" ;
+  gist:hasMagnitude @ag:FIM7_Physical_Q5 ?   // rdfs:label "Physical Functioning Q5" ;
+  gist:hasMagnitude @ag:FIM7_Physical_Q6 ?   // rdfs:label "Physical Functioning Q6" ;
+  gist:hasMagnitude @ag:FIM7_Emotional_Q1 ?  // rdfs:label "Emotional Functioning Q1" ;
+  gist:hasMagnitude @ag:FIM7_Emotional_Q2 ?  // rdfs:label "Emotional Functioning Q2" ;
+  gist:hasMagnitude @ag:FIM7_Emotional_Q3 ?  // rdfs:label "Emotional Functioning Q3" ;
+  gist:hasMagnitude @ag:FIM7_Emotional_Q4 ?  // rdfs:label "Emotional Functioning Q4" ;
+  gist:hasMagnitude @ag:FIM7_Emotional_Q5 ?  // rdfs:label "Emotional Functioning Q5" ;
+  gist:hasMagnitude @ag:FIM7_Social_Q1 ?     // rdfs:label "Social Functioning Q1" ;
+  gist:hasMagnitude @ag:FIM7_Social_Q2 ?     // rdfs:label "Social Functioning Q2" ;
+  gist:hasMagnitude @ag:FIM7_Social_Q3 ?     // rdfs:label "Social Functioning Q3" ;
+  gist:hasMagnitude @ag:FIM7_Social_Q4 ?     // rdfs:label "Social Functioning Q4" ;
+  gist:hasMagnitude @ag:FIM7_Cognitive_Q1 ?  // rdfs:label "Cognitive Functioning Q1" ;
+  gist:hasMagnitude @ag:FIM7_Cognitive_Q2 ?  // rdfs:label "Cognitive Functioning Q2" ;
+  gist:hasMagnitude @ag:FIM7_Cognitive_Q3 ?  // rdfs:label "Cognitive Functioning Q3" ;
+  gist:hasMagnitude @ag:FIM7_Cognitive_Q4 ?  // rdfs:label "Cognitive Functioning Q4" ;
+  gist:hasMagnitude @ag:FIM7_Cognitive_Q5 ?  // rdfs:label "Cognitive Functioning Q5" ;
+  gist:hasMagnitude @ag:FIM7_Communication_Q6 ? // rdfs:label "Communication Q6" ;
+  gist:hasMagnitude @ag:FIM7_Communication_Q7 ? // rdfs:label "Communication Q7" ;
+  gist:hasMagnitude @ag:FIM7_Communication_Q8 ? // rdfs:label "Communication Q8" ;
+  gist:hasMagnitude @ag:FIM7_Worry_Q1 ?      // rdfs:label "Worry Q1" ;
+  gist:hasMagnitude @ag:FIM7_Worry_Q2 ?      // rdfs:label "Worry Q2" ;
+  gist:hasMagnitude @ag:FIM7_Worry_Q3 ?      // rdfs:label "Worry Q3" ;
+  gist:hasMagnitude @ag:FIM7_Worry_Q4 ?      // rdfs:label "Worry Q4" ;
+  gist:hasMagnitude @ag:FIM7_Worry_Q5 ?      // rdfs:label "Worry Q5" ;
+  gist:hasMagnitude @ag:FIM7_DailyActivities_Q1 ?       // rdfs:label "Daily Activities Q1" ;
+  gist:hasMagnitude @ag:FIM7_DailyActivities_Q2 ?       // rdfs:label "Daily Activities Q2" ;
+  gist:hasMagnitude @ag:FIM7_DailyActivities_Q3 ?       // rdfs:label "Daily Activities Q3" ;
+  gist:hasMagnitude @ag:FIM7_FamilyRelationships_Q4 ?   // rdfs:label "Family Relationships Q4" ;
+  gist:hasMagnitude @ag:FIM7_FamilyRelationships_Q5 ?   // rdfs:label "Family Relationships Q5" ;
+  gist:hasMagnitude @ag:FIM7_FamilyRelationships_Q6 ?   // rdfs:label "Family Relationships Q6" ;
+  gist:hasMagnitude @ag:FIM7_FamilyRelationships_Q7 ?   // rdfs:label "Family Relationships Q7" ;
+  gist:hasMagnitude @ag:FIM7_FamilyRelationships_Q8 ?   // rdfs:label "Family Relationships Q8" ;
+}
+
+# Physical Functioning 7-day (REDCap: fim_physical_7_q1-6)
+ag:FIM7_Physical_Q1
+  // rdfs:label "I feel tired during the day"
+  // rdfs:comment "PedsQL FIM 7-day Physical Functioning Q1 (REDCap: fim_physical_7_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Physical_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Physical_Q2
+  // rdfs:label "I feel tired when I wake up in the morning"
+  // rdfs:comment "PedsQL FIM 7-day Physical Functioning Q2 (REDCap: fim_physical_7_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Physical_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Physical_Q3
+  // rdfs:label "I feel too tired to do the things I like to do"
+  // rdfs:comment "PedsQL FIM 7-day Physical Functioning Q3 (REDCap: fim_physical_7_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Physical_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Physical_Q4
+  // rdfs:label "I get headaches"
+  // rdfs:comment "PedsQL FIM 7-day Physical Functioning Q4 (REDCap: fim_physical_7_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Physical_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Physical_Q5
+  // rdfs:label "I feel physically weak"
+  // rdfs:comment "PedsQL FIM 7-day Physical Functioning Q5 (REDCap: fim_physical_7_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Physical_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Physical_Q6
+  // rdfs:label "I feel sick to my stomach"
+  // rdfs:comment "PedsQL FIM 7-day Physical Functioning Q6 (REDCap: fim_physical_7_q6). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Physical_Q6] ? ; gist:numericValue xsd:integer ? ; }
+
+# Emotional Functioning 7-day (REDCap: fim_emotional_7_q1-5)
+ag:FIM7_Emotional_Q1
+  // rdfs:label "I feel anxious"
+  // rdfs:comment "PedsQL FIM 7-day Emotional Functioning Q1 (REDCap: fim_emotional_7_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Emotional_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Emotional_Q2
+  // rdfs:label "I feel sad"
+  // rdfs:comment "PedsQL FIM 7-day Emotional Functioning Q2 (REDCap: fim_emotional_7_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Emotional_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Emotional_Q3
+  // rdfs:label "I feel angry"
+  // rdfs:comment "PedsQL FIM 7-day Emotional Functioning Q3 (REDCap: fim_emotional_7_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Emotional_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Emotional_Q4
+  // rdfs:label "I feel frustrated"
+  // rdfs:comment "PedsQL FIM 7-day Emotional Functioning Q4 (REDCap: fim_emotional_7_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Emotional_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Emotional_Q5
+  // rdfs:label "I feel helpless or hopeless"
+  // rdfs:comment "PedsQL FIM 7-day Emotional Functioning Q5 (REDCap: fim_emotional_7_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Emotional_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# Social Functioning 7-day (REDCap: fim_social_7_q1-4)
+ag:FIM7_Social_Q1
+  // rdfs:label "I feel isolated from others"
+  // rdfs:comment "PedsQL FIM 7-day Social Functioning Q1 (REDCap: fim_social_7_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Social_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Social_Q2
+  // rdfs:label "I have trouble getting support from others"
+  // rdfs:comment "PedsQL FIM 7-day Social Functioning Q2 (REDCap: fim_social_7_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Social_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Social_Q3
+  // rdfs:label "It is hard to find time for social activities"
+  // rdfs:comment "PedsQL FIM 7-day Social Functioning Q3 (REDCap: fim_social_7_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Social_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Social_Q4
+  // rdfs:label "I do not have enough energy for social activities"
+  // rdfs:comment "PedsQL FIM 7-day Social Functioning Q4 (REDCap: fim_social_7_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Social_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+# Cognitive Functioning 7-day (REDCap: fim_cognitive_7_q1-5)
+ag:FIM7_Cognitive_Q1
+  // rdfs:label "It is hard for me to keep my attention on things"
+  // rdfs:comment "PedsQL FIM 7-day Cognitive Functioning Q1 (REDCap: fim_cognitive_7_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Cognitive_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Cognitive_Q2
+  // rdfs:label "It is hard for me to remember what people tell me"
+  // rdfs:comment "PedsQL FIM 7-day Cognitive Functioning Q2 (REDCap: fim_cognitive_7_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Cognitive_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Cognitive_Q3
+  // rdfs:label "It is hard for me to remember what I just heard"
+  // rdfs:comment "PedsQL FIM 7-day Cognitive Functioning Q3 (REDCap: fim_cognitive_7_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Cognitive_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Cognitive_Q4
+  // rdfs:label "It is hard for me to think quickly"
+  // rdfs:comment "PedsQL FIM 7-day Cognitive Functioning Q4 (REDCap: fim_cognitive_7_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Cognitive_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Cognitive_Q5
+  // rdfs:label "I have trouble remembering what I was just thinking"
+  // rdfs:comment "PedsQL FIM 7-day Cognitive Functioning Q5 (REDCap: fim_cognitive_7_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Cognitive_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# Communication 7-day (REDCap: fim_communication_7_q6-8; numbering continues from instrument scale)
+ag:FIM7_Communication_Q6
+  // rdfs:label "I feel that others do not understand my family's situation"
+  // rdfs:comment "PedsQL FIM 7-day Communication Q6 (REDCap: fim_communication_7_q6). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Communication_Q6] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Communication_Q7
+  // rdfs:label "It is hard for me to talk about my child's health with others"
+  // rdfs:comment "PedsQL FIM 7-day Communication Q7 (REDCap: fim_communication_7_q7). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Communication_Q7] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Communication_Q8
+  // rdfs:label "It is hard for me to tell doctors and nurses how I feel"
+  // rdfs:comment "PedsQL FIM 7-day Communication Q8 (REDCap: fim_communication_7_q8). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Communication_Q8] ? ; gist:numericValue xsd:integer ? ; }
+
+# Worry 7-day (REDCap: fim_worry_7_q1-5)
+ag:FIM7_Worry_Q1
+  // rdfs:label "I worry about whether or not my child's medical treatments are working"
+  // rdfs:comment "PedsQL FIM 7-day Worry Q1 (REDCap: fim_worry_7_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Worry_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Worry_Q2
+  // rdfs:label "I worry about the side effects of my child's medications/medical treatments"
+  // rdfs:comment "PedsQL FIM 7-day Worry Q2 (REDCap: fim_worry_7_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Worry_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Worry_Q3
+  // rdfs:label "I worry about how others will react to my child's condition"
+  // rdfs:comment "PedsQL FIM 7-day Worry Q3 (REDCap: fim_worry_7_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Worry_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Worry_Q4
+  // rdfs:label "I worry about how my child's illness is affecting other family members"
+  // rdfs:comment "PedsQL FIM 7-day Worry Q4 (REDCap: fim_worry_7_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Worry_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_Worry_Q5
+  // rdfs:label "I worry about my child's future"
+  // rdfs:comment "PedsQL FIM 7-day Worry Q5 (REDCap: fim_worry_7_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_Worry_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+# Daily Activities 7-day (REDCap: fim_daily_activ_7_q1-3)
+ag:FIM7_DailyActivities_Q1
+  // rdfs:label "Family activities taking more time and effort"
+  // rdfs:comment "PedsQL FIM 7-day Daily Activities Q1 (REDCap: fim_daily_activ_7_q1). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_DailyActivities_Q1] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_DailyActivities_Q2
+  // rdfs:label "Difficulty finding time to finish household tasks"
+  // rdfs:comment "PedsQL FIM 7-day Daily Activities Q2 (REDCap: fim_daily_activ_7_q2). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_DailyActivities_Q2] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_DailyActivities_Q3
+  // rdfs:label "Feeling too tired to finish household tasks"
+  // rdfs:comment "PedsQL FIM 7-day Daily Activities Q3 (REDCap: fim_daily_activ_7_q3). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_DailyActivities_Q3] ? ; gist:numericValue xsd:integer ? ; }
+
+# Family Relationships 7-day (REDCap: fim_f_relationship_7_q4-8; numbering continues from instrument)
+ag:FIM7_FamilyRelationships_Q4
+  // rdfs:label "Lack of communication between family members"
+  // rdfs:comment "PedsQL FIM 7-day Family Relationships Q4 (REDCap: fim_f_relationship_7_q4). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_FamilyRelationships_Q4] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_FamilyRelationships_Q5
+  // rdfs:label "Conflicts between family members"
+  // rdfs:comment "PedsQL FIM 7-day Family Relationships Q5 (REDCap: fim_f_relationship_7_q5). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_FamilyRelationships_Q5] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_FamilyRelationships_Q6
+  // rdfs:label "Difficulty making decisions together as a family"
+  // rdfs:comment "PedsQL FIM 7-day Family Relationships Q6 (REDCap: fim_f_relationship_7_q6). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_FamilyRelationships_Q6] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_FamilyRelationships_Q7
+  // rdfs:label "Difficulty solving family problems together"
+  // rdfs:comment "PedsQL FIM 7-day Family Relationships Q7 (REDCap: fim_f_relationship_7_q7). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_FamilyRelationships_Q7] ? ; gist:numericValue xsd:integer ? ; }
+
+ag:FIM7_FamilyRelationships_Q8
+  // rdfs:label "Stress or tension between family members"
+  // rdfs:comment "PedsQL FIM 7-day Family Relationships Q8 (REDCap: fim_f_relationship_7_q8). Scored 0–4."
+{ a [gist:Magnitude] ; gist:hasAspect [ag:Aspect_FIM7_FamilyRelationships_Q8] ? ; gist:numericValue xsd:integer ? ; }
+
+# ─── PedsQL Adult Quality of Life Inventory ──────────────────────────────────
+# REDCap form: pedsql_adult_quality_of_life_inventory
+# Age band selected via age_calculate checkbox (multi-select):
+#   2  → Parent Report for Adults          (columns adult_107–129)
+#   4  → Parent Report for Young Adults 18–25 (columns adult_137–159)
+#   6  → Parent Report for Teens 13–18    (columns adult_166–188)
+#   8  → Parent Report for Children 8–12  (columns adult_193–215)
+#   10 → Parent Report for Young Children 5–7 (columns adult_340–363)
+#   11 → Parent Report for Toddlers 2–4   (columns adult_77–97)
+# Each band covers Physical, Emotional, Social, and School/Work subscales.
+# Items scored 0–4: 0=Never to 4=Almost Always.
+# The REDCap column number is used as the aspect identifier for each item.
+
+ag:PedsQLAdultResult
+  // rdfs:label "PedsQL Quality of Life Inventory (parent-reported, age-banded)"
+  // rdfs:comment "PedsQL age-banded Quality of Life Inventory, parent-reported, covering Physical Functioning, Emotional Functioning, Social Functioning, and School/Work Functioning. Age band is selected by the age_calculate checkbox field."
+{
+  a [gist:Content] ;
+  gist:isAbout [ag:Concept_AdultQoL] ?
+    // rdfs:label "Instrument concept"
+    // rdfs:comment "PedsQL QoL instrument, age-banded parent-reported form" ;
+  gist:isCategorizedBy [
+    ag:AgeBand_2to4
+    ag:AgeBand_5to7
+    ag:AgeBand_8to12
+    ag:AgeBand_13to17
+    ag:AgeBand_18to25
+    ag:AgeBand_26Plus
+  ] ?
+    // rdfs:label "Age Band"
+    // rdfs:comment "PedsQL age band determining which item set applies (REDCap: age_calculate). 2=Toddlers 2-4, 11=Young Children 5-7, 10=Children 8-12, 8=Teens 13-18, 4=Young Adults 18-25, 2=Adults 26+" ;
+  gist:hasMagnitude @ag:AdultItemMagnitude *
+    // rdfs:label "QoL Item Response"
+    // rdfs:comment "A single item response from the age-appropriate PedsQL subscale. The aspect IRI encodes the REDCap column number (e.g. ag:Aspect_Adult_Q107). Items scored 0–4." ;
+}
+
+ag:AdultItemMagnitude
+  // rdfs:label "PedsQL QoL Item Response"
+  // rdfs:comment "One item response within the PedsQL age-banded QoL inventory. The gist:hasAspect value identifies the specific item via its REDCap column number. Physical items: walking, running, sport, lifting, bathing/chores, aches, fatigue. Emotional items: fear, sadness, anger, sleep, worry. Social items: peer relationships, teasing, keeping up. School/Work items: attention, forgetting, keeping up, absences."
+{
+  a [gist:Magnitude] ;
+  gist:hasAspect [
+    # ── Adults (age_calculate___2, REDCap: adult_107–129) ──────────────────
+    ag:Aspect_Adult_Q107  # Walking more than 100m (Physical)
+    ag:Aspect_Adult_Q108  # Running (Physical)
+    ag:Aspect_Adult_Q109  # Participating in sports activity or exercise (Physical)
+    ag:Aspect_Adult_Q110  # Lifting something heavy (Physical)
+    ag:Aspect_Adult_Q111  # Doing chores around the house (Physical)
+    ag:Aspect_Adult_Q112  # Feel afraid or scared (Emotional)
+    ag:Aspect_Adult_Q113  # Feel sad (Emotional)
+    ag:Aspect_Adult_Q114  # Feel angry (Emotional)
+    ag:Aspect_Adult_Q115  # Worrying about what will happen to him or her (Emotional)
+    ag:Aspect_Adult_Q116  # Getting along with other adults (Social)
+    ag:Aspect_Adult_Q117  # Other adults not wanting to be his or her friend (Social)
+    ag:Aspect_Adult_Q118  # Getting teased by other adults (Social)
+    ag:Aspect_Adult_Q119  # Hard to pay attention at work or school (Work/Studies)
+    ag:Aspect_Adult_Q120  # Forgetting things (Work/Studies)
+    ag:Aspect_Adult_Q121  # Taking a bath or shower by him or herself (Physical)
+    ag:Aspect_Adult_Q122  # Having aches or pains (Physical)
+    ag:Aspect_Adult_Q123  # Feeling tired (Physical)
+    ag:Aspect_Adult_Q124  # Trouble sleeping (Emotional)
+    ag:Aspect_Adult_Q125  # Not able to do things that others his or her age can do (Social)
+    ag:Aspect_Adult_Q126  # Keeping up with other adults (Social)
+    ag:Aspect_Adult_Q127  # Keeping up with work or studies (Work/Studies)
+    ag:Aspect_Adult_Q128  # Missing work/college because of not feeling well (Work/Studies)
+    ag:Aspect_Adult_Q129  # Missing work/college to go to the doctor or hospital (Work/Studies)
+    # ── Young Adults 18–25 (age_calculate___4, REDCap: adult_137–159) ──────
+    ag:Aspect_Adult_Q137  # Walking more than 100m (Physical)
+    ag:Aspect_Adult_Q138  # Running (Physical)
+    ag:Aspect_Adult_Q139  # Participating in sports activity or exercise (Physical)
+    ag:Aspect_Adult_Q140  # Lifting something heavy (Physical)
+    ag:Aspect_Adult_Q141  # Doing chores around the house (Physical)
+    ag:Aspect_Adult_Q142  # Feel afraid or scared (Emotional)
+    ag:Aspect_Adult_Q143  # Feel sad or blue (Emotional)
+    ag:Aspect_Adult_Q144  # Feel angry (Emotional)
+    ag:Aspect_Adult_Q145  # Worrying about what will happen to him or her (Emotional)
+    ag:Aspect_Adult_Q146  # Getting along with other young adults (Social)
+    ag:Aspect_Adult_Q147  # Other young adults not wanting to be his or her friend (Social)
+    ag:Aspect_Adult_Q148  # Getting teased by other young adults (Social)
+    ag:Aspect_Adult_Q149  # Paying attention at work or school (Work/Studies)
+    ag:Aspect_Adult_Q150  # Forgetting things (Work/Studies)
+    ag:Aspect_Adult_Q151  # Keeping up with work or studies (Work/Studies)
+    ag:Aspect_Adult_Q152  # Taking a bath or shower by him or herself (Physical)
+    ag:Aspect_Adult_Q153  # Having aches or pains (Physical)
+    ag:Aspect_Adult_Q154  # Feeling tired (Physical)
+    ag:Aspect_Adult_Q155  # Missing work/college because of not feeling well (Work/Studies)
+    ag:Aspect_Adult_Q156  # Missing work/college to go to the doctor or hospital (Work/Studies)
+    ag:Aspect_Adult_Q157  # Trouble sleeping (Emotional)
+    ag:Aspect_Adult_Q158  # Not able to do things that others his or her age can do (Social)
+    ag:Aspect_Adult_Q159  # Keeping up with other adults (Social)
+    # ── Teens 13–18 (age_calculate___6, REDCap: adult_166–188) ─────────────
+    ag:Aspect_Adult_Q166  # Walking more than 100m (Physical)
+    ag:Aspect_Adult_Q167  # Running (Physical)
+    ag:Aspect_Adult_Q168  # Participating in sports activity or exercise (Physical)
+    ag:Aspect_Adult_Q169  # Lifting something heavy (Physical)
+    ag:Aspect_Adult_Q170  # Having aches or pains (Physical)
+    ag:Aspect_Adult_Q171  # Feel afraid or scared (Emotional)
+    ag:Aspect_Adult_Q172  # Feel sad or blue (Emotional)
+    ag:Aspect_Adult_Q173  # Feel angry (Emotional)
+    ag:Aspect_Adult_Q174  # Worry about what will happen to him or her (Emotional)
+    ag:Aspect_Adult_Q175  # Getting along with other teens (Social)
+    ag:Aspect_Adult_Q176  # Other teens not wanting to be his or her friend (Social)
+    ag:Aspect_Adult_Q177  # Getting teased by other teens (Social)
+    ag:Aspect_Adult_Q178  # Paying attention in class (School)
+    ag:Aspect_Adult_Q179  # Forgetting things (School)
+    ag:Aspect_Adult_Q180  # Keeping up with schoolwork (School)
+    ag:Aspect_Adult_Q181  # Taking a bath or shower by him or herself (Physical)
+    ag:Aspect_Adult_Q182  # Doing chores around the house (Physical)
+    ag:Aspect_Adult_Q183  # Feeling tired (Physical)
+    ag:Aspect_Adult_Q184  # Trouble sleeping (Emotional)
+    ag:Aspect_Adult_Q185  # Not able to do things that others his or her age can do (Social)
+    ag:Aspect_Adult_Q186  # Keeping up with other teenagers (Social)
+    ag:Aspect_Adult_Q187  # Missing school to go to the doctor or hospital (School)
+    ag:Aspect_Adult_Q188  # Missing school because of not feeling well (School)
+    # ── Children 8–12 (age_calculate___8, REDCap: adult_193–215) ───────────
+    ag:Aspect_Adult_Q193  # Walking more than 100m (Physical)
+    ag:Aspect_Adult_Q194  # Running (Physical)
+    ag:Aspect_Adult_Q195  # Participating in sports activity or exercise (Physical)
+    ag:Aspect_Adult_Q196  # Lifting something heavy (Physical)
+    ag:Aspect_Adult_Q197  # Doing chores around the house (Physical)
+    ag:Aspect_Adult_Q198  # Feel afraid or scared (Emotional)
+    ag:Aspect_Adult_Q199  # Feel sad or blue (Emotional)
+    ag:Aspect_Adult_Q200  # Feel angry (Emotional)
+    ag:Aspect_Adult_Q201  # Worry about what will happen to him or her (Emotional)
+    ag:Aspect_Adult_Q202  # Getting along with other children (Social)
+    ag:Aspect_Adult_Q203  # Other kids not wanting to be his or her friend (Social)
+    ag:Aspect_Adult_Q204  # Getting teased by other children (Social)
+    ag:Aspect_Adult_Q205  # Paying attention in class (School)
+    ag:Aspect_Adult_Q206  # Forgetting things (School)
+    ag:Aspect_Adult_Q207  # Keeping up with schoolwork (School)
+    ag:Aspect_Adult_Q208  # Taking a bath or shower by him or herself (Physical)
+    ag:Aspect_Adult_Q209  # Feeling tired (Physical)
+    ag:Aspect_Adult_Q210  # Having aches or pains (Physical)
+    ag:Aspect_Adult_Q211  # Trouble sleeping (Emotional)
+    ag:Aspect_Adult_Q212  # Not able to do things that others his or her age can do (Social)
+    ag:Aspect_Adult_Q213  # Keeping up with other children (Social)
+    ag:Aspect_Adult_Q214  # Missing school to go to the doctor or hospital (School)
+    ag:Aspect_Adult_Q215  # Missing school because of not feeling well (School)
+    # ── Young Children 5–7 (age_calculate___10, REDCap: adult_340–363) ─────
+    ag:Aspect_Adult_Q340  # Walking more than 100m (Physical)
+    ag:Aspect_Adult_Q342  # Running (Physical)
+    ag:Aspect_Adult_Q343  # Participating in sports activity or exercise (Physical)
+    ag:Aspect_Adult_Q344  # Lifting something heavy (Physical)
+    ag:Aspect_Adult_Q345  # Having aches or pains (Physical)
+    ag:Aspect_Adult_Q346  # Feeling afraid or scared (Emotional)
+    ag:Aspect_Adult_Q347  # Feeling sad or blue (Emotional)
+    ag:Aspect_Adult_Q348  # Feeling angry (Emotional)
+    ag:Aspect_Adult_Q349  # Worrying about what will happen to him or her (Emotional)
+    ag:Aspect_Adult_Q350  # Getting teased by other children (Social)
+    ag:Aspect_Adult_Q351  # Getting along with other children (Social)
+    ag:Aspect_Adult_Q352  # Other kids not wanting to be his or her friend (Social)
+    ag:Aspect_Adult_Q353  # Paying attention in class (School)
+    ag:Aspect_Adult_Q354  # Forgetting things (School)
+    ag:Aspect_Adult_Q355  # Keeping up with school activities (School)
+    ag:Aspect_Adult_Q356  # Taking a bath or shower by him or herself (Physical)
+    ag:Aspect_Adult_Q357  # Doing chores, like picking up his or her toys (Physical)
+    ag:Aspect_Adult_Q358  # Feeling tired (Physical)
+    ag:Aspect_Adult_Q359  # Keeping up when playing with other children (Social)
+    ag:Aspect_Adult_Q360  # Not able to do things that others his or her age can do (Social)
+    ag:Aspect_Adult_Q361  # Missing school to go to the doctor or hospital (School)
+    ag:Aspect_Adult_Q362  # Missing school because of not feeling well (School)
+    ag:Aspect_Adult_Q363  # Trouble sleeping (Emotional)
+    # ── Toddlers 2–4 (age_calculate___11, REDCap: adult_77–97) ─────────────
+    ag:Aspect_Adult_Q77   # Walking (Physical)
+    ag:Aspect_Adult_Q78   # Running (Physical)
+    ag:Aspect_Adult_Q79   # Participating in sports activity or exercise (Physical)
+    ag:Aspect_Adult_Q80   # Lifting something heavy (Physical)
+    ag:Aspect_Adult_Q81   # Helping to pick up his or her toys (Physical)
+    ag:Aspect_Adult_Q82   # Feeling afraid or scared (Emotional)
+    ag:Aspect_Adult_Q83   # Feel sad (Emotional)
+    ag:Aspect_Adult_Q84   # Feel angry (Emotional)
+    ag:Aspect_Adult_Q85   # Worrying (Emotional)
+    ag:Aspect_Adult_Q86   # Playing with other children (Social)
+    ag:Aspect_Adult_Q87   # Other kids not wanting to play with him or her (Social)
+    ag:Aspect_Adult_Q88   # Getting teased by other children (Social)
+    ag:Aspect_Adult_Q89   # Doing the same school activities as peers (School)
+    ag:Aspect_Adult_Q90   # Missing school/daycare because of not feeling well (School)
+    ag:Aspect_Adult_Q91   # Missing school/daycare to go to the doctor or hospital (School)
+    ag:Aspect_Adult_Q92   # Bathing (Physical)
+    ag:Aspect_Adult_Q93   # Feeling tired (Physical)
+    ag:Aspect_Adult_Q94   # Having aches and pain (Physical)
+    ag:Aspect_Adult_Q95   # Having trouble sleeping (Emotional)
+    ag:Aspect_Adult_Q96   # Keeping up with other children (Social)
+    ag:Aspect_Adult_Q97   # Not able to do things that others his or her age can do (Social)
+  ] ? ;
+  gist:numericValue xsd:integer ? ;
 }
