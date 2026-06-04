@@ -1,0 +1,11 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX ox: <https://paediatrics.ox.ac.uk/terms/>
+PREFIX ag: <https://paediatrics.ox.ac.uk/angelman/terms/>
+
+start = @ox:PersonShape
+
+ox:PersonShape {
+  a [gist:Person] ;
+}
