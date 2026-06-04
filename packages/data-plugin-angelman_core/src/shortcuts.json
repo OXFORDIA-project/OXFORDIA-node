@@ -1,1 +1,1011 @@
-{}
+{
+  "PersonId": {
+    "name": "PersonId",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isIdentifiedBy" } },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/uniqueText" } }
+    ]
+  },
+  "Gender": {
+    "name": "Gender",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
+    ],
+    "target": {
+      "node": {
+        "iri": [
+          "https://paediatrics.ox.ac.uk/angelman/terms/Gender_Male",
+          "https://paediatrics.ox.ac.uk/angelman/terms/Gender_Female",
+          "https://paediatrics.ox.ac.uk/angelman/terms/Gender_Other"
+        ]
+      }
+    }
+  },
+  "DominantHand": {
+    "name": "DominantHand",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
+    ],
+    "target": {
+      "node": {
+        "iri": [
+          "https://paediatrics.ox.ac.uk/angelman/terms/DominantHand_Right",
+          "https://paediatrics.ox.ac.uk/angelman/terms/DominantHand_Left",
+          "https://paediatrics.ox.ac.uk/angelman/terms/DominantHand_Mixed",
+          "https://paediatrics.ox.ac.uk/angelman/terms/DominantHand_Unknown"
+        ]
+      }
+    }
+  },
+  "BaselineAge": {
+    "name": "BaselineAge",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Aspect_Age"] } }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "VisitType": {
+    "name": "VisitType",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
+    ],
+    "target": {
+      "node": {
+        "iri": [
+          "https://paediatrics.ox.ac.uk/angelman/terms/VisitType_Baseline",
+          "https://paediatrics.ox.ac.uk/angelman/terms/VisitType_Visit2",
+          "https://paediatrics.ox.ac.uk/angelman/terms/VisitType_Visit3",
+          "https://paediatrics.ox.ac.uk/angelman/terms/VisitType_Visit4",
+          "https://paediatrics.ox.ac.uk/angelman/terms/VisitType_Visit5",
+          "https://paediatrics.ox.ac.uk/angelman/terms/VisitType_Visit6"
+        ]
+      }
+    }
+  },
+  "VisitAge": {
+    "name": "VisitAge",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Aspect_AgeAtVisit"] } }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Functioning": {
+    "name": "FIMYoung_Functioning",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Functioning_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Functioning_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Functioning_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Functioning_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Functioning_Q5",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Functioning_Q6"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Emotional": {
+    "name": "FIMYoung_Emotional",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Emotional_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Emotional_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Emotional_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Emotional_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Emotional_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Social": {
+    "name": "FIMYoung_Social",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Social_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Social_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Social_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Social_Q4"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Cognitive": {
+    "name": "FIMYoung_Cognitive",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Cognitive_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Cognitive_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Cognitive_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Cognitive_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Cognitive_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Communication": {
+    "name": "FIMYoung_Communication",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Communication_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Communication_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Communication_Q3"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Worry": {
+    "name": "FIMYoung_Worry",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Worry_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Worry_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Worry_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Worry_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Worry_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Activities": {
+    "name": "FIMYoung_Activities",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Activities_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Activities_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Activities_Q3"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIMYoung_Relationships": {
+    "name": "FIMYoung_Relationships",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_YoungChild"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Relationships_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Relationships_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Relationships_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Relationships_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM_Relationships_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_Physical": {
+    "name": "FIM7_Physical",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Physical_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Physical_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Physical_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Physical_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Physical_Q5",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Physical_Q6"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_Emotional": {
+    "name": "FIM7_Emotional",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Emotional_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Emotional_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Emotional_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Emotional_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Emotional_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_Social": {
+    "name": "FIM7_Social",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Social_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Social_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Social_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Social_Q4"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_Cognitive": {
+    "name": "FIM7_Cognitive",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Cognitive_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Cognitive_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Cognitive_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Cognitive_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Cognitive_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_Communication": {
+    "name": "FIM7_Communication",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Communication_Q6",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Communication_Q7",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Communication_Q8"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_Worry": {
+    "name": "FIM7_Worry",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Worry_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Worry_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Worry_Q3",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Worry_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_Worry_Q5"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_DailyActivities": {
+    "name": "FIM7_DailyActivities",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_DailyActivities_Q1",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_DailyActivities_Q2",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_DailyActivities_Q3"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "FIM7_FamilyRelationships": {
+    "name": "FIM7_FamilyRelationships",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_FIM_7Plus"] } }
+            }
+          ]
+        }
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
+              "some": {
+                "node": {
+                  "iri": [
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_FamilyRelationships_Q4",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_FamilyRelationships_Q5",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_FamilyRelationships_Q6",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_FamilyRelationships_Q7",
+                    "https://paediatrics.ox.ac.uk/angelman/terms/Aspect_FIM7_FamilyRelationships_Q8"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  },
+  "AdultQoL_AgeBand": {
+    "name": "AdultQoL_AgeBand",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_AdultQoL"] } }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
+    ],
+    "target": {
+      "node": {
+        "iri": [
+          "https://paediatrics.ox.ac.uk/angelman/terms/AgeBand_2to4",
+          "https://paediatrics.ox.ac.uk/angelman/terms/AgeBand_5to7",
+          "https://paediatrics.ox.ac.uk/angelman/terms/AgeBand_8to12",
+          "https://paediatrics.ox.ac.uk/angelman/terms/AgeBand_13to17",
+          "https://paediatrics.ox.ac.uk/angelman/terms/AgeBand_18to25",
+          "https://paediatrics.ox.ac.uk/angelman/terms/AgeBand_26Plus"
+        ]
+      }
+    }
+  },
+  "AdultQoL_Item": {
+    "name": "AdultQoL_Item",
+    "start": {
+      "predicates": [
+        {
+          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
+        }
+      ]
+    },
+    "steps": [
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
+        "inverse": true
+      },
+      {
+        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" },
+        "where": {
+          "predicates": [
+            {
+              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isAbout" },
+              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/angelman/terms/Concept_AdultQoL"] } }
+            }
+          ]
+        }
+      },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" } },
+      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+    ]
+  }
+}

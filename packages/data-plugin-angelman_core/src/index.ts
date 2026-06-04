@@ -89,7 +89,6 @@ export * from "./generated/angelman_dataSchema.schema";
 export * from "./generated/angelman_dataSchema.shapeTypes";
 export * from "./generated/angelman_dataSchema.typings";
 import { angelmanGraphPathShortcuts } from "./shortcuts";
-export * from "./shortcutHelpers";
 export * from "./shortcuts";
 
 export const angelmanDataPlugin: DataPlugin = {
