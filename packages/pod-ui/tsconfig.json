@@ -11,6 +11,9 @@
   ],
   "references": [
     {
+      "path": "../data-plugin-angelman_ui"
+    },
+    {
       "path": "../data-plugin-nemaline_ui"
     },
     {
