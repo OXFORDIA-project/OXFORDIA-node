@@ -60,5 +60,6 @@ export function findGraphPathShortcutByName(
     : null;
 }
 
+export * from "./shortcutHelpers";
 export * from "./shortcutMatching";
 export * from "./types";

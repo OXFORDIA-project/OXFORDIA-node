@@ -26,6 +26,7 @@
     "@ldo/rdf-utils": "^1.0.0-alpha.46",
     "@ldo/solid-react": "^1.0.0-alpha.46",
     "@react-navigation/native": "^7.1.17",
+    "@oxfordia/data-plugin-angelman_ui": "*",
     "@oxfordia/data-plugin-nemaline_ui": "*",
     "@oxfordia/pod-ui-core": "*",
     "@oxfordia/stat-plugin-kaplan-meier_ui": "*",
@@ -44,7 +45,8 @@
     "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0",
-    "react-router": "^7.6.3"
+    "react-router": "^7.6.3",
+    "@simple-table/react": "^3.5.2"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
