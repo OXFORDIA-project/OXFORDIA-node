@@ -73,8 +73,16 @@ solid_json <- function(value) {
   )
 }
 
+solid_resp_text <- function(resp) {
+  if (!httr2::resp_has_body(resp)) {
+    return("")
+  }
+
+  tryCatch(httr2::resp_body_string(resp), error = function(...) "")
+}
+
 solid_resp_json <- function(resp) {
-  body <- httr2::resp_body_string(resp)
+  body <- solid_resp_text(resp)
   if (!nzchar(body)) {
     return(list())
   }
@@ -82,17 +90,29 @@ solid_resp_json <- function(resp) {
   solid_parse_json(body)
 }
 
+solid_truncate <- function(value, max_chars = 500L) {
+  if (nchar(value, type = "chars") <= max_chars) {
+    return(value)
+  }
+
+  paste0(substr(value, 1, max_chars), "... [truncated]")
+}
+
 solid_error_message <- function(resp) {
   payload <- tryCatch(solid_resp_json(resp), error = function(...) NULL)
   candidates <- character()
 
   if (is.list(payload)) {
-    candidates <- c(
-      payload$message %||% NULL,
-      payload$error_description %||% NULL,
-      payload$error %||% NULL,
-      payload$details %||% NULL
+    candidates <- unlist(
+      list(
+        payload$message %||% NULL,
+        payload$error_description %||% NULL,
+        payload$error %||% NULL,
+        payload$details %||% NULL
+      ),
+      use.names = FALSE
     )
+    candidates <- as.character(candidates)
   }
 
   candidates <- candidates[nzchar(candidates)]
@@ -100,23 +120,50 @@ solid_error_message <- function(resp) {
     return(candidates[[1]])
   }
 
-  body <- httr2::resp_body_string(resp)
-  if (nzchar(body)) {
-    return(body)
-  }
-
-  ""
+  solid_truncate(trimws(solid_resp_text(resp)))
 }
 
-solid_stop_for_response <- function(resp, context) {
+solid_stop_for_response <- function(resp, step, method, url) {
   message <- solid_error_message(resp)
   status <- httr2::resp_status(resp)
+  content_type <- httr2::resp_header(resp, "content-type", default = NULL)
+  www_authenticate <- httr2::resp_header(
+    resp,
+    "www-authenticate",
+    default = NULL
+  )
 
-  if (nzchar(message)) {
-    stop(sprintf("%s failed (%s): %s", context, status, message), call. = FALSE)
+  details <- c(
+    sprintf(
+      "%s failed: %s %s returned HTTP %s%s",
+      step,
+      method,
+      url,
+      status,
+      if (nzchar(message)) paste0(": ", message) else " (empty body)."
+    ),
+    if (!is.null(content_type)) paste0("  Content-Type: ", content_type),
+    if (!is.null(www_authenticate)) {
+      paste0("  WWW-Authenticate: ", www_authenticate)
+    }
+  )
+
+  stop(paste(details, collapse = "\n"), call. = FALSE)
+}
+
+solid_debug_enabled <- function() {
+  isTRUE(getOption("solidauthr.debug")) ||
+    tolower(trimws(Sys.getenv("SOLID_DEBUG", unset = ""))) %in%
+      c("1", "true", "yes", "y", "on")
+}
+
+solid_debug_log <- function(...) {
+  if (!solid_debug_enabled()) {
+    return(invisible(FALSE))
   }
 
-  stop(sprintf("%s failed (%s).", context, status), call. = FALSE)
+  message("[solidauthr] ", paste0(..., collapse = ""))
+  invisible(TRUE)
 }
 
 solid_normalize_htu <- function(url) {

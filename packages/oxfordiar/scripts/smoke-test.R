@@ -57,12 +57,106 @@ pkgload::load_all(
   quiet = TRUE
 )
 
-# Build one shared auth client used for every target in this smoke test.
-auth <- oxfordiar::ox_auth_solid(
-  issuer = Sys.getenv("OX_SOLID_ISSUER"),
-  client_id = Sys.getenv("OX_SOLID_CLIENT_ID"),
-  client_secret = Sys.getenv("OX_SOLID_CLIENT_SECRET")
+# Per-request logging is off by default; set `OX_DEBUG=1` to trace every
+# request. Failures are reported with full context either way.
+debug_enabled <- tolower(Sys.getenv("OX_DEBUG", unset = "")) %in%
+  c("1", "true", "yes", "y", "on")
+options(oxfordia.debug = debug_enabled, solidauthr.debug = debug_enabled)
+
+# Fail early with a clear list if any required env vars are missing.
+required_env <- c(
+  "OX_MEAN_SHORTCUT",
+  "OX_KAPLAN_MEIER_TIME_SHORTCUT",
+  "OX_KAPLAN_MEIER_EVENT_SHORTCUT",
+  "OX_KAPLAN_MEIER_GROUP_SHORTCUT",
+  "OX_SOLID_ISSUER",
+  "OX_SOLID_CLIENT_ID",
+  "OX_SOLID_CLIENT_SECRET",
+  sprintf("OX_TARGET_%d_SERVER_NAME", 1:3),
+  sprintf("OX_TARGET_%d_RESOURCE_URI", 1:3)
 )
+missing_env <- required_env[!nzchar(trimws(Sys.getenv(required_env)))]
+if (length(missing_env) > 0) {
+  stop(
+    sprintf(
+      "Missing env vars (from %s): %s",
+      env_file,
+      paste(missing_env, collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}
+
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+# Run one named step of the smoke test. On failure, print which step broke
+# along with any request/response context the Oxfordia packages attached, then
+# exit non-zero.
+run_step <- function(name, expr) {
+  cat("==> ", name, "\n", sep = "")
+  tryCatch(
+    expr,
+    error = function(error) {
+      cat("\n[FAILED] ", name, "\n", conditionMessage(error), "\n", sep = "")
+
+      context <- error$ox_context %||% list()
+      for (field in names(context)) {
+        if (identical(field, "request_body") || is.null(context[[field]])) {
+          next
+        }
+        cat(
+          "  ",
+          field,
+          ": ",
+          oxfordiar:::ox_render_debug_value(context[[field]], max_chars = 1200L),
+          "\n",
+          sep = ""
+        )
+      }
+      if (!is.null(context$request_body)) {
+        cat(
+          "  request_body: ",
+          oxfordiar:::ox_render_debug_value(context$request_body, max_chars = 1200L),
+          "\n",
+          sep = ""
+        )
+      }
+
+      quit(status = 1, save = "no")
+    }
+  )
+}
+
+cat("Issuer:    ", Sys.getenv("OX_SOLID_ISSUER"), "\n", sep = "")
+cat("Client id: ", Sys.getenv("OX_SOLID_CLIENT_ID"), "\n", sep = "")
+for (i in 1:3) {
+  cat(
+    sprintf("Target %d:  ", i),
+    Sys.getenv(sprintf("OX_TARGET_%d_SERVER_NAME", i)),
+    " -> ",
+    Sys.getenv(sprintf("OX_TARGET_%d_RESOURCE_URI", i)),
+    "\n",
+    sep = ""
+  )
+}
+cat("\n")
+
+# Authenticate once up front so IdP problems (discovery, credentials) are
+# reported separately from problems with the pods themselves.
+session <- run_step("Solid authentication", {
+  session <- solidauthr::solid_session(
+    issuer = Sys.getenv("OX_SOLID_ISSUER"),
+    client_id = Sys.getenv("OX_SOLID_CLIENT_ID"),
+    client_secret = Sys.getenv("OX_SOLID_CLIENT_SECRET")
+  )
+  session$token()
+  session
+})
+print(session)
+cat("\n")
+
+# Share the authenticated session across every target in this smoke test.
+auth <- oxfordiar::ox_auth_solid(session = session)
 
 # Build the fixed set of three smoke-test targets directly from env vars.
 targets <- oxfordiar::ox_targets(
@@ -82,12 +176,15 @@ targets <- oxfordiar::ox_targets(
 
 # Run the federated mean query and show both the overall summary and the
 # original per-target rows.
-mean_result <- oxfordiar.stat.mean::ox_mean(
-  shortcut = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
-    "OX_MEAN_SHORTCUT"
-  )),
-  targets = targets,
-  auth = auth
+mean_result <- run_step(
+  "Mean query",
+  oxfordiar.stat.mean::ox_mean(
+    shortcut = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+      "OX_MEAN_SHORTCUT"
+    )),
+    targets = targets,
+    auth = auth
+  )
 )
 cat("Overall mean\n")
 print(mean_result$data)
@@ -97,18 +194,21 @@ print(mean_result$by_target)
 cat("\n")
 
 # Run the federated Kaplan-Meier query and log only grouped time/event rows.
-kaplan_meier_result <- oxfordiar.stat.kaplanmeier::ox_kaplan_meier(
-  time = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
-    "OX_KAPLAN_MEIER_TIME_SHORTCUT"
-  )),
-  event = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
-    "OX_KAPLAN_MEIER_EVENT_SHORTCUT"
-  )),
-  group_by = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
-    "OX_KAPLAN_MEIER_GROUP_SHORTCUT"
-  )),
-  targets = targets,
-  auth = auth
+kaplan_meier_result <- run_step(
+  "Kaplan-Meier query",
+  oxfordiar.stat.kaplanmeier::ox_kaplan_meier(
+    time = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+      "OX_KAPLAN_MEIER_TIME_SHORTCUT"
+    )),
+    event = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+      "OX_KAPLAN_MEIER_EVENT_SHORTCUT"
+    )),
+    group_by = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+      "OX_KAPLAN_MEIER_GROUP_SHORTCUT"
+    )),
+    targets = targets,
+    auth = auth
+  )
 )
 
 print_kaplan_meier_groups <- function(result) {
