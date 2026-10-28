@@ -2,6 +2,7 @@ import { set, type ShapeType } from "@ldo/ldo";
 import { findGraphPathShortcutByName } from "@oxfordia/data-plugin_core";
 import { nemalineDataPlugin } from "@oxfordia/data-plugin-nemaline_core";
 import {
+  DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
   StatisticAccessRuleDocumentShapeType,
   type StatisticAccessRuleDocument,
   type StatisticPolicy,
@@ -93,7 +94,7 @@ export const nemalineDefaultStatisticAccessRuleDocumentShapeType: ShapeType<Stat
 
 export function createNemalineDefaultStatisticAccessRuleDocument(
   statisticAccessRuleDocumentUri: string,
-  allowedAgents: string[] = [],
+  allowedAgents: readonly string[] = DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
 ): StatisticAccessRuleDocument {
   const meanPolicy: MeanStatisticPolicy = {
     "@id": `${statisticAccessRuleDocumentUri}#mean-policy`,

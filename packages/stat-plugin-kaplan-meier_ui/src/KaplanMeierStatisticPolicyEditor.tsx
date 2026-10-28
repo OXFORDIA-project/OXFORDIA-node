@@ -1,6 +1,6 @@
 import { set } from "@ldo/ldo";
 import React from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Button, Text } from "linked-data-browser";
 import { Trash2 } from "lucide-react-native";
@@ -11,6 +11,7 @@ import {
   createEmptyGraphPath,
   ensureGraphPathIds,
   GraphPathFieldEditor,
+  NumericTextInput,
 } from "@oxfordia/stat-plugin_ui";
 
 type KaplanMeierStatisticPolicy = StatisticPolicy & {
@@ -249,10 +250,9 @@ export function KaplanMeierStatisticPolicyEditor({
 
             <View style={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>k-Anonymity</Text>
-              <TextInput
-                value={String(path.kAnonymity)}
-                onChangeText={(value) => {
-                  const kAnonymity = Math.max(1, Number(value || "1"));
+              <NumericTextInput
+                value={path.kAnonymity}
+                onChangeValue={(kAnonymity) => {
                   onChange({
                     ...policy,
                     allowedPath: set(
@@ -260,14 +260,13 @@ export function KaplanMeierStatisticPolicyEditor({
                         currentIndex === index
                           ? {
                               ...currentPath,
-                              kAnonymity: Number.isFinite(kAnonymity) ? kAnonymity : 1,
+                              kAnonymity,
                             }
                           : currentPath,
                       ),
                     ),
                   });
                 }}
-                keyboardType="numeric"
                 style={styles.input}
               />
             </View>

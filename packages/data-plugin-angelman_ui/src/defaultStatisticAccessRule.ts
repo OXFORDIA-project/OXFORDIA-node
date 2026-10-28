@@ -2,6 +2,7 @@ import { set, type ShapeType } from "@ldo/ldo";
 import { findGraphPathShortcutByName } from "@oxfordia/data-plugin_core";
 import { angelmanDataPlugin } from "@oxfordia/data-plugin-angelman_core";
 import {
+  DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
   StatisticAccessRuleDocumentShapeType,
   type StatisticAccessRuleDocument,
   type StatisticPolicy,
@@ -73,7 +74,7 @@ export const angelmanDefaultStatisticAccessRuleDocumentShapeType: ShapeType<Stat
 
 export function createAngelmanDefaultStatisticAccessRuleDocument(
   statisticAccessRuleDocumentUri: string,
-  allowedAgents: string[] = [],
+  allowedAgents: readonly string[] = DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
 ): StatisticAccessRuleDocument {
   const meanPolicy: MeanStatisticPolicy = {
     "@id": `${statisticAccessRuleDocumentUri}#mean-policy`,

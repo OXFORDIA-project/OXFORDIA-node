@@ -2,6 +2,7 @@ import { set } from "@ldo/ldo";
 import { useEffect, useMemo, useState } from "react";
 import { useChangeSubject, useMatchSubject, useResource } from "@ldo/solid-react";
 import {
+  DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
   StatisticAccessRuleDocumentShapeType,
   type StatisticAccessRuleDocument,
   type StatisticPolicy,
@@ -39,7 +40,9 @@ function createInitialDocument(
     "@id": rootId,
     type: set({ "@id": "StatisticAccessRule" }),
     dataSchema: dataSchemaName,
-    allowedAgents: set(),
+    allowedAgents: set(
+      ...DEFAULT_STATISTIC_ACCESS_RULE_AGENTS.map((agent) => ({ "@id": agent })),
+    ),
     hasStatisticPolicy: set(),
   };
 }
