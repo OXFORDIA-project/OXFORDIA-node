@@ -19,14 +19,11 @@ OXFORDIA Pod is a Solid Pod deployment for federated research data. It's an Nx m
 # Install dependencies
 npm install
 
-# Full dev server with live reload (both pod-server and pod-ui)
+# Full dev setup: pod-server + pod-ui with Fast Refresh, at http://localhost:3000
 npm run dev
 
-# Dev pod-server only
+# Dev pod-server only (serves the static pod-ui build from dist-server)
 npm run dev:server
-
-# Dev pod-ui only  
-npm run dev:ui
 
 # Run three pod instances in parallel (for testing federation)
 npm run dev:pods
@@ -39,6 +36,8 @@ Default URLs:
 - All connect to `http://localhost:8889/blazegraph/sparql` by default
 
 Override with env vars: `PORT_1`, `BASE_URL_2`, `DATA_DIR_3`, `SPARQL_ENDPOINT_1`, etc.
+
+How `npm run dev` works (`scripts/dev.sh`): `scripts/dev-proxy.js` listens on `PORT` (3000) and routes Metro traffic (`*.bundle`, `/hot`, `/.ui-static/`, …) to the Expo dev server (`METRO_PORT`, 8081) and everything else to CSS (`SERVER_PORT`, 3001, started with `config/config.dev.json` and `BASE_URL` = the proxy URL). Metro resolves `@oxfordia/*` to each package's `src/`, so UI edits hot-reload without tsc. Server packages run from `dist/`: one incremental `tsc -b --watch` emits, and nodemon restarts CSS. Never add `--force` to the watch/dev scripts; it rewrites every `dist/` file and triggers full restarts.
 
 ### Build
 

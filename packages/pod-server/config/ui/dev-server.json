@@ -1,0 +1,33 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^8.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/asynchronous-handlers/^1.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/components/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "comment": [
+        "Development UI: serves a shell page that loads the pod-ui bundle from the Expo/Metro dev server.",
+        "Requests for the bundle, HMR and /.ui-static/ are routed to Metro by scripts/dev-proxy.js, so this config only works behind that proxy."
+      ],
+      "@id": "urn:solid-server:default:DefaultUiConverter",
+      "@type": "ConstantConverter",
+      "contentType": "text/html",
+      "filePath": "../pod-ui/dev-shell/index.html",
+      "options_container": true,
+      "options_document": true,
+      "options_minQuality": 1
+    },
+    {
+      "@type": "Override",
+      "overrideInstance": {
+        "@type": "StaticAssetEntry",
+        "@id": "urn:solid-server:default:RootStaticAsset"
+      },
+      "overrideParameters": {
+        "@type": "StaticAssetEntry",
+        "filePath": "../pod-ui/dev-shell/index.html"
+      }
+    }
+  ]
+}

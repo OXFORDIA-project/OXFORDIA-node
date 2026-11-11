@@ -1,0 +1,18 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^8.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/asynchronous-handlers/^1.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/components/context.jsonld"
+  ],
+  "import": [
+    "fss:config/pod.json",
+    "fss:config/ui/dev-server.json"
+  ],
+  "@graph": [
+    {
+      "comment": [
+        "Local development config: same pod as config.json, but the UI is served live from the Metro dev server (see scripts/dev.sh)."
+      ]
+    }
+  ]
+}
