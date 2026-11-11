@@ -1,0 +1,100 @@
+diff --git a/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/core/index.js b/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/core/index.js
+index 4b378b6..a034f4a 100644
+--- a/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/core/index.js
++++ b/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/core/index.js
+@@ -1765,7 +1765,7 @@ const requestDynamicClientRegistration = async (registration_endpoint, client_de
+  * @param idp
+  * @param redirect_uri
+  */
+-const redirectForLogin = async (idp, redirect_uri, client_details) => {
++const redirectForLogin = async (idp, redirect_uri, client_details, prompt = "consent") => {
+     // RFC 6749 - Section 3.1.2 - sanitize redirect_uri
+     const redirect_uri_ = new URL(redirect_uri);
+     const redirect_uri_sane = redirect_uri_.origin + redirect_uri_.pathname + redirect_uri_.search;
+@@ -1826,7 +1826,7 @@ const redirectForLogin = async (idp, redirect_uri, client_details) => {
+         `&code_challenge_method=S256` +
+         `&code_challenge=${pkce_code_challenge}` +
+         `&state=${csrf_token}` +
+-        `&prompt=consent`; // this query parameter value MUST be present for CSS v7 to issue a refresh token ( // TODO open issue because prompting is the default behaviour but without this query param no refresh token is provided despite the "remember this client" box being checked)
++        `&prompt=${encodeURIComponent(prompt)}`; // this query parameter value MUST be present for CSS v7 to issue a refresh token ( // TODO open issue because prompting is the default behaviour but without this query param no refresh token is provided despite the "remember this client" box being checked)
+     window.location.href = redirect_to_idp;
+ };
+ /**
+@@ -2127,8 +2127,8 @@ class SessionCore extends EventTarget {
+         if (sessionOptions?.onSessionExpiration)
+             this.addEventListener(SessionEvents.EXPIRATION, (event) => sessionOptions?.onSessionExpiration?.(event));
+     }
+-    async login(idp, redirect_uri) {
+-        await redirectForLogin(idp, redirect_uri, this.information.clientDetails);
++    async login(idp, redirect_uri, options) {
++        await redirectForLogin(idp, redirect_uri, this.information.clientDetails, options?.prompt);
+     }
+     /**
+      * Handles the redirect from the identity provider after a login attempt.
+diff --git a/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/web/index.js b/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/web/index.js
+index 346b9d9..84c3d04 100644
+--- a/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/web/index.js
++++ b/node_modules/@uvdsl/solid-oidc-client-browser/dist/esm/web/index.js
+@@ -1765,7 +1765,7 @@ const requestDynamicClientRegistration = async (registration_endpoint, client_de
+  * @param idp
+  * @param redirect_uri
+  */
+-const redirectForLogin = async (idp, redirect_uri, client_details) => {
++const redirectForLogin = async (idp, redirect_uri, client_details, prompt = "consent") => {
+     // RFC 6749 - Section 3.1.2 - sanitize redirect_uri
+     const redirect_uri_ = new URL(redirect_uri);
+     const redirect_uri_sane = redirect_uri_.origin + redirect_uri_.pathname + redirect_uri_.search;
+@@ -1826,7 +1826,7 @@ const redirectForLogin = async (idp, redirect_uri, client_details) => {
+         `&code_challenge_method=S256` +
+         `&code_challenge=${pkce_code_challenge}` +
+         `&state=${csrf_token}` +
+-        `&prompt=consent`; // this query parameter value MUST be present for CSS v7 to issue a refresh token ( // TODO open issue because prompting is the default behaviour but without this query param no refresh token is provided despite the "remember this client" box being checked)
++        `&prompt=${encodeURIComponent(prompt)}`; // this query parameter value MUST be present for CSS v7 to issue a refresh token ( // TODO open issue because prompting is the default behaviour but without this query param no refresh token is provided despite the "remember this client" box being checked)
+     window.location.href = redirect_to_idp;
+ };
+ /**
+@@ -2127,8 +2127,8 @@ class SessionCore extends EventTarget {
+         if (sessionOptions?.onSessionExpiration)
+             this.addEventListener(SessionEvents.EXPIRATION, (event) => sessionOptions?.onSessionExpiration?.(event));
+     }
+-    async login(idp, redirect_uri) {
+-        await redirectForLogin(idp, redirect_uri, this.information.clientDetails);
++    async login(idp, redirect_uri, options) {
++        await redirectForLogin(idp, redirect_uri, this.information.clientDetails, options?.prompt);
+     }
+     /**
+      * Handles the redirect from the identity provider after a login attempt.
+diff --git a/node_modules/@uvdsl/solid-oidc-client-browser/dist/types/core/Session.d.ts b/node_modules/@uvdsl/solid-oidc-client-browser/dist/types/core/Session.d.ts
+index efbb516..b0a40e2 100644
+--- a/node_modules/@uvdsl/solid-oidc-client-browser/dist/types/core/Session.d.ts
++++ b/node_modules/@uvdsl/solid-oidc-client-browser/dist/types/core/Session.d.ts
+@@ -1,5 +1,11 @@
+ import { SessionDatabase } from "./SessionDatabase";
+ import { DynamicRegistrationClientDetails, DereferencableIdClientDetails, TokenDetails } from "./SessionInformation";
++export interface LoginOptions {
++    /**
++     * Value of the OIDC `prompt` parameter. Defaults to "consent", which CSS requires to issue a refresh token.
++     */
++    prompt?: string;
++}
+ export interface SessionOptions {
+     database?: SessionDatabase;
+     onSessionStateChange?: (event?: Event) => void;
+@@ -29,7 +35,7 @@ export interface Session {
+     /**
+      * Redirect the user for login to their IDP.
+      */
+-    login(idp: string, redirect_uri: string): Promise<void>;
++    login(idp: string, redirect_uri: string, options?: LoginOptions): Promise<void>;
+     /**
+      * Handles the redirect from the identity provider after a login attempt.
+      * It attempts to retrieve tokens using the authorization code.
+@@ -75,7 +81,7 @@ export declare class SessionCore extends EventTarget implements Session {
+     protected resolveRefresh?: (() => void);
+     protected rejectRefresh?: ((reason?: any) => void);
+     constructor(clientDetails?: DereferencableIdClientDetails | DynamicRegistrationClientDetails, sessionOptions?: SessionOptions);
+-    login(idp: string, redirect_uri: string): Promise<void>;
++    login(idp: string, redirect_uri: string, options?: LoginOptions): Promise<void>;
+     /**
+      * Handles the redirect from the identity provider after a login attempt.
+      * It attempts to retrieve tokens using the authorization code.
