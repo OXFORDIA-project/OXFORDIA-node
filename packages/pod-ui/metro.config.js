@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const { getDefaultConfig } = require("expo/metro-config");
 
@@ -29,7 +30,24 @@ const podUiOrigin = path.resolve(projectRoot, "package.json");
 // __toESM correctly sets target.default = the function.
 const LDO_PROXY_SHIM = path.resolve(projectRoot, "ldo-jsonld-dataset-proxy-shim.js");
 
+// Resolve workspace packages (@oxfordia/*) to their TypeScript sources instead of
+// their compiled dist/ output. Metro transpiles TS itself, so UI edits in any plugin
+// package show up via Fast Refresh without waiting on a tsc rebuild.
+const WORKSPACE_SCOPE = "@oxfordia/";
+const resolveWorkspaceSource = (moduleName) => {
+  if (!moduleName.startsWith(WORKSPACE_SCOPE)) return null;
+  const packageName = moduleName.slice(WORKSPACE_SCOPE.length);
+  if (packageName.includes("/")) return null;
+  const entry = path.resolve(workspaceRoot, "packages", packageName, "src/index.ts");
+  return fs.existsSync(entry) ? entry : null;
+};
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  const workspaceSource = resolveWorkspaceSource(moduleName);
+  if (workspaceSource) {
+    return { filePath: workspaceSource, type: "sourceFile" };
+  }
+
   if (context.originModulePath.includes(LDB_PATH_FRAGMENT)) {
     try {
       return context.resolveRequest(

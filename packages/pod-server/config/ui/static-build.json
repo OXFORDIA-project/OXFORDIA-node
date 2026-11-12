@@ -1,0 +1,42 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^8.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/asynchronous-handlers/^1.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@oxfordia/pod-server/^0.0.0/components/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "comment": "Serve pod-ui as the default HTML representation.",
+      "@id": "urn:solid-server:default:DefaultUiConverter",
+      "@type": "ConstantConverter",
+      "contentType": "text/html",
+      "filePath": "../pod-ui/dist-server/index.html",
+      "options_container": true,
+      "options_document": true,
+      "options_minQuality": 1
+    },
+    {
+      "@type": "Override",
+      "overrideInstance": {
+        "@type": "StaticAssetEntry",
+        "@id": "urn:solid-server:default:RootStaticAsset"
+      },
+      "overrideParameters": {
+        "@type": "StaticAssetEntry",
+        "filePath": "../pod-ui/dist-server/index.html"
+      }
+    },
+    {
+      "comment": "Serve pod-ui static files.",
+      "@id": "urn:solid-server:default:StaticAssetHandler",
+      "@type": "StaticAssetHandler",
+      "assets": [
+        {
+          "@type": "StaticAssetEntry",
+          "relativeUrl": "/.ui-static/",
+          "filePath": "../pod-ui/dist-server/"
+        }
+      ]
+    }
+  ]
+}

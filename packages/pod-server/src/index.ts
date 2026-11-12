@@ -14,6 +14,7 @@ import { kaplanMeierPlugin } from "@oxfordia/stat-plugin-kaplan-meier_server";
 import { meanPlugin } from "@oxfordia/stat-plugin-mean_server";
 export * from "./CreatePasswordLoginHandler";
 export * from "./CreatePromptFactory";
+export * from "./HealthCheckHandler";
 
 export const defaultDataPlugins = [nemalineDataPlugin];
 export const defaultStatisticPlugins = [meanPlugin, kaplanMeierPlugin];

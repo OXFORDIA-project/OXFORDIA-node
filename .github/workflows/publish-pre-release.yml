@@ -13,8 +13,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-version:
+    name: Check Version Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check version files agree
+        run: bash scripts/version.sh check
+
   build-deb:
     name: Build Debian Package (${{ matrix.package_name }} / ${{ matrix.arch }})
+    needs: check-version
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -60,6 +71,9 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Stamp version
+        run: bash scripts/version.sh set "${{ steps.meta.outputs.version }}"
+
       - name: Install dependencies
         run: npm ci
 
@@ -88,9 +102,20 @@ jobs:
           name: ${{ matrix.package_name }}-deb-${{ matrix.arch }}
           path: build/${{ matrix.package_name }}_${{ steps.meta.outputs.version }}_${{ matrix.arch }}.deb
 
+  publish-docker:
+    name: Publish Docker Image
+    needs: check-version
+    uses: ./.github/workflows/publish-docker-image.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      ref: ${{ github.sha }}
+      channel: next
+
   publish-pre-release:
     name: Publish Pre-Release
-    needs: build-deb
+    needs: [build-deb, publish-docker]
     runs-on: ubuntu-latest
 
     steps:
@@ -114,6 +139,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: build
+          pattern: "*-deb-*"
 
       - name: Flatten Debian artifacts
         run: |
@@ -123,7 +149,7 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Lint chart
-        run: helm lint deploy/helm/pod-server --set triplestore.external.url=https://sparql.example.org/query
+        run: helm lint deploy/helm/pod-server --set app.baseUrl=https://pod.example.org/ --set triplestore.external.url=https://sparql.example.org/query
 
       - name: Package Helm chart
         run: |

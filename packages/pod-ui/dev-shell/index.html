@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!--
+  Development shell served by pod-server's config.dev.json (npm run dev).
+  The bundle is loaded from the Expo/Metro dev server through scripts/dev-proxy.js,
+  which keeps everything on the pod's origin so Fast Refresh / HMR can connect.
+  Mirrors the HTML that `expo start` generates for web.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>OXFORDIA Pod UI (dev)</title>
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script src="/packages/pod-ui/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable" defer></script>
+  </body>
+</html>

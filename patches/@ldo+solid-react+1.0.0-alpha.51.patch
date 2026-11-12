@@ -1,0 +1,51 @@
+diff --git a/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.cjs b/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.cjs
+index 604aa9a..be35478 100644
+--- a/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.cjs
++++ b/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.cjs
+@@ -71,7 +71,10 @@ function createBrowserSolidReactMethods(dataset) {
+ 		const solidAuth = (0, react.useMemo)(() => ({
+ 			login: session.login,
+ 			logout: session.logout,
+-			signUp: session.login,
++			signUp: (idp, redirect_uri, options) => session.login(idp, redirect_uri, {
++				...options,
++				prompt: "consent create"
++			}),
+ 			fetch: session.authFetch,
+ 			session,
+ 			ranInitialAuthCheck
+diff --git a/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.mjs b/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.mjs
+index 5e94bee..2f9909e 100644
+--- a/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.mjs
++++ b/node_modules/@ldo/solid-react/dist/createBrowserSolidReactMethods.mjs
+@@ -68,7 +68,10 @@ function createBrowserSolidReactMethods(dataset) {
+ 		const solidAuth = useMemo(() => ({
+ 			login: session.login,
+ 			logout: session.logout,
+-			signUp: session.login,
++			signUp: (idp, redirect_uri, options) => session.login(idp, redirect_uri, {
++				...options,
++				prompt: "consent create"
++			}),
+ 			fetch: session.authFetch,
+ 			session,
+ 			ranInitialAuthCheck
+diff --git a/node_modules/@ldo/solid-react/src/createBrowserSolidReactMethods.tsx b/node_modules/@ldo/solid-react/src/createBrowserSolidReactMethods.tsx
+index fea2086..622a67f 100644
+--- a/node_modules/@ldo/solid-react/src/createBrowserSolidReactMethods.tsx
++++ b/node_modules/@ldo/solid-react/src/createBrowserSolidReactMethods.tsx
+@@ -101,7 +101,13 @@ export function createBrowserSolidReactMethods(
+       () => ({
+         login: session.login,
+         logout: session.logout,
+-        signUp: session.login,
++        // "create" routes the IdP to its registration flow; "consent" is still
++        // required for CSS to issue a refresh token.
++        signUp: (idp, redirect_uri, options) =>
++          session.login(idp, redirect_uri, {
++            ...options,
++            prompt: "consent create",
++          }),
+         fetch: session.authFetch,
+         session,
+         ranInitialAuthCheck,
