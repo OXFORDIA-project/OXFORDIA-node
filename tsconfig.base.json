@@ -57,6 +57,24 @@
       "@oxfordia/stat-plugin-mean_ui": [
         "./packages/stat-plugin-mean_ui/src/index.ts"
       ],
+      "@oxfordia/stat-plugin-count_core": [
+        "./packages/stat-plugin-count_core/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-count_server": [
+        "./packages/stat-plugin-count_server/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-count_ui": [
+        "./packages/stat-plugin-count_ui/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-standard-deviation_core": [
+        "./packages/stat-plugin-standard-deviation_core/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-standard-deviation_server": [
+        "./packages/stat-plugin-standard-deviation_server/src/index.ts"
+      ],
+      "@oxfordia/stat-plugin-standard-deviation_ui": [
+        "./packages/stat-plugin-standard-deviation_ui/src/index.ts"
+      ],
       "@oxfordia/stat-plugin-kaplan-meier_core": [
         "./packages/stat-plugin-kaplan-meier_core/src/index.ts"
       ],

@@ -19,6 +19,12 @@
       "path": "../stat-plugin-mean_server"
     },
     {
+      "path": "../stat-plugin-count_server"
+    },
+    {
+      "path": "../stat-plugin-standard-deviation_server"
+    },
+    {
       "path": "../stat-plugin-kaplan-meier_server"
     }
   ]

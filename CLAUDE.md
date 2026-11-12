@@ -115,7 +115,7 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
 
 - **`packages/pod-server`**: Default server bundle that injects:
   - Nemaline data plugin
-  - Mean and Kaplan-Meier statistic plugins
+  - Mean, Kaplan-Meier, count, and standard deviation statistic plugins
   - CSS config and Components.js bundle
   - Password login handler
 
@@ -124,7 +124,7 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
   - Statistic access rule editor
   - Resource navigation
 
-- **`packages/pod-ui`**: Default UI bundle injecting nemaline, mean, and Kaplan-Meier UI plugins. Built with Expo and served as static HTML from pod-server.
+- **`packages/pod-ui`**: Default UI bundle injecting nemaline, mean, Kaplan-Meier, count, and standard deviation UI plugins. Built with Expo and served as static HTML from pod-server.
 
 #### Plugin System
 
@@ -140,6 +140,8 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
 - `stat-plugin_ui`: UI contract and form builders
 - `stat-plugin-mean_*`: Mean statistic (core/server/ui)
 - `stat-plugin-kaplan-meier_*`: Kaplan-Meier survival analysis (core/server/ui)
+- `stat-plugin-count_*`: Count statistic (core/server/ui)
+- `stat-plugin-standard-deviation_*`: Standard deviation statistic (core/server/ui)
 
 #### R Packages
 
@@ -147,6 +149,8 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
 - **`packages/oxfordiar.data.nemaline`**: R client for nemaline data queries
 - **`packages/oxfordiar.stat.mean`**: R client for mean statistics
 - **`packages/oxfordiar.stat.kaplanmeier`**: R client for Kaplan-Meier statistics
+- **`packages/oxfordiar.stat.count`**: R client for count statistics
+- **`packages/oxfordiar.stat.standarddeviation`**: R client for standard deviation statistics
 
 #### Utilities
 

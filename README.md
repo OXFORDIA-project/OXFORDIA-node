@@ -160,11 +160,13 @@ sudo bash oxfordia-pod-idp-init.sh
 - `packages/stat-plugin_ui`: statistic-plugin UI contract and graph-path editor helpers
 - `packages/stat-plugin-mean_*`: mean statistic core/server/ui packages
 - `packages/stat-plugin-kaplan-meier_*`: Kaplan-Meier statistic core/server/ui packages
+- `packages/stat-plugin-count_*`: count statistic core/server/ui packages
+- `packages/stat-plugin-standard-deviation_*`: standard deviation statistic core/server/ui packages
 - `packages/oxfordia-client`: R client for federated statistic queries using registered data/statistic plugins
 - `packages/pod-server-core`: generic server wrapper that accepts injected plugins
-- `packages/pod-server`: default server bundle with nemaline, mean, and Kaplan-Meier
+- `packages/pod-server`: default server bundle with nemaline, mean, Kaplan-Meier, count, and standard deviation
 - `packages/pod-ui-core`: generic UI wrapper that accepts injected plugin UIs
-- `packages/pod-ui`: default UI bundle with nemaline, mean, and Kaplan-Meier
+- `packages/pod-ui`: default UI bundle with nemaline, mean, Kaplan-Meier, count, and standard deviation
 - `packages/pod-idp`: single-server CSS identity-provider deployment and related operator assets
 
 ### Local Development

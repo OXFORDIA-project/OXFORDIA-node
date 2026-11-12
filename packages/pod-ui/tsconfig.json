@@ -23,6 +23,12 @@
       "path": "../stat-plugin-mean_ui"
     },
     {
+      "path": "../stat-plugin-count_ui"
+    },
+    {
+      "path": "../stat-plugin-standard-deviation_ui"
+    },
+    {
       "path": "../stat-plugin-kaplan-meier_ui"
     }
   ]

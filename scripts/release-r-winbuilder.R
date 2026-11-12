@@ -20,7 +20,9 @@ package_dirs <- file.path(
     "oxfordiar",
     "oxfordiar.data.nemaline",
     "oxfordiar.stat.mean",
-    "oxfordiar.stat.kaplanmeier"
+    "oxfordiar.stat.kaplanmeier",
+    "oxfordiar.stat.count",
+    "oxfordiar.stat.standarddeviation"
   )
 )
 

@@ -8,12 +8,16 @@ PACKAGES=(
   "packages/oxfordiar.data.nemaline"
   "packages/oxfordiar.stat.mean"
   "packages/oxfordiar.stat.kaplanmeier"
+  "packages/oxfordiar.stat.count"
+  "packages/oxfordiar.stat.standarddeviation"
 )
 
 DEPENDENT_PACKAGES=(
   "packages/oxfordiar.data.nemaline"
   "packages/oxfordiar.stat.mean"
   "packages/oxfordiar.stat.kaplanmeier"
+  "packages/oxfordiar.stat.count"
+  "packages/oxfordiar.stat.standarddeviation"
 )
 
 TAG_PREFIX="r-v"
