@@ -7,6 +7,9 @@ metadata:
     {{- include "pod-server.labels" . | nindent 4 }}
 spec:
   replicas: 1
+  # The journal volume is ReadWriteOnce; never run two Blazegraph pods at once.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: blazegraph
@@ -16,23 +19,63 @@ spec:
       labels:
         app.kubernetes.io/name: blazegraph
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/rwstore: {{ .Files.Get "files/RWStore.properties" | sha256sum }}
     spec:
+      {{- with .Values.triplestore.managed.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: blazegraph
           image: "{{ .Values.triplestore.managed.image.repository }}:{{ .Values.triplestore.managed.image.tag }}"
           imagePullPolicy: {{ .Values.triplestore.managed.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.triplestore.managed.servicePort }}
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /bigdata/status
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          # Blazegraph never retries opening its journal. If a replacement pod
+          # starts while the old one still holds the file lock, restart it.
+          livenessProbe:
+            httpGet:
+              path: /bigdata/status
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.triplestore.managed.resources | nindent 12 }}
           volumeMounts:
+            # The image's entrypoint chowns /var/lib/jetty on start, so a volume
+            # mounted beneath it is writable regardless of storage driver.
             - name: data
-              mountPath: /data
+              mountPath: /var/lib/jetty/data
+            - name: rwstore
+              mountPath: /RWStore.properties
+              subPath: RWStore.properties
+              readOnly: true
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: {{ include "pod-server.blazegraphFullname" . }}
+        - name: rwstore
+          configMap:
+            name: {{ include "pod-server.blazegraphFullname" . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pod-server.blazegraphFullname" . }}
+  labels:
+    {{- include "pod-server.labels" . | nindent 4 }}
+data:
+  RWStore.properties: |
+{{ .Files.Get "files/RWStore.properties" | indent 4 }}
 ---
 apiVersion: v1
 kind: Service

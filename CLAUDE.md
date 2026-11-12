@@ -85,6 +85,7 @@ npm run format:r:check
 npm run version:get       # Print current version
 npm run version:set v0.0.2-alpha.1  # Set exact version
 npm run version:bump major|minor|patch|prerelease
+npm run version:check     # Fail if package.json, lockfile and Chart.yaml disagree
 ```
 
 ### GitHub Actions (Local Testing with `act`)
@@ -343,7 +344,7 @@ docker run --rm -p 3000:3000 \
   -e CSS_ROOT_FILE_PATH=/data \
   -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/blazegraph/sparql \
   -v "$PWD/data:/data" \
-  oxfordia-pod-server
+  ghcr.io/oxfordia-project/oxfordia-node:local
 ```
 
 ### Debian Package

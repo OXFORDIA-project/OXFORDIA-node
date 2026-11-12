@@ -12,6 +12,17 @@
       },
       "overrideSteps": [
         {
+          "comment": "Health checks match the raw path, so they go first, ahead of anything that resolves the base URL.",
+          "@type": "OverrideListInsertAt",
+          "overrideParameter": {
+            "@id": "StatusWaterfallHandler:_handlers"
+          },
+          "overrideTarget": 0,
+          "overrideValue": {
+            "@id": "urn:solid-server:default:HealthCheckHandler"
+          }
+        },
+        {
           "@type": "OverrideListInsertBefore",
           "overrideParameter": {
             "@id": "StatusWaterfallHandler:_handlers"
@@ -24,6 +35,14 @@
           }
         }
       ]
+    },
+    {
+      "comment": "Serves GET /healthz, including a SPARQL endpoint reachability check.",
+      "@id": "urn:solid-server:default:HealthCheckHandler",
+      "@type": "HealthCheckHandler",
+      "args_sparqlEndpoint": {
+        "@id": "urn:solid-server:default:variable:sparqlEndpoint"
+      }
     },
     {
       "comment": "Routes all api related requests to the relevant handlers.",
