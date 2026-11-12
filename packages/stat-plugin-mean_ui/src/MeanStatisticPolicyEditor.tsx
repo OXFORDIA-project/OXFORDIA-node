@@ -1,6 +1,6 @@
 import { set } from "@ldo/ldo";
 import React from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Button, Text } from "linked-data-browser";
 import { Trash2 } from "lucide-react-native";
@@ -11,6 +11,7 @@ import {
   createEmptyGraphPath,
   ensureGraphPathIds,
   GraphPathFieldEditor,
+  NumericTextInput,
 } from "@oxfordia/stat-plugin_ui";
 
 type MeanStatisticPolicy = StatisticPolicy & {
@@ -136,10 +137,9 @@ export function MeanStatisticPolicyEditor({
 
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Min Count</Text>
-            <TextInput
-              value={String(path.minCount)}
-              onChangeText={(value) => {
-                const minCount = Math.max(1, Number(value || "1"));
+            <NumericTextInput
+              value={path.minCount}
+              onChangeValue={(minCount) => {
                 onChange({
                   ...policy,
                   allowedPath: set(
@@ -147,14 +147,13 @@ export function MeanStatisticPolicyEditor({
                       currentIndex === index
                         ? {
                             ...currentPath,
-                            minCount: Number.isFinite(minCount) ? minCount : 1,
+                            minCount,
                           }
                         : currentPath,
                     ),
                   ),
                 });
               }}
-              keyboardType="numeric"
               style={styles.input}
             />
           </View>

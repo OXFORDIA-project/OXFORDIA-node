@@ -27,7 +27,7 @@ function applyTrustProxy(app: Express): void {
   }
 }
 
-async function checkTriplestore(sparqlEndpoint: string): Promise<void> {
+export async function checkTriplestore(sparqlEndpoint: string): Promise<void> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
 

@@ -14,6 +14,12 @@
       "path": "./packages/data-plugin-nemaline_ui/tsconfig.json"
     },
     {
+      "path": "./packages/data-plugin-angelman_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/data-plugin-angelman_ui/tsconfig.json"
+    },
+    {
       "path": "./packages/stat-plugin_core/tsconfig.json"
     },
     {

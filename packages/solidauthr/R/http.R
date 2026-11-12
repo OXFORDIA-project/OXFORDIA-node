@@ -2,6 +2,34 @@ solid_no_error <- function(req) {
   httr2::req_error(req, is_error = function(resp) FALSE)
 }
 
+# Performs a request, tagging transport failures (DNS, connection refused, TLS)
+# with the step and URL so callers can tell which request never got a response.
+solid_perform <- function(req, step, method, url) {
+  solid_debug_log(step, ": ", method, " ", url)
+  resp <- tryCatch(
+    httr2::req_perform(req),
+    error = function(error) {
+      stop(
+        sprintf(
+          "%s failed: %s %s could not be completed: %s",
+          step,
+          method,
+          url,
+          conditionMessage(error)
+        ),
+        call. = FALSE
+      )
+    }
+  )
+  solid_debug_log(
+    step,
+    ": HTTP ",
+    httr2::resp_status(resp),
+    if (!httr2::resp_has_body(resp)) " (empty body)" else ""
+  )
+  resp
+}
+
 solid_apply_headers <- function(req, headers) {
   if (is.null(headers) || length(headers) == 0) {
     return(req)

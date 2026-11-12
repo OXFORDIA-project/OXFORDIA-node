@@ -3,13 +3,13 @@ import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   ContainerResourceCreator,
-  ContainerResourceView,
   DataBrowser,
   ProfileResourceView,
   RawCodeResourceView,
   RdfResourceCreator,
   type DataBrowserConfigProps,
 } from "linked-data-browser";
+import { CustomContainerConfig } from "./resourceViews/container/CustomContainerConfig";
 import type { DataPluginUi } from "@oxfordia/data-plugin_ui";
 import type { StatisticPluginUi } from "@oxfordia/stat-plugin_ui";
 import { HomeConfig } from "./resourceViews/home/HomeConfig";
@@ -40,14 +40,14 @@ export function PodUiCore({
         resourceViews={[
           HomeConfig,
           ProfileResourceView,
-          ContainerResourceView,
+          CustomContainerConfig,
           ...dataPluginUis.map((pluginUi) => pluginUi.resourceView),
           createStatisticAccessRuleConfig(dataPlugins, statisticPluginUis),
           RawCodeResourceView,
         ]}
         resourceCreators={[
-          RdfResourceCreator,
-          ContainerResourceCreator,
+          // RdfResourceCreator,
+          // ContainerResourceCreator,
           ...dataPluginUis.map((pluginUi) => pluginUi.resourceCreator),
         ]}
       />

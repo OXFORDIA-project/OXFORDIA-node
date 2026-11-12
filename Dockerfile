@@ -8,10 +8,13 @@ COPY package.json package-lock.json tsconfig.json tsconfig.base.json ./
 COPY packages ./packages
 COPY docker ./docker
 COPY deploy ./deploy
+COPY patches ./patches
 
 RUN npm ci
-RUN npm run build:server:types
+RUN npm run build:server
 RUN npm run build:ui
+RUN test -f packages/pod-server/dist/components/context.jsonld \
+  && test -f packages/pod-ui/dist-server/index.html
 RUN npm prune --omit=dev
 RUN bash deploy/common/stage-runtime.sh /runtime
 
@@ -33,5 +36,8 @@ ENV CSS_CONFIG=/opt/oxfordia-pod/packages/pod-server/config/config.json \
 USER 10001:node
 
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:' + (process.env.CSS_PORT || 3000) + '/healthz').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 
 ENTRYPOINT ["/opt/oxfordia-pod/entrypoint.sh"]

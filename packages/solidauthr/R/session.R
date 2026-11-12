@@ -94,7 +94,12 @@ SolidSession <- R6::R6Class(
           )
         )
 
-        httr2::req_perform(auth_req)
+        solid_perform(
+          auth_req,
+          step = "Resource request",
+          method = request_method,
+          url = target_url
+        )
       }
 
       resp <- private$perform_with_nonce_retry(
@@ -108,7 +113,9 @@ SolidSession <- R6::R6Class(
       if (httr2::resp_status(resp) >= 400) {
         solid_stop_for_response(
           resp,
-          sprintf("%s %s", request_method, target_url)
+          step = "Resource request",
+          method = request_method,
+          url = target_url
         )
       }
 
@@ -176,11 +183,22 @@ SolidSession <- R6::R6Class(
         return(self$oidc_configuration)
       }
 
-      req <- solid_build_request(solid_build_well_known_url(self$issuer))
-      resp <- httr2::req_perform(req)
+      discovery_url <- solid_build_well_known_url(self$issuer)
+      req <- solid_build_request(discovery_url)
+      resp <- solid_perform(
+        req,
+        step = "OIDC discovery",
+        method = "GET",
+        url = discovery_url
+      )
 
       if (httr2::resp_status(resp) >= 400) {
-        solid_stop_for_response(resp, "OIDC discovery")
+        solid_stop_for_response(
+          resp,
+          step = "OIDC discovery",
+          method = "GET",
+          url = discovery_url
+        )
       }
 
       configuration <- solid_resp_json(resp)
@@ -278,7 +296,12 @@ SolidSession <- R6::R6Class(
         )
         req <- do.call(httr2::req_body_form, c(list(req), token_request$body))
         req <- solid_no_error(req)
-        httr2::req_perform(req)
+        solid_perform(
+          req,
+          step = "Token request",
+          method = "POST",
+          url = self$token_endpoint
+        )
       }
 
       resp <- private$perform_with_nonce_retry(
@@ -290,7 +313,12 @@ SolidSession <- R6::R6Class(
       )
 
       if (httr2::resp_status(resp) >= 400) {
-        solid_stop_for_response(resp, "Token request")
+        solid_stop_for_response(
+          resp,
+          step = "Token request",
+          method = "POST",
+          url = self$token_endpoint
+        )
       }
 
       payload <- solid_resp_json(resp)
@@ -321,6 +349,7 @@ SolidSession <- R6::R6Class(
         }
 
         if (!retried && !is.null(nonce) && status %in% c(400L, 401L)) {
+          solid_debug_log("Retrying with server-issued DPoP nonce")
           retried <- TRUE
           next
         }

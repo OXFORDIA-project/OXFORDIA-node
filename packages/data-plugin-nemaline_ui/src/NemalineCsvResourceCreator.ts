@@ -72,7 +72,7 @@ function rowToPerson(row: string[], baseUri: string): Omit<Person, '@context'> {
   const cluster = row[2] ?? '';
   const baselineAge = parseNum(row[3]);
   const geneticGroup = (row[4] ?? '').toLowerCase();
-  const loaStatus = row[5] ?? '';
+  const loaStatus = (row[5] ?? '').trim();
   const loaAge = parseNum(row[6]);
   const timeV1 = parseNum(row[7]);
   const timeV2 = parseNum(row[8]);
@@ -91,7 +91,9 @@ function rowToPerson(row: string[], baseUri: string): Omit<Person, '@context'> {
   const personUri = `${baseUri}#person-${id}`;
   const idUri = `${baseUri}#id-${id}`;
 
-  const ambulant = isAmbulantStatus(loaStatus);
+  // undefined when the loaStatus cell is blank/missing — don't fabricate a status
+  const ambulant: boolean | undefined = loaStatus ? isAmbulantStatus(loaStatus) : undefined;
+
   const categories = set<
     | { '@id': 'Cluster1' }
     | { '@id': 'Cluster2' }
@@ -111,30 +113,26 @@ function rowToPerson(row: string[], baseUri: string): Omit<Person, '@context'> {
   if (geneticGroup === 'variant1') categories.add({ '@id': 'GeneticGroupVariant1' });
   else if (geneticGroup === 'variant2') categories.add({ '@id': 'GeneticGroupVariant2' });
   else if (geneticGroup === 'variant3') categories.add({ '@id': 'GeneticGroupVariant3' });
-  categories.add(ambulant ? { '@id': 'StatusAmbulant' } : { '@id': 'StatusNonAmbulant' });
+  if (ambulant !== undefined)
+    categories.add(ambulant ? { '@id': 'StatusAmbulant' } : { '@id': 'StatusNonAmbulant' });
   if (dominantHand === 'Left') categories.add({ '@id': 'LeftHanded' });
   if (dominantHand === 'Right') categories.add({ '@id': 'RightHanded' });
   if (belowAverage === 'below') categories.add({ '@id': 'PerformanceBelowAverage' });
-
-  const lastVisitTime = getLastObservedVisitTime([timeV1, timeV2, timeV3, timeV4, timeV5]);
-  const fallbackBaselineAge = Number.isNaN(baselineAge) ? 0 : baselineAge;
-  const kmEvent = ambulant ? 0 : 1;
-  const kmTime = ambulant
-    ? fallbackBaselineAge + (Number.isNaN(lastVisitTime) ? 0 : lastVisitTime)
-    : (Number.isNaN(loaAge) ? fallbackBaselineAge : loaAge);
 
   const magnitudes = set<
     BaselineAgeMagnitude |
     LoAAgeMagnitude |
     TotalMFMMagnitude
   >();
-  magnitudes.add({
-    '@id': `${baseUri}#baseline-age-${id}`,
-    type: set({ '@id': 'Magnitude' }),
-    hasAspect: { '@id': 'AspectAge' },
-    hasUnitOfMeasure: { '@id': 'UnitYear' },
-    numericValue: Number.isNaN(baselineAge) ? 0 : baselineAge,
-  } as BaselineAgeMagnitude);
+  if (!Number.isNaN(baselineAge)) {
+    magnitudes.add({
+      '@id': `${baseUri}#baseline-age-${id}`,
+      type: set({ '@id': 'Magnitude' }),
+      hasAspect: { '@id': 'AspectAge' },
+      hasUnitOfMeasure: { '@id': 'UnitYear' },
+      numericValue: baselineAge,
+    } as BaselineAgeMagnitude);
+  }
   if (!Number.isNaN(loaAge)) {
     magnitudes.add({
       '@id': `${baseUri}#loa-age-${id}`,
@@ -164,6 +162,8 @@ function rowToPerson(row: string[], baseUri: string): Omit<Person, '@context'> {
   const hasParticipants = set<MFMAssessmentEvent | KaplanMeierObservation>();
   for (let v = 0; v < visits.length; v++) {
     const [time, mfm] = visits[v];
+    if (Number.isNaN(time)) continue; // skip visits with no time — can't be placed on the timeline
+
     const eventUri = `${baseUri}#assessment-${id}-v${v + 1}`;
     const resultUri = `${baseUri}#result-${id}-v${v + 1}`;
 
@@ -171,20 +171,7 @@ function rowToPerson(row: string[], baseUri: string): Omit<Person, '@context'> {
       type: set({ '@id': 'Magnitude' }),
       hasAspect: { '@id': 'AspectDurationSinceStudyEnrollment' },
       hasUnitOfMeasure: { '@id': 'UnitYear' },
-      numericValue: Number.isNaN(time) ? 0 : time,
-    };
-
-    const mfmMag: MFMScoreMagnitude = {
-      type: set({ '@id': 'Magnitude' }),
-      hasAspect: { '@id': 'AspectMFM32VisitScore' },
-      numericValue: Number.isNaN(mfm) ? 0 : mfm,
-    };
-
-    const result: AssessmentResult = {
-      '@id': resultUri,
-      type: set({ '@id': 'Content' }),
-      isAbout: { '@id': 'ConceptMotorFunction' },
-      hasMagnitude: mfmMag,
+      numericValue: time,
     };
 
     const event: MFMAssessmentEvent = {
@@ -193,33 +180,69 @@ function rowToPerson(row: string[], baseUri: string): Omit<Person, '@context'> {
       isCategorizedBy: { '@id': 'AssessmentTypeMFM32' },
       hasMagnitude: timeMag,
       hasParticipant: { '@id': personUri } as Person,
-      produces: result,
     };
+
+    if (!Number.isNaN(mfm)) {
+      const mfmMag: MFMScoreMagnitude = {
+        type: set({ '@id': 'Magnitude' }),
+        hasAspect: { '@id': 'AspectMFM32VisitScore' },
+        numericValue: mfm,
+      };
+      event.produces = {
+        '@id': resultUri,
+        type: set({ '@id': 'Content' }),
+        isAbout: { '@id': 'ConceptMotorFunction' },
+        hasMagnitude: mfmMag,
+      } as AssessmentResult;
+    }
+
     hasParticipants.add(event);
   }
 
-  const kmObservation: KaplanMeierObservation = {
-    '@id': `${baseUri}#km-observation-${id}`,
-    type: set({ '@id': 'Determination' }),
-    isCategorizedBy: { '@id': 'AssessmentTypeKaplanMeier' },
-    hasParticipant: { '@id': personUri } as Person,
-    hasMagnitude: set<KaplanMeierEventMagnitude | KaplanMeierTimeMagnitude>(
-      {
-        '@id': `${baseUri}#km-event-${id}`,
-        type: set({ '@id': 'Magnitude' }),
-        hasAspect: { '@id': 'AspectKaplanMeierEventIndicator' },
-        numericValue: kmEvent,
-      } as KaplanMeierEventMagnitude,
-      {
-        '@id': `${baseUri}#km-time-${id}`,
-        type: set({ '@id': 'Magnitude' }),
-        hasAspect: { '@id': 'AspectKaplanMeierTimeToEvent' },
-        hasUnitOfMeasure: { '@id': 'UnitYear' },
-        numericValue: kmTime,
-      } as KaplanMeierTimeMagnitude,
-    ),
-  };
-  hasParticipants.add(kmObservation);
+  // Only add KaplanMeier when we have enough data to compute a meaningful time-to-event
+  if (ambulant !== undefined) {
+    const kmEvent = ambulant ? 0 : 1;
+    const lastVisitTime = getLastObservedVisitTime([timeV1, timeV2, timeV3, timeV4, timeV5]);
+    let kmTime: number | undefined;
+    if (ambulant) {
+      // Ambulant: observation time is baselineAge + time since enrollment at last visit
+      if (!Number.isNaN(lastVisitTime)) {
+        kmTime = Number.isNaN(baselineAge) ? lastVisitTime : baselineAge + lastVisitTime;
+      }
+    } else {
+      // Non-ambulant: event time is age at loss of ambulation; fall back to baseline age
+      if (!Number.isNaN(loaAge)) {
+        kmTime = loaAge;
+      } else if (!Number.isNaN(baselineAge)) {
+        kmTime = baselineAge;
+      }
+    }
+
+    if (kmTime !== undefined) {
+      const kmObservation: KaplanMeierObservation = {
+        '@id': `${baseUri}#km-observation-${id}`,
+        type: set({ '@id': 'Determination' }),
+        isCategorizedBy: { '@id': 'AssessmentTypeKaplanMeier' },
+        hasParticipant: { '@id': personUri } as Person,
+        hasMagnitude: set<KaplanMeierEventMagnitude | KaplanMeierTimeMagnitude>(
+          {
+            '@id': `${baseUri}#km-event-${id}`,
+            type: set({ '@id': 'Magnitude' }),
+            hasAspect: { '@id': 'AspectKaplanMeierEventIndicator' },
+            numericValue: kmEvent,
+          } as KaplanMeierEventMagnitude,
+          {
+            '@id': `${baseUri}#km-time-${id}`,
+            type: set({ '@id': 'Magnitude' }),
+            hasAspect: { '@id': 'AspectKaplanMeierTimeToEvent' },
+            hasUnitOfMeasure: { '@id': 'UnitYear' },
+            numericValue: kmTime,
+          } as KaplanMeierTimeMagnitude,
+        ),
+      };
+      hasParticipants.add(kmObservation);
+    }
+  }
 
   const person: Omit<Person, '@context'> = {
     '@id': personUri,

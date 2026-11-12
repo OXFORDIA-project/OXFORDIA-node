@@ -66,6 +66,12 @@ ox_query <- function(
 
     if (inherits(result, "error")) {
       if (isTRUE(fail_fast)) {
+        result$message <- sprintf(
+          "Target '%s' (%s): %s",
+          target$name,
+          target$resource_uri,
+          conditionMessage(result)
+        )
         stop(result)
       }
 

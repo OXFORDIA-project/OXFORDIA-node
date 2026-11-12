@@ -5,6 +5,7 @@ export * from "./generated/statisticAccessRuleDocument.context";
 export * from "./generated/statisticAccessRuleDocument.schema";
 export * from "./generated/statisticAccessRuleDocument.shapeTypes";
 export * from "./generated/statisticAccessRuleDocument.typings";
+export * from "./defaults";
 export * from "./graphPath";
 export * from "./types";
 export { graphPathSchema as graphPathShExSchema } from "./generated/graphPath.schema";

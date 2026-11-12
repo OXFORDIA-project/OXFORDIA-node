@@ -36,12 +36,9 @@ export function getGraphPathShortcutsForDataSchema(
     dataPlugins,
     dataSchemaName,
   );
-  return Object.entries(shortcutMap).map(([name, createGraphPath]) => ({
+  return Object.entries(shortcutMap).map(([name, graphPath]) => ({
     name,
-    graphPath: (() => {
-      const graphPath = createGraphPath();
-      return graphPath.name ? graphPath : { ...graphPath, name };
-    })(),
+    graphPath: graphPath.name ? graphPath : { ...graphPath, name },
   }));
 }
 
@@ -54,17 +51,15 @@ export function findGraphPathShortcutByName(
     dataPlugins,
     dataSchemaName,
   );
-  const createGraphPath = shortcutMap[shortcutName];
-  return createGraphPath
+  const graphPath = shortcutMap[shortcutName];
+  return graphPath
     ? {
         name: shortcutName,
-        graphPath: (() => {
-          const graphPath = createGraphPath();
-          return graphPath.name ? graphPath : { ...graphPath, name: shortcutName };
-        })(),
+        graphPath: graphPath.name ? graphPath : { ...graphPath, name: shortcutName },
       }
     : null;
 }
 
+export * from "./shortcutHelpers";
 export * from "./shortcutMatching";
 export * from "./types";

@@ -34,7 +34,7 @@ export const HomeView: FunctionComponent = () => {
           text="Log in with your Pod"
           variant="default"
           style={styles.button}
-          onPress={() => login(DEFAULT_ISSUER)}
+          onPress={() => login(DEFAULT_ISSUER, window.location.href)}
         />
       </View>
     </View>

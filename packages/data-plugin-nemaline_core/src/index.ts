@@ -20,7 +20,6 @@ export * from "./generated/nemaline_dataSchema.schema";
 export * from "./generated/nemaline_dataSchema.shapeTypes";
 export * from "./generated/nemaline_dataSchema.typings";
 import { nemalineGraphPathShortcuts } from "./shortcuts";
-export * from "./shortcutHelpers";
 export * from "./shortcuts";
 
 export const nemalineDataPlugin: DataPlugin = {

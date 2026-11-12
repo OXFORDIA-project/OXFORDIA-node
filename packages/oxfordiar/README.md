@@ -20,21 +20,64 @@ Use statistic-specific packages for actual analyses:
 
 ### Install
 
-If the packages are available on CRAN, install the runtime plus whichever data
-and statistic packages you want to use:
+The Oxfordia R packages are not on CRAN yet. Install them from GitHub, either
+directly or from a local clone. Either way, install them in dependency order:
+`oxfordiar` depends on `solidauthr`, and the data and statistic packages depend
+on `oxfordiar`.
+
+#### From GitHub (recommended)
+
+No clone is needed. `remotes` installs each package from its folder in the
+monorepo:
+
+```r
+install.packages("remotes", repos = "https://cloud.r-project.org")
+
+repo <- "OXFORDIA-project/OXFORDIA-node"
+for (pkg in c(
+  "solidauthr",
+  "oxfordiar",
+  "oxfordiar.data.nemaline",
+  "oxfordiar.stat.mean",
+  "oxfordiar.stat.kaplanmeier"
+)) {
+  remotes::install_github(
+    repo,
+    subdir = file.path("packages", pkg),
+    ref = "main"
+  )
+}
+```
+
+To pin a specific version, set `ref` to a release tag instead of `main`. You
+can leave out `oxfordiar.stat.mean` or `oxfordiar.stat.kaplanmeier` if you only
+need one statistic.
+
+If the repository is private, set a GitHub personal access token first, for
+example with `Sys.setenv(GITHUB_PAT = "<your token>")` or `gitcreds::gitcreds_set()`.
+
+#### From a local clone
+
+Use this if you want to edit the packages, or if your environment cannot reach
+GitHub from R (copy the cloned folder in instead). Only R is required; Node and
+the rest of the monorepo are not needed.
+
+```sh
+git clone https://github.com/OXFORDIA-project/OXFORDIA-node.git
+cd OXFORDIA-node
+Rscript packages/oxfordiar/scripts/install-deps.R
+```
+
+The script installs all five packages from the checkout in dependency order.
+
+#### From CRAN (once released)
+
+After the packages are published to CRAN, install the runtime plus whichever
+data and statistic packages you want to use:
 
 ```r
 install.packages(
   c("oxfordiar", "oxfordiar.data.nemaline", "oxfordiar.stat.mean"),
-  repos = "https://cloud.r-project.org"
-)
-```
-
-For Kaplan-Meier queries instead of means:
-
-```r
-install.packages(
-  c("oxfordiar", "oxfordiar.data.nemaline", "oxfordiar.stat.kaplanmeier"),
   repos = "https://cloud.r-project.org"
 )
 ```

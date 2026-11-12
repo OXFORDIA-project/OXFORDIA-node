@@ -4,8 +4,14 @@ metadata:
   name: {{ include "pod-server.fullname" . }}
   labels:
     {{- include "pod-server.labels" . | nindent 4 }}
+{{- if ne (int .Values.replicaCount) 1 }}
+{{- fail "replicaCount must be 1: pod state is on a ReadWriteOnce volume with file-based locks" }}
+{{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  # Pod data is on a ReadWriteOnce volume; a rolling update can't attach it twice.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "pod-server.selectorLabels" . | nindent 6 }}
@@ -28,7 +34,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: pod-server
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.css.extraArgs }}
           args:
@@ -47,9 +53,10 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
+          # /healthz also checks the triplestore; restarting this pod can't fix
+          # a triplestore outage, so liveness only checks the server is listening.
           livenessProbe:
-            httpGet:
-              path: /healthz
+            tcpSocket:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10

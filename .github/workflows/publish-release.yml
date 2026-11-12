@@ -12,6 +12,9 @@ concurrency:
   group: publish-release-${{ github.event.release.tag_name }}
   cancel-in-progress: false
 
+env:
+  HELM_REPO_URL: https://oxfordia-project.github.io/OXFORDIA-node
+
 jobs:
   build-deb:
     name: Build Debian Package (${{ matrix.package_name }} / ${{ matrix.arch }})
@@ -59,6 +62,9 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Stamp version
+        run: bash scripts/version.sh set "${{ steps.meta.outputs.version }}"
+
       - name: Install dependencies
         run: npm ci
 
@@ -87,10 +93,21 @@ jobs:
           name: ${{ matrix.package_name }}-deb-${{ matrix.arch }}
           path: build/${{ matrix.package_name }}_${{ steps.meta.outputs.version }}_${{ matrix.arch }}.deb
 
+  publish-docker:
+    name: Publish Docker Image
+    if: github.event.release.prerelease == false
+    uses: ./.github/workflows/publish-docker-image.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      ref: ${{ github.event.release.tag_name }}
+      channel: release
+
   publish-release:
     name: Build and Publish Release Assets
     if: github.event.release.prerelease == false
-    needs: build-deb
+    needs: [build-deb, publish-docker]
     runs-on: ubuntu-latest
 
     steps:
@@ -112,52 +129,93 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: build
+          pattern: "*-deb-*"
 
       - name: Flatten Debian artifacts
         run: |
           find build -mindepth 2 -type f -name '*.deb' -exec mv {} build/ \;
 
+      # Unversioned copies let docs link to releases/latest/download/<name>,
+      # so install instructions never go stale.
+      - name: Add unversioned asset names
+        run: |
+          mkdir -p build/latest
+          for package in oxfordia-pod oxfordia-pod-idp; do
+            for arch in amd64 arm64; do
+              cp "build/${package}_${VERSION}_${arch}.deb" "build/latest/${package}_${arch}.deb"
+            done
+          done
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
-      - name: Set release chart version
-        run: |
-          perl -0pi -e 's/^version: .*/version: $ENV{RELEASE_VERSION}/m' deploy/helm/pod-server/Chart.yaml
-          perl -0pi -e 's/^appVersion: .*/appVersion: $ENV{RELEASE_VERSION}/m' deploy/helm/pod-server/Chart.yaml
-        env:
-          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+      - name: Stamp version
+        run: bash scripts/version.sh set "${{ steps.meta.outputs.version }}"
 
       - name: Lint chart
-        run: helm lint deploy/helm/pod-server --set triplestore.external.url=https://sparql.example.org/query
+        run: helm lint deploy/helm/pod-server --set app.baseUrl=https://pod.example.org/ --set triplestore.external.url=https://sparql.example.org/query
 
       - name: Package Helm chart
-        run: |
-          mkdir -p .cr-release-packages
-          helm package deploy/helm/pod-server \
-            --version "${{ steps.meta.outputs.version }}" \
-            --app-version "${{ steps.meta.outputs.version }}" \
-            --destination .cr-release-packages/
+        run: helm package deploy/helm/pod-server --destination build/chart/
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name }}
+          make_latest: "true"
           files: |
             build/oxfordia-pod_${{ steps.meta.outputs.version }}_amd64.deb
             build/oxfordia-pod_${{ steps.meta.outputs.version }}_arm64.deb
             build/oxfordia-pod-idp_${{ steps.meta.outputs.version }}_amd64.deb
             build/oxfordia-pod-idp_${{ steps.meta.outputs.version }}_arm64.deb
+            build/latest/*.deb
             oxfordia-pod-init.sh
             oxfordia-pod-idp-init.sh
-            .cr-release-packages/pod-server-${{ steps.meta.outputs.version }}.tgz
+            build/chart/pod-server-${{ steps.meta.outputs.version }}.tgz
 
-      - name: Publish Helm chart
-        uses: helm/chart-releaser-action@v1.7.0
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
         with:
-          charts_dir: deploy/helm
-          packages_with_index: false
+          ref: gh-pages
+          path: gh-pages
+
+      # The chart archive stays on the GitHub release; gh-pages only serves
+      # index.yaml pointing at it.
+      - name: Publish Helm repository index
+        run: |
+          helm repo index build/chart \
+            --url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}" \
+            --merge gh-pages/index.yaml
+          cp build/chart/index.yaml gh-pages/index.yaml
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.yaml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Publish Helm chart pod-server ${TAG#v}"
+          git push origin HEAD:gh-pages
         env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+
+      - name: Verify Helm repository
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf "${HELM_REPO_URL}/index.yaml" | grep -q "version: ${VERSION}$"; then
+              helm repo add oxfordia "${HELM_REPO_URL}"
+              helm pull oxfordia/pod-server --version "${VERSION}" --destination /tmp
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "GitHub Pages did not serve pod-server ${VERSION} at ${HELM_REPO_URL}/index.yaml." >&2
+          echo "Check Settings > Pages: source must be the gh-pages branch." >&2
+          exit 1
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
 
   sync-main-version:
     name: Sync Release Version To Main
@@ -177,21 +235,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Sync package version
-        run: |
-          release_version="${RELEASE_TAG#v}"
-          npm version "${release_version}" --no-git-tag-version
+      - name: Sync version files
+        run: bash scripts/version.sh set "${RELEASE_TAG}"
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
 
       - name: Commit version sync
         run: |
-          if git diff --quiet -- package.json package-lock.json; then
+          files=(package.json package-lock.json deploy/helm/pod-server/Chart.yaml)
+          if git diff --quiet -- "${files[@]}"; then
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
+          git add "${files[@]}"
           git commit -m "chore: sync release version ${{ github.event.release.tag_name }}"
           git push origin HEAD:main

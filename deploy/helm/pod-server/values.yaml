@@ -1,12 +1,15 @@
+# Must be 1: pod state lives on a ReadWriteOnce volume with file-based locks.
 replicaCount: 1
 
 image:
-  repository: ghcr.io/oxfordia-project/pod-server
-  tag: latest
+  repository: ghcr.io/oxfordia-project/oxfordia-node
+  # Defaults to the chart appVersion, which release CI sets to the image version.
+  tag: ""
   pullPolicy: IfNotPresent
 
 app:
-  baseUrl: https://pod.example.org
+  # Required. Public URL of the node, e.g. https://pod.example.org/
+  baseUrl: ""
   trustProxy: true
   dataPath: /var/lib/oxfordia-pod/data
 
@@ -25,12 +28,22 @@ triplestore:
   managed:
     image:
       repository: lyrasis/blazegraph
-      tag: 2.1.6-RC
+      tag: 2.1.5
       pullPolicy: IfNotPresent
     storageSize: 20Gi
     storageClass: ""
     servicePort: 9999
-    resources: {}
+    # lyrasis/blazegraph is only published for amd64. Set to null where amd64
+    # emulation is available (e.g. Docker Desktop on Apple Silicon).
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    # The image runs Java with -Xmx1g, so it needs more than 1Gi in total.
+    resources:
+      requests:
+        memory: 1536Mi
+        cpu: 100m
+      limits:
+        memory: 2Gi
 
 persistence:
   enabled: true
@@ -42,6 +55,9 @@ ingress:
   enabled: false
   className: ""
   hostname: pod.example.org
+  # ingress-nginx rejects request bodies over 1m by default, which blocks data
+  # uploads. Raise it for your controller, e.g.:
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "100m"
   annotations: {}
   tls:
     enabled: false
@@ -52,13 +68,14 @@ service:
   type: ClusterIP
   port: 80
 
+# Startup alone peaks near 400Mi while Components.js loads the server.
 resources:
   requests:
-    memory: 256Mi
+    memory: 512Mi
     cpu: 100m
   limits:
-    memory: 512Mi
-    cpu: 500m
+    memory: 1Gi
+    cpu: "1"
 
 serviceAccount:
   create: true

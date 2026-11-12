@@ -8,23 +8,11 @@ objects. Those shortcuts can be passed directly to statistic packages such as
 
 ## Install
 
-If the packages are available on CRAN:
-
-```r
-install.packages(
-  c("oxfordiar", "oxfordiar.data.nemaline"),
-  repos = "https://cloud.r-project.org"
-)
-```
-
-If you also want to run statistics:
-
-```r
-install.packages(
-  c("oxfordiar", "oxfordiar.data.nemaline", "oxfordiar.stat.mean", "oxfordiar.stat.kaplanmeier"),
-  repos = "https://cloud.r-project.org"
-)
-```
+The Oxfordia R packages are not on CRAN yet. See the
+[`oxfordiar` install instructions](../oxfordiar/README.md#install) for
+installing from GitHub or from a local clone. They install this package along
+with `solidauthr`, `oxfordiar` and the other Oxfordia packages, in the right
+order.
 
 ## Quick Start
 

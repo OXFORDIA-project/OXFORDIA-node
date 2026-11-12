@@ -1,10 +1,11 @@
 import React from "react";
 import { PodUiCore, type PodUiCoreProps } from "@oxfordia/pod-ui-core";
+import { angelmanDataPluginUi } from "@oxfordia/data-plugin-angelman_ui";
 import { nemalineDataPluginUi } from "@oxfordia/data-plugin-nemaline_ui";
 import { kaplanMeierStatisticPluginUi } from "@oxfordia/stat-plugin-kaplan-meier_ui";
 import { meanStatisticPluginUi } from "@oxfordia/stat-plugin-mean_ui";
 
-export const defaultDataPluginUis = [nemalineDataPluginUi];
+export const defaultDataPluginUis = [nemalineDataPluginUi, angelmanDataPluginUi];
 export const defaultStatisticPluginUis = [
   meanStatisticPluginUi,
   kaplanMeierStatisticPluginUi,
