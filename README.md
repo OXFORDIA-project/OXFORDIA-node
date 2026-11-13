@@ -162,8 +162,9 @@ sudo bash oxfordia-pod-idp-init.sh
 
 - `packages/data-plugin_core`: shared data-plugin contract and graph-path shortcut helpers
 - `packages/data-plugin_ui`: shared linked-data-browser UI contract for data plugins
-- `packages/data-plugin-nemaline_core`: nemaline ShEx/LDO generation and shortcut catalog
-- `packages/data-plugin-nemaline_ui`: nemaline resource view and CSV resource creator
+- `packages/data-plugin-nemaline_core`: nemaline pilot-analysis ShEx/LDO generation and shortcut catalog
+- `packages/data-plugin-nemaline_ui`: nemaline pilot-analysis resource view and CSV resource creator
+- `packages/data-plugin-legacy-nemaline_*`: the original nemaline data plugin (schema name `legacy-nemaline`)
 - `packages/stat-plugin_core`: shared statistic-plugin contract plus common GraphPath/statistic-access-rule LDO assets
 - `packages/stat-plugin_server`: server statistic-plugin contract and SPARQL helpers
 - `packages/stat-plugin_ui`: statistic-plugin UI contract and graph-path editor helpers
@@ -171,9 +172,9 @@ sudo bash oxfordia-pod-idp-init.sh
 - `packages/stat-plugin-kaplan-meier_*`: Kaplan-Meier statistic core/server/ui packages
 - `packages/oxfordia-client`: R client for federated statistic queries using registered data/statistic plugins
 - `packages/pod-server-core`: generic server wrapper that accepts injected plugins
-- `packages/pod-server`: default server bundle with nemaline, mean, and Kaplan-Meier
+- `packages/pod-server`: default server bundle with nemaline, legacy nemaline, mean, and Kaplan-Meier
 - `packages/pod-ui-core`: generic UI wrapper that accepts injected plugin UIs
-- `packages/pod-ui`: default UI bundle with nemaline, mean, and Kaplan-Meier
+- `packages/pod-ui`: default UI bundle with nemaline, legacy nemaline, angelman, mean, and Kaplan-Meier
 - `packages/pod-idp`: single-server CSS identity-provider deployment and related operator assets
 
 ### Local Development

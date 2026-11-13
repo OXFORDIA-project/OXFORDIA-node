@@ -10,6 +10,9 @@
   ],
   "references": [
     {
+      "path": "../data-plugin-legacy-nemaline_core"
+    },
+    {
       "path": "../data-plugin-nemaline_core"
     },
     {

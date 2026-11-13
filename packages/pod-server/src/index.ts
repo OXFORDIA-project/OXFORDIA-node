@@ -9,6 +9,7 @@ import {
 } from "@solid/community-server";
 import { Express } from "express";
 import { getLoggerFor } from "global-logger-factory";
+import { legacyNemalineDataPlugin } from "@oxfordia/data-plugin-legacy-nemaline_core";
 import { nemalineDataPlugin } from "@oxfordia/data-plugin-nemaline_core";
 import { kaplanMeierPlugin } from "@oxfordia/stat-plugin-kaplan-meier_server";
 import { meanPlugin } from "@oxfordia/stat-plugin-mean_server";
@@ -16,7 +17,7 @@ export * from "./CreatePasswordLoginHandler";
 export * from "./CreatePromptFactory";
 export * from "./HealthCheckHandler";
 
-export const defaultDataPlugins = [nemalineDataPlugin];
+export const defaultDataPlugins = [nemalineDataPlugin, legacyNemalineDataPlugin];
 export const defaultStatisticPlugins = [meanPlugin, kaplanMeierPlugin];
 
 export function createApp(

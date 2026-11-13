@@ -7,7 +7,12 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/**/*.json"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.ts"
   ],
   "references": [
     {
