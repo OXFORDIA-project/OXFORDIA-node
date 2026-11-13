@@ -8,6 +8,12 @@
       "path": "./packages/data-plugin_ui/tsconfig.json"
     },
     {
+      "path": "./packages/data-plugin-legacy-nemaline_core/tsconfig.json"
+    },
+    {
+      "path": "./packages/data-plugin-legacy-nemaline_ui/tsconfig.json"
+    },
+    {
       "path": "./packages/data-plugin-nemaline_core/tsconfig.json"
     },
     {

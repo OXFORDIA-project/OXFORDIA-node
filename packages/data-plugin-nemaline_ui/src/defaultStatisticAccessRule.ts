@@ -17,25 +17,20 @@ import {
   type KaplanMeierAllowedPath,
   type KaplanMeierStatisticAccessRule,
 } from "@oxfordia/stat-plugin-kaplan-meier_core";
+import { DERIVED_NUMERIC_FIELDS, NUMERIC_COLUMNS } from "./pilotColumns";
 
 const DATA_SCHEMA_NAME = "nemaline";
-const DEFAULT_MIN_COUNT = 1;
-const DEFAULT_K_ANONYMITY = 1;
-const DEFAULT_MEAN_SHORTCUTS = [
-  "BaselineAge",
-  "LoAAge",
-  "TotalMFM",
-  "KaplanMeierEvent",
-  "KaplanMeierTime",
-  "MFMVisitTimeFromBaseline",
-  "MFMVisitScore",
-] as const;
+// The pilot guidance sets a UK minimum count suppression of 3 for most fields.
+const DEFAULT_MIN_COUNT = 3;
+const DEFAULT_K_ANONYMITY = 3;
+const DEFAULT_MEAN_SHORTCUTS = [...NUMERIC_COLUMNS, ...DERIVED_NUMERIC_FIELDS].map(
+  (field) => field.shortcut,
+);
 const DEFAULT_KAPLAN_MEIER_GROUP_BY_SHORTCUTS = [
-  "ClusterCategory",
-  "GeneticGroup",
-  "AmbulationStatus",
-  "DominantHand",
-  "BelowAverageFlag",
+  "CausativeGene",
+  "GenderAssignedAtBirth",
+  "Zygosity",
+  "CurrentFN",
 ] as const;
 
 type MeanStatisticPolicy = StatisticPolicy & MeanStatisticAccessRule;
@@ -55,10 +50,10 @@ function requireNemalineGraphPath(shortcutName: string) {
 }
 
 function createDefaultMeanAllowedPath(
-  shortcutName: (typeof DEFAULT_MEAN_SHORTCUTS)[number],
+  shortcutName: string,
   statisticAccessRuleDocumentUri: string,
 ): MeanAllowedPath {
-  const suffix = shortcutName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  const suffix = shortcutName.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
   return {
     "@id": `${statisticAccessRuleDocumentUri}#mean-allowed-path-${suffix}`,
     graphPath: requireNemalineGraphPath(shortcutName),
@@ -66,13 +61,14 @@ function createDefaultMeanAllowedPath(
   };
 }
 
+// Age at attaining ambulation (AmbGainTime/AmbGainEvent are derived at upload).
 function createDefaultKaplanMeierAllowedPath(
   statisticAccessRuleDocumentUri: string,
 ): KaplanMeierAllowedPath {
   return {
-    "@id": `${statisticAccessRuleDocumentUri}#kaplan-meier-allowed-path-default`,
-    timeGraphPath: requireNemalineGraphPath("KaplanMeierTime"),
-    eventGraphPath: requireNemalineGraphPath("KaplanMeierEvent"),
+    "@id": `${statisticAccessRuleDocumentUri}#kaplan-meier-allowed-path-ambulation-gain`,
+    timeGraphPath: requireNemalineGraphPath("AmbGainTime"),
+    eventGraphPath: requireNemalineGraphPath("AmbGainEvent"),
     groupByGraphPath: set(
       ...DEFAULT_KAPLAN_MEIER_GROUP_BY_SHORTCUTS.map((shortcutName) =>
         requireNemalineGraphPath(shortcutName),
@@ -109,9 +105,7 @@ export function createNemalineDefaultStatisticAccessRuleDocument(
   const kaplanMeierPolicy: KaplanMeierStatisticPolicy = {
     "@id": `${statisticAccessRuleDocumentUri}#kaplan-meier-policy`,
     statisticName: "kaplan-meier",
-    allowedPath: set(
-      createDefaultKaplanMeierAllowedPath(statisticAccessRuleDocumentUri),
-    ),
+    allowedPath: set(createDefaultKaplanMeierAllowedPath(statisticAccessRuleDocumentUri)),
   };
 
   return {
@@ -123,9 +117,6 @@ export function createNemalineDefaultStatisticAccessRuleDocument(
         "@id": agent,
       })),
     ),
-    hasStatisticPolicy: set<NemalineStatisticPolicy>(
-      meanPolicy,
-      kaplanMeierPolicy,
-    ),
+    hasStatisticPolicy: set<NemalineStatisticPolicy>(meanPolicy, kaplanMeierPolicy),
   };
 }

@@ -14,6 +14,9 @@
       "path": "../data-plugin-angelman_ui"
     },
     {
+      "path": "../data-plugin-legacy-nemaline_ui"
+    },
+    {
       "path": "../data-plugin-nemaline_ui"
     },
     {
