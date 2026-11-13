@@ -12,7 +12,7 @@ data:
   CSS_PORT: "3000"
   TRUST_PROXY: {{ ternary "true" "false" .Values.app.trustProxy | quote }}
   {{- if eq .Values.triplestore.mode "managed" }}
-  CSS_SPARQL_ENDPOINT: {{ printf "http://%s:%v/blazegraph/sparql" (include "pod-server.blazegraphFullname" .) .Values.triplestore.managed.servicePort | quote }}
+  CSS_SPARQL_ENDPOINT: {{ printf "http://%s:%v/bigdata/sparql" (include "pod-server.blazegraphFullname" .) .Values.triplestore.managed.servicePort | quote }}
   {{- else if eq .Values.triplestore.mode "external" }}
   CSS_SPARQL_ENDPOINT: {{ required "triplestore.external.url is required when triplestore.mode=external" .Values.triplestore.external.url | quote }}
   {{- else }}

@@ -1,0 +1,185 @@
+name: Publish Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build (a release tag such as v0.1.0, or a commit SHA for next).
+        type: string
+        required: true
+      channel:
+        description: "release: tags <version> and latest. next: tags 0.0.0-next.<sha> and next."
+        type: string
+        required: true
+  # Manual runs (re)publish an image for an existing release tag or commit.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Release tag (e.g. v0.0.1-alpha.7) or full commit SHA on next.
+        type: string
+        required: true
+      channel:
+        description: "release: tags <version> and latest. next: tags 0.0.0-next.<sha> and next."
+        type: choice
+        options:
+          - release
+          - next
+        default: release
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/oxfordia-project/oxfordia-node
+
+jobs:
+  meta:
+    name: Derive Image Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Derive version and tags
+        id: meta
+        run: |
+          case "${CHANNEL}" in
+            release)
+              version="${REF#v}"
+              tags="${version} latest"
+              ;;
+            next)
+              sha="$(git rev-parse HEAD)"
+              version="0.0.0-next.${sha::7}"
+              tags="${version} next"
+              ;;
+            *) echo "Unknown channel: ${CHANNEL}" >&2; exit 1 ;;
+          esac
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tags=${tags}" >> "$GITHUB_OUTPUT"
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          REF: ${{ inputs.ref }}
+
+  build:
+    name: Build Image (${{ matrix.arch }})
+    needs: meta
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Stamp version
+        run: bash scripts/version.sh set "${{ needs.meta.outputs.version }}"
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.meta.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=docker-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=docker-${{ matrix.arch }}
+
+      - name: Smoke test image
+        run: |
+          docker run -d --name smoke -e CSS_SPARQL_ENDPOINT= "${IMAGE}@${DIGEST}"
+          for _ in $(seq 1 30); do
+            if docker exec smoke node -e "fetch('http://127.0.0.1:3000/healthz').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs smoke
+          exit 1
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+
+      - name: Export digest
+        run: |
+          mkdir -p "${RUNNER_TEMP}/digests"
+          touch "${RUNNER_TEMP}/digests/${DIGEST#sha256:}"
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Publish Multi-Arch Manifest
+    needs: [meta, build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: docker-digest-*
+          merge-multiple: true
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          tag_args=()
+          for tag in ${TAGS}; do
+            tag_args+=(-t "${IMAGE}:${tag}")
+          done
+          docker buildx imagetools create "${tag_args[@]}" $(printf "${IMAGE}@sha256:%s " *)
+        env:
+          TAGS: ${{ needs.meta.outputs.tags }}
+
+      - name: Inspect image
+        run: |
+          for tag in ${TAGS}; do
+            docker buildx imagetools inspect "${IMAGE}:${tag}"
+          done
+        env:
+          TAGS: ${{ needs.meta.outputs.tags }}

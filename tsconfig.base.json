@@ -21,6 +21,12 @@
       "@oxfordia/data-plugin_ui": [
         "./packages/data-plugin_ui/src/index.ts"
       ],
+      "@oxfordia/data-plugin-legacy-nemaline_core": [
+        "./packages/data-plugin-legacy-nemaline_core/src/index.ts"
+      ],
+      "@oxfordia/data-plugin-legacy-nemaline_ui": [
+        "./packages/data-plugin-legacy-nemaline_ui/src/index.ts"
+      ],
       "@oxfordia/data-plugin-nemaline_core": [
         "./packages/data-plugin-nemaline_core/src/index.ts"
       ],

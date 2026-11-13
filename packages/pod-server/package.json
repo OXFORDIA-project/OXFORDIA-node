@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ldo/ldo": "^1.0.0-alpha.51",
+    "@oxfordia/data-plugin-legacy-nemaline_core": "*",
     "@oxfordia/data-plugin-nemaline_core": "*",
     "@oxfordia/pod-server-core": "*",
     "@oxfordia/stat-plugin-count_server": "*",

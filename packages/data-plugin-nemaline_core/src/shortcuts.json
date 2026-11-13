@@ -1,350 +1,514 @@
 {
-  "PersonId": {
-    "name": "PersonId",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
-    "steps": [
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isIdentifiedBy" } },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/uniqueText" } }
-    ]
-  },
-  "ClusterCategory": {
-    "name": "ClusterCategory",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
-    "steps": [
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
-    ],
-    "target": {
-      "node": {
-        "iri": [
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Cluster_1",
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Cluster_2",
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Cluster_3"
-        ]
-      }
-    }
-  },
-  "GeneticGroup": {
-    "name": "GeneticGroup",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
-    "steps": [
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
-    ],
-    "target": {
-      "node": {
-        "iri": [
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GeneticGroup_Variant1",
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GeneticGroup_Variant2",
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GeneticGroup_Variant3"
-        ]
-      }
-    }
-  },
-  "AmbulationStatus": {
-    "name": "AmbulationStatus",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
-    "steps": [
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
-    ],
-    "target": {
-      "node": {
-        "iri": [
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Status_Ambulant",
-          "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Status_NonAmbulant"
-        ]
-      }
-    }
-  },
-  "DominantHand": {
-    "name": "DominantHand",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
-    "steps": [
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
-    ],
-    "target": {
-      "node": {
-        "iri": [
-          "https://paediatrics.ox.ac.uk/terms/LeftHanded",
-          "https://paediatrics.ox.ac.uk/terms/RightHanded"
-        ]
-      }
-    }
-  },
-  "BelowAverageFlag": {
-    "name": "BelowAverageFlag",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
-    "steps": [
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" } }
-    ],
-    "target": {
-      "node": {
-        "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Performance_BelowAverage"]
-      }
-    }
-  },
   "BaselineAge": {
     "name": "BaselineAge",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Aspect_Age"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtBaselineVisit"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
   },
-  "LoAAge": {
-    "name": "LoAAge",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+  "NumberOfVariants": {
+    "name": "NumberOfVariants",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtLossOfAmbulation"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_NumberOfVariants"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
   },
-  "TotalMFM": {
-    "name": "TotalMFM",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+  "AgeAtFirstSymptom": {
+    "name": "AgeAtFirstSymptom",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_AggregateScore"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtFirstSymptom"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
   },
-  "KaplanMeierEvent": {
-    "name": "KaplanMeierEvent",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+  "AgeAtPresentation": {
+    "name": "AgeAtPresentation",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
-        "inverse": true,
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_KaplanMeier"] } }
-            }
-          ]
-        }
-      },
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_KaplanMeierEventIndicator"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtPresentation"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
   },
-  "KaplanMeierTime": {
-    "name": "KaplanMeierTime",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+  "AgeAtDiagnosis": {
+    "name": "AgeAtDiagnosis",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
-        "inverse": true,
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_KaplanMeier"] } }
-            }
-          ]
-        }
-      },
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_KaplanMeierTimeToEvent"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtDiagnosis"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
   },
-  "MFMVisitTimeFromBaseline": {
-    "name": "MFMVisitTimeFromBaseline",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+  "AgeAmbulationAchieved": {
+    "name": "AgeAmbulationAchieved",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
-        "inverse": true,
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_MFM32"] } }
-            }
-          ]
-        }
-      },
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_DurationSinceStudyEnrollment"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtAmbulationAchieved"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
   },
-  "MFMVisitScore": {
-    "name": "MFMVisitScore",
-    "start": {
-      "predicates": [
-        {
-          "predicate": { "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-          "some": { "node": { "iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"] } }
-        }
-      ]
-    },
+  "AgeAmbulationLost": {
+    "name": "AgeAmbulationLost",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
     "steps": [
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasParticipant" },
-        "inverse": true,
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AssessmentType_MFM32"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/produces" } },
-      {
-        "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude" },
-        "where": {
-          "predicates": [
-            {
-              "predicate": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect" },
-              "some": { "node": { "iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_VisitScore"] } }
-            }
-          ]
-        }
-      },
-      { "via": { "@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue" } }
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtLossOfAmbulation"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
     ]
+  },
+  "AgeIndependentSittingAchieved": {
+    "name": "AgeIndependentSittingAchieved",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtIndependentSittingAchieved"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "AgeIndependentSittingLost": {
+    "name": "AgeIndependentSittingLost",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtLossOfIndependentSitting"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "VentilationHoursOn": {
+    "name": "VentilationHoursOn",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_DailyHoursOnVentilation"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "VentilationHoursOff": {
+    "name": "VentilationHoursOff",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_DailyHoursOffVentilation"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "AgeTubeFeedingCommenced": {
+    "name": "AgeTubeFeedingCommenced",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtTubeFeedingCommenced"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "CEDASScore": {
+    "name": "CEDASScore",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_CEDASScore"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "Weight": {
+    "name": "Weight",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_WeightAtBaselineVisit"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "Height": {
+    "name": "Height",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_HeightAtBaselineVisit"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "CobbAngle": {
+    "name": "CobbAngle",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_CobbAngle"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "AgeCobbAngleMeasured": {
+    "name": "AgeCobbAngleMeasured",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtCobbAngleMeasurement"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "AgeSpinalSurgery": {
+    "name": "AgeSpinalSurgery",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AgeAtSpinalSurgery"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "CHOPINTENDTotal": {
+    "name": "CHOPINTENDTotal",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_CHOPINTEND_TotalBestSide"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "MFM32Total": {
+    "name": "MFM32Total",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_AggregateScore"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "MFM32D1": {
+    "name": "MFM32D1",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_D1Score"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "MFM32D2": {
+    "name": "MFM32D2",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_D2Score"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "MFM32D3": {
+    "name": "MFM32D3",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_MFM32_D3Score"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "GripStrengthRight": {
+    "name": "GripStrengthRight",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_GripStrengthRight"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "GripStrengthLeft": {
+    "name": "GripStrengthLeft",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_GripStrengthLeft"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "PinchStrengthRight": {
+    "name": "PinchStrengthRight",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_PinchStrengthRight"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "PinchStrengthLeft": {
+    "name": "PinchStrengthLeft",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_PinchStrengthLeft"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "ZScoreH": {
+    "name": "ZScoreH",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_HeightForAgeZScore_UKWHO"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "ZScoreW": {
+    "name": "ZScoreW",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_WeightForAgeZScore_UKWHO"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "AmbGainEvent": {
+    "name": "AmbGainEvent",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AmbulationGainEvent"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "AmbGainTime": {
+    "name": "AmbGainTime",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasMagnitude"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasAspect"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Aspect_AmbulationGainTime"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/numericValue"}}
+    ]
+  },
+  "GenderAssignedAtBirth": {
+    "name": "GenderAssignedAtBirth",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gender_Male", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gender_Female", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gender_Unknown", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gender_Other"]}}
+  },
+  "CausativeGene": {
+    "name": "CausativeGene",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_NEB", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_ACTA1", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_TPM2", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_TPM3", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_KLHL40", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_KLHL41", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_MYPN", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_LMOD3", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_CFL2", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_KBTBD13", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_TNNT1", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Gene_TNNT3"]}}
+  },
+  "Zygosity": {
+    "name": "Zygosity",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Zygosity_Homozygous", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Zygosity_Heterozygous", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Zygosity_CompoundHeterozygous", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Zygosity_Hemizygous"]}}
+  },
+  "MuscleBiopsy": {
+    "name": "MuscleBiopsy",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/MuscleBiopsy_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/MuscleBiopsy_No", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/MuscleBiopsy_Unknown"]}}
+  },
+  "BiopsyResult": {
+    "name": "BiopsyResult",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/BiopsyResult_RodsOrBodies", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/BiopsyResult_RodsOrBodiesAndType1FibreAtrophy", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/BiopsyResult_NoRodsButType1FibreAtrophy", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/BiopsyResult_RodsOrBodiesAndOtherFindings", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/BiopsyResult_NoRodsButOtherFindings", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/BiopsyResult_NoBiopsyDone"]}}
+  },
+  "NatureOfFirstSymptoms": {
+    "name": "NatureOfFirstSymptoms",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_SkeletalMuscleOnly", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_RespiratoryOnly", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_BulbarOnly", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_SkeletalMuscleAndRespiratory", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_SkeletalMuscleAndBulbar", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_RespiratoryAndBulbar", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_SkeletalMuscleRespiratoryAndBulbar", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_FamilyHistoryAlone", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FirstSymptom_Other"]}}
+  },
+  "FamilyHistory": {
+    "name": "FamilyHistory",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FamilyHistory_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FamilyHistory_No", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FamilyHistory_Possibly", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/FamilyHistory_Unknown"]}}
+  },
+  "EverAchievedAmbulation": {
+    "name": "EverAchievedAmbulation",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/EverAmbulant_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/EverAmbulant_No", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/EverAmbulant_NotApplicable"]}}
+  },
+  "AmbulantAtBaseline": {
+    "name": "AmbulantAtBaseline",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AmbulantAtBaseline_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/AmbulantAtBaseline_No"]}}
+  },
+  "EverAchievedIndependentSitting": {
+    "name": "EverAchievedIndependentSitting",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/EverSatIndependently_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/EverSatIndependently_No", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/EverSatIndependently_NotApplicable"]}}
+  },
+  "IndependentSittingAtBaseline": {
+    "name": "IndependentSittingAtBaseline",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/SittingAtBaseline_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/SittingAtBaseline_No"]}}
+  },
+  "VentilationType": {
+    "name": "VentilationType",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Ventilation_None", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Ventilation_NonInvasive", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Ventilation_Invasive"]}}
+  },
+  "PreviousVentilation": {
+    "name": "PreviousVentilation",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PreviousVentilation_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PreviousVentilation_No"]}}
+  },
+  "TubeFeedingAtBaseline": {
+    "name": "TubeFeedingAtBaseline",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/TubeFedAtBaseline_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/TubeFedAtBaseline_No"]}}
+  },
+  "PreviousTubeFeeding": {
+    "name": "PreviousTubeFeeding",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PreviousTubeFeeding_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PreviousTubeFeeding_No"]}}
+  },
+  "ScoliosisAtBaseline": {
+    "name": "ScoliosisAtBaseline",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/ScoliosisAtBaseline_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/ScoliosisAtBaseline_No"]}}
+  },
+  "EverHadSpinalSurgery": {
+    "name": "EverHadSpinalSurgery",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/SpinalSurgery_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/SpinalSurgery_No"]}}
+  },
+  "GripDeviceMake": {
+    "name": "GripDeviceMake",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_JamarPerformanceHealth", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_BiometricsLtd", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_NorthCoastMedical", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_FabricationEnterprises", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_TakeiScientificInstruments", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_KERN", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_MIEMedicalResearch", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_MyogripAteliersLaumonier", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_Citec", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_MicroFETHogganScientific", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceMake_Other"]}}
+  },
+  "GripDeviceModel": {
+    "name": "GripDeviceModel",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_HydraulicHandDynamometer", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_SmartHandDynamometer", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_G200HandGrip", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_G100HandGrip", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_BaselineHydraulicHandDynamometer", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_BaselineDigitalSmedleyDynamometer", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_5401GripD", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_5001GripA", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_MAPHandGrip", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_MIEDigitalGripAnalyser", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_CITECHandHeld", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/GripDeviceModel_Other"]}}
+  },
+  "PinchDeviceMake": {
+    "name": "PinchDeviceMake",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_JamarPerformanceHealth", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_BiometricsLtd", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_NorthCoastMedical", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_FabricationEnterprisesBaseline", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_TakeiScientificInstruments", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_MIEMedicalResearch", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_AteliersLaumonier", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_CITEC", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_BLEngineering", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_MicroFETHogganScientific", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceMake_Other"]}}
+  },
+  "PinchDeviceModel": {
+    "name": "PinchDeviceModel",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_HydraulicPinchGauge", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_DigitalPinchGauge", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_MechanicalPinchGauge", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_Pinchmeter", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_PinchAnalyser", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_MyoPinch", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_PinchStrengthMeter", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_CITECHandHeld", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/PinchDeviceModel_Other"]}}
+  },
+  "CurrentFN": {
+    "name": "CurrentFN",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/CurrentFunction_Walker", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/CurrentFunction_Sitter", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/CurrentFunction_NonSitter"]}}
+  },
+  "Variant1HGVS": {
+    "name": "Variant1HGVS",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_1"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/containedText"}}
+    ]
+  },
+  "Variant1Type": {
+    "name": "Variant1Type",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_1"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_SNV", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Insertion", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Deletion", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Duplication", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_CNV", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Unknown"]}}
+  },
+  "Variant1Consequence": {
+    "name": "Variant1Consequence",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_1"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Missense", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Nonsense", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Frameshift", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_InFrame", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_SpliceAltering", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Synonymous", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Splice", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Unknown"]}}
+  },
+  "Variant1LossOfFunction": {
+    "name": "Variant1LossOfFunction",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_1"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_No", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_Unknown", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_Other"]}}
+  },
+  "Variant1Pathogenicity": {
+    "name": "Variant1Pathogenicity",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_1"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_Pathogenic", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_LikelyPathogenic", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_UncertainSignificance", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_LikelyBenign", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_Benign", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_Unknown"]}}
+  },
+  "Variant2HGVS": {
+    "name": "Variant2HGVS",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_2"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/containedText"}}
+    ]
+  },
+  "Variant2Type": {
+    "name": "Variant2Type",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_2"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_SNV", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Insertion", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Deletion", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Duplication", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_CNV", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantType_Unknown"]}}
+  },
+  "Variant2Consequence": {
+    "name": "Variant2Consequence",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_2"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Missense", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Nonsense", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Frameshift", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_InFrame", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_SpliceAltering", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Synonymous", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Splice", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantConsequence_Unknown"]}}
+  },
+  "Variant2LossOfFunction": {
+    "name": "Variant2LossOfFunction",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_2"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_Yes", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_No", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_Unknown", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/LossOfFunction_Other"]}}
+  },
+  "Variant2Pathogenicity": {
+    "name": "Variant2Pathogenicity",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": [
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/hasPart"}, "where": {"predicates": [{"predicate": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}, "some": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/VariantPosition_2"]}}}]}},
+      {"via": {"@id": "https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy"}}
+    ],
+    "target": {"node": {"iri": ["https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_Pathogenic", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_LikelyPathogenic", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_UncertainSignificance", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_LikelyBenign", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_Benign", "https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/Pathogenicity_Unknown"]}}
   }
 }

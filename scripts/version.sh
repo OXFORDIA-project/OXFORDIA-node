@@ -1,75 +1,103 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Version management script for OXFORDIA Pod
-# Usage: ./scripts/version.sh [get|set <version>|bump <type>]
+# Version management for OXFORDIA Pod.
+#
+# The release tag is the source of truth: release CI runs `set <tag>` before
+# building, so every artifact carries the tag's version, then commits the
+# stamped files back to main. These files hold the version:
+#   - package.json / package-lock.json (root package)
+#   - deploy/helm/pod-server/Chart.yaml (version and appVersion)
+#
+# Usage: ./scripts/version.sh [get | set <version> | bump <type> | check [<version>]]
 
-VERSION_FILE="version.json"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+chart_file="${repo_root}/deploy/helm/pod-server/Chart.yaml"
+semver_re='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
 
-# Function to get current version
 get_version() {
-    if [[ -f "$VERSION_FILE" ]]; then
-        grep -o '"version": "[^"]*"' "$VERSION_FILE" | cut -d'"' -f4
-    else
-        echo "0.1.0-alpha.0"
-    fi
+    node -p "require('${repo_root}/package.json').version"
 }
 
-# Function to set version
+chart_field() {
+    sed -n "s/^$1: *//p" "${chart_file}"
+}
+
+normalize() {
+    local version="${1#v}"
+    if [[ ! "${version}" =~ ${semver_re} ]]; then
+        echo "Error: Invalid version: $1" >&2
+        exit 1
+    fi
+    echo "${version}"
+}
+
 set_version() {
-    local new_version="$1"
-    if [[ -f "$VERSION_FILE" ]]; then
-        # Update existing version.json
-        sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$new_version\"/" "$VERSION_FILE"
-        rm -f "$VERSION_FILE.bak"
-    else
-        # Create new version.json
-        cat > "$VERSION_FILE" << EOF
-{
-  "version": "$new_version",
-  "description": "OXFORDIA Pod version configuration"
-}
-EOF
-    fi
-    
-    # Update package.json
-    sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$new_version\"/" package.json
-    rm -f package.json.bak
-    
-    # Update URLs in config files (extract major version and set minor/patch to 0)
-    local major_version
-    if [[ "$new_version" =~ ^([0-9]+)\. ]]; then
-        major_version="${BASH_REMATCH[1]}"
-        local url_version="$major_version.0.0"
-        
-        # Update URLs in all config files and package.json
-        find config -name "*.json" -type f -exec sed -i.bak "s|linkedsoftwaredependencies\.org/bundles/npm/setmeld-pod/\^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*|linkedsoftwaredependencies.org/bundles/npm/setmeld-pod/^$url_version|g" {} \;
-        sed -i.bak "s|linkedsoftwaredependencies\.org/bundles/npm/setmeld-pod/\^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*|linkedsoftwaredependencies.org/bundles/npm/setmeld-pod/^$url_version|g" package.json
-        find config -name "*.json.bak" -type f -delete
-        rm -f package.json.bak
-    fi
-    
-    echo "Version updated to: $new_version"
+    local new_version
+    new_version="$(normalize "$1")"
+
+    (cd "${repo_root}" && VERSION="${new_version}" node -e '
+const fs = require("fs");
+const version = process.env.VERSION;
+for (const file of ["package.json", "package-lock.json"]) {
+  const json = JSON.parse(fs.readFileSync(file, "utf8"));
+  json.version = version;
+  if (json.packages && json.packages[""]) json.packages[""].version = version;
+  fs.writeFileSync(file, JSON.stringify(json, null, 2) + "\n");
+}')
+
+    sed -i.bak \
+        -e "s/^version: .*/version: ${new_version}/" \
+        -e "s/^appVersion: .*/appVersion: ${new_version}/" \
+        "${chart_file}"
+    rm -f "${chart_file}.bak"
+
+    echo "Version updated to: ${new_version}"
 }
 
-# Function to bump version
+check_version() {
+    local expected="${1:-}"
+    local pkg lock chart_version chart_app status=0
+    pkg="$(get_version)"
+    lock="$(node -p "require('${repo_root}/package-lock.json').version")"
+    chart_version="$(chart_field version)"
+    chart_app="$(chart_field appVersion)"
+    if [[ -n "${expected}" ]]; then
+        expected="$(normalize "${expected}")"
+    else
+        expected="${pkg}"
+    fi
+
+    for entry in "package.json:${pkg}" "package-lock.json:${lock}" \
+        "Chart.yaml version:${chart_version}" "Chart.yaml appVersion:${chart_app}"; do
+        if [[ "${entry##*:}" != "${expected}" ]]; then
+            echo "Version mismatch: ${entry%:*} is ${entry##*:}, expected ${expected}" >&2
+            status=1
+        fi
+    done
+
+    if [[ "${status}" -ne 0 ]]; then
+        echo "Run: npm run version:set ${expected}" >&2
+        exit 1
+    fi
+    echo "All versions are ${expected}"
+}
+
 bump_version() {
-    local current_version=$(get_version)
-    local bump_type="$1"
-    
-    # Parse version components
-    local major minor patch prerelease prerelease_version
+    local current_version bump_type="$1"
+    current_version="$(get_version)"
+
+    local major minor patch prerelease_version
     if [[ "$current_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$ ]]; then
         major="${BASH_REMATCH[1]}"
         minor="${BASH_REMATCH[2]}"
         patch="${BASH_REMATCH[3]}"
-        prerelease="${BASH_REMATCH[4]}"
         prerelease_version="${BASH_REMATCH[5]}"
     else
-        echo "Error: Invalid version format: $current_version"
+        echo "Error: Invalid version format: $current_version" >&2
         exit 1
     fi
-    
+
     local new_version
     case "$bump_type" in
         "major")
@@ -83,11 +111,8 @@ bump_version() {
             ;;
         "prerelease")
             if [[ -n "$prerelease_version" ]]; then
-                # Extract prerelease type and number
                 if [[ "$prerelease_version" =~ ^([a-zA-Z0-9.-]+)\.([0-9]+)$ ]]; then
-                    local prerelease_type="${BASH_REMATCH[1]}"
-                    local prerelease_num="${BASH_REMATCH[2]}"
-                    new_version="$major.$minor.$patch-$prerelease_type.$((prerelease_num + 1))"
+                    new_version="$major.$minor.$patch-${BASH_REMATCH[1]}.$((BASH_REMATCH[2] + 1))"
                 else
                     new_version="$major.$minor.$patch-$prerelease_version.1"
                 fi
@@ -96,49 +121,43 @@ bump_version() {
             fi
             ;;
         *)
-            echo "Error: Invalid bump type. Use: major, minor, patch, or prerelease"
+            echo "Error: Invalid bump type. Use: major, minor, patch, or prerelease" >&2
             exit 1
             ;;
     esac
-    
+
     set_version "$new_version"
 }
 
-# Main script logic
 case "${1:-get}" in
     "get")
         get_version
         ;;
     "set")
         if [[ -z "${2:-}" ]]; then
-            echo "Error: Version required for 'set' command"
-            echo "Usage: $0 set <version>"
+            echo "Usage: $0 set <version>" >&2
             exit 1
         fi
         set_version "$2"
         ;;
     "bump")
         if [[ -z "${2:-}" ]]; then
-            echo "Error: Bump type required for 'bump' command"
-            echo "Usage: $0 bump <major|minor|patch|prerelease>"
+            echo "Usage: $0 bump <major|minor|patch|prerelease>" >&2
             exit 1
         fi
         bump_version "$2"
         ;;
+    "check")
+        check_version "${2:-}"
+        ;;
     *)
-        echo "Usage: $0 [get|set <version>|bump <type>]"
+        echo "Usage: $0 [get | set <version> | bump <type> | check [<version>]]"
         echo ""
         echo "Commands:"
-        echo "  get                    - Get current version"
-        echo "  set <version>          - Set version to specific value"
-        echo "  bump <type>            - Bump version (major|minor|patch|prerelease)"
-        echo ""
-        echo "Examples:"
-        echo "  $0 get"
-        echo "  $0 set 1.0.0"
-        echo "  $0 set 0.2.0-beta.1"
-        echo "  $0 bump patch"
-        echo "  $0 bump prerelease"
+        echo "  get                - Print the current version"
+        echo "  set <version>      - Set the version everywhere (a leading v is stripped)"
+        echo "  bump <type>        - Bump version (major|minor|patch|prerelease)"
+        echo "  check [<version>]  - Fail if any file disagrees (with each other, or with <version>)"
         exit 1
         ;;
 esac

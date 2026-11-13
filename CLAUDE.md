@@ -85,6 +85,7 @@ npm run format:r:check
 npm run version:get       # Print current version
 npm run version:set v0.0.2-alpha.1  # Set exact version
 npm run version:bump major|minor|patch|prerelease
+npm run version:check     # Fail if package.json, lockfile and Chart.yaml disagree
 ```
 
 ### GitHub Actions (Local Testing with `act`)
@@ -114,7 +115,7 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
   - Account/login helpers
 
 - **`packages/pod-server`**: Default server bundle that injects:
-  - Nemaline data plugin
+  - Nemaline and legacy nemaline data plugins
   - Mean, Kaplan-Meier, count, and standard deviation statistic plugins
   - CSS config and Components.js bundle
   - Password login handler
@@ -124,15 +125,16 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
   - Statistic access rule editor
   - Resource navigation
 
-- **`packages/pod-ui`**: Default UI bundle injecting nemaline, mean, Kaplan-Meier, count, and standard deviation UI plugins. Built with Expo and served as static HTML from pod-server.
+- **`packages/pod-ui`**: Default UI bundle injecting nemaline, legacy nemaline, angelman, mean, Kaplan-Meier, count, and standard deviation UI plugins. Built with Expo and served as static HTML from pod-server.
 
 #### Plugin System
 
 **Data Plugins** (`data-plugin_*`):
 - `data-plugin_core`: Contract/interfaces
 - `data-plugin_ui`: UI contract for resource views
-- `data-plugin-nemaline_core`: Nemaline ShEx schema and LDO generation
-- `data-plugin-nemaline_ui`: Nemaline-specific resource views
+- `data-plugin-nemaline_core`: Nemaline pilot-analysis ShEx schema and LDO generation
+- `data-plugin-nemaline_ui`: Nemaline pilot-analysis resource view and CSV importer
+- `data-plugin-legacy-nemaline_core` / `_ui`: The original nemaline plugin (schema name `legacy-nemaline`)
 
 **Statistic Plugins** (`stat-plugin_*`):
 - `stat-plugin_core`: Core contract, defines query/output/access-rule schemas
@@ -347,7 +349,7 @@ docker run --rm -p 3000:3000 \
   -e CSS_ROOT_FILE_PATH=/data \
   -e CSS_SPARQL_ENDPOINT=http://host.docker.internal:8889/blazegraph/sparql \
   -v "$PWD/data:/data" \
-  oxfordia-pod-server
+  ghcr.io/oxfordia-project/oxfordia-node:local
 ```
 
 ### Debian Package

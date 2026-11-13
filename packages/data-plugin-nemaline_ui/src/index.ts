@@ -10,9 +10,9 @@ export const nemalineDataPluginUi: DataPluginUi = {
   dataPlugin: nemalineDataPlugin,
 };
 
-export * from "./KaplanMeierObservationsTester";
-export * from "./MeanQueryTester";
 export * from "./NemalineConfig";
 export * from "./NemalineCsvResourceCreator";
 export * from "./NemalineView";
 export * from "./defaultStatisticAccessRule";
+export * from "./nemalinePilotCsv";
+export * from "./pilotColumns";

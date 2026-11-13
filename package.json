@@ -1,6 +1,6 @@
 {
   "name": "oxfordia-monorepo",
-  "version": "0.0.1-alpha.4",
+  "version": "0.0.1-alpha.7",
   "description": "OXFORDIA Nx monorepo",
   "private": true,
   "engines": {
@@ -14,7 +14,7 @@
     "build": "nx run-many -t build --all --parallel=3",
     "build:deb": "bash deploy/deb/build-deb.sh",
     "build:deb:idp": "bash deploy/deb/build-idp-deb.sh",
-    "build:docker": "docker build -t oxfordia-pod-server .",
+    "build:docker": "docker build -t ghcr.io/oxfordia-project/oxfordia-node:local .",
     "build:server": "npm run build:server:types && npm --prefix packages/pod-server run build",
     "build:server:types": "tsc -b packages/pod-server/tsconfig.json --pretty false --force",
     "build:ui": "npm run build:ui:types && npm --prefix packages/pod-ui run build:server",
@@ -43,7 +43,8 @@
     "watch:ui:types": "tsc -b packages/pod-ui/tsconfig.json --watch --preserveWatchOutput",
     "version:get": "bash ./scripts/version.sh get",
     "version:set": "bash ./scripts/version.sh set",
-    "version:bump": "bash ./scripts/version.sh bump"
+    "version:bump": "bash ./scripts/version.sh bump",
+    "version:check": "bash ./scripts/version.sh check"
   },
   "workspaces": [
     "packages/*"
