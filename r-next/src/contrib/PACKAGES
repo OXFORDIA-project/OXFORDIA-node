@@ -1,0 +1,69 @@
+Package: oxfordiar
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: httr2, jsonlite, solidauthr (>= 0.1.2)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: 6bec8c5f37a3662578198e494c4779f2
+NeedsCompilation: no
+File: oxfordiar_0.0.1.14.tar.gz
+
+Package: oxfordiar.data.legacynemaline
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: jsonlite, oxfordiar (>= 0.0.1.14)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: b790e99bc3b7d1ed7b7227c1829125f8
+NeedsCompilation: no
+File: oxfordiar.data.legacynemaline_0.0.1.14.tar.gz
+
+Package: oxfordiar.data.nemaline
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: jsonlite, oxfordiar (>= 0.0.1.14)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: 0fab00221ba3ffa298eba6ee4547dfed
+NeedsCompilation: no
+File: oxfordiar.data.nemaline_0.0.1.14.tar.gz
+
+Package: oxfordiar.stat.count
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: oxfordiar (>= 0.0.1.14)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: 5906c86f4f0c89c10009f9c145f2c028
+NeedsCompilation: no
+File: oxfordiar.stat.count_0.0.1.14.tar.gz
+
+Package: oxfordiar.stat.kaplanmeier
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: oxfordiar (>= 0.0.1.14)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: 037047f6a7a33ea9691bb6af5619e9f4
+NeedsCompilation: no
+File: oxfordiar.stat.kaplanmeier_0.0.1.14.tar.gz
+
+Package: oxfordiar.stat.mean
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: oxfordiar (>= 0.0.1.14)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: caa0a0702050185376d5275d0695e821
+NeedsCompilation: no
+File: oxfordiar.stat.mean_0.0.1.14.tar.gz
+
+Package: oxfordiar.stat.standarddeviation
+Version: 0.0.1.14
+Depends: R (>= 4.1.0)
+Imports: oxfordiar (>= 0.0.1.14)
+Suggests: testthat (>= 3.0.0)
+License: MIT
+MD5sum: dc22374dc5d29d8ce94c5129fcc94031
+NeedsCompilation: no
+File: oxfordiar.stat.standarddeviation_0.0.1.14.tar.gz
