@@ -116,8 +116,9 @@ jobs:
         run: |
           Rscript -e '
             lib <- tempfile("lib-"); dir.create(lib)
+            # solidauthr comes from CRAN, like the other dependencies.
             packages <- c(
-              "solidauthr", "oxfordiar", "oxfordiar.data.nemaline",
+              "oxfordiar", "oxfordiar.data.nemaline",
               "oxfordiar.data.legacynemaline", "oxfordiar.stat.count",
               "oxfordiar.stat.mean", "oxfordiar.stat.standarddeviation",
               "oxfordiar.stat.kaplanmeier"
