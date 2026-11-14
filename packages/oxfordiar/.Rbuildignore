@@ -1,2 +1,8 @@
-^\\.env$
 ^dist$
+^\.rlib$
+^\.env$
+^\.env\.example$
+^\.lintr$
+^project\.json$
+^scripts$
+^smoke-output$

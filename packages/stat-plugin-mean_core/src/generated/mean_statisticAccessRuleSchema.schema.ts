@@ -1,11 +1,11 @@
-import { Schema } from "shexj";
+import type { Schema } from "shexj";
 
 /**
  * =============================================================================
- * mean_statisticAccessRuleSchemaSchema: ShexJ Schema for mean_statisticAccessRuleSchema
+ * meanStatisticAccessRuleSchemaSchema: ShexJ Schema for mean_statisticAccessRuleSchema
  * =============================================================================
  */
-export const mean_statisticAccessRuleSchemaSchema: Schema = {
+export const meanStatisticAccessRuleSchemaSchema: Schema = {
   type: "Schema",
   start: "https://oxfordia.setmeld.com/statistics#MeanStatisticAccessRuleShape",
   shapes: [
@@ -37,6 +37,15 @@ export const mean_statisticAccessRuleSchemaSchema: Schema = {
               predicate: "https://oxfordia.setmeld.com/statistics#graphPath",
               valueExpr:
                 "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+            },
+            {
+              type: "TripleConstraint",
+              predicate:
+                "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+              min: 0,
+              max: -1,
             },
             {
               type: "TripleConstraint",

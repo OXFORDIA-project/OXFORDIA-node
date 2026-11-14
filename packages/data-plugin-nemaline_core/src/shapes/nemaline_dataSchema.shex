@@ -4,92 +4,348 @@ PREFIX gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
 PREFIX ox: <https://paediatrics.ox.ac.uk/terms/>
 PREFIX nm: <https://paediatrics.ox.ac.uk/nemaline-myopathy/terms/>
 
-start = @ox:PersonShape
+# Nemaline Myopathy Data Federation pilot analysis (2026/2027).
+# One Person per spreadsheet row; all values relate to the baseline visit.
+# See "Guidance for pilot analysis data entry" V1.0 (13 Oct 2026).
+#
+# All gist:numericValue literals are xsd:decimal: LDO cannot express a
+# predicate with mixed literal datatypes in a JSON-LD context.
 
-ox:PersonShape {
+start = @nm:PersonShape
+
+nm:PersonShape {
   a [gist:Person] ;
-  gist:isIdentifiedBy @ox:IDShape ? ;
-  gist:isCategorizedBy [nm:Cluster_1 nm:Cluster_2 nm:Cluster_3] ? ;
-  gist:isCategorizedBy [nm:GeneticGroup_Variant1 nm:GeneticGroup_Variant2 nm:GeneticGroup_Variant3] ? ;
-  gist:isCategorizedBy [ox:LeftHanded ox:RightHanded] ? ;
-  gist:isCategorizedBy [nm:Status_Ambulant nm:Status_NonAmbulant] ? ;
-  gist:isCategorizedBy [nm:Performance_BelowAverage] ? ;
-  gist:hasMagnitude @ox:BaselineAgeMagnitude ? ;
-  gist:hasMagnitude @ox:LoAAgeMagnitude ? ;
-  gist:hasMagnitude @ox:TotalMFMMagnitude ? ;
-  ^gist:hasParticipant @nm:MFMAssessmentEventShape * ;
-  ^gist:hasParticipant @nm:KaplanMeierObservationShape ? ;
+  # Gender assigned at birth (column D)
+  gist:isCategorizedBy [nm:Gender_Male nm:Gender_Female nm:Gender_Unknown nm:Gender_Other] ? ;
+  # Causative gene (column E)
+  gist:isCategorizedBy [nm:Gene_NEB nm:Gene_ACTA1 nm:Gene_TPM2 nm:Gene_TPM3 nm:Gene_KLHL40 nm:Gene_KLHL41 nm:Gene_MYPN nm:Gene_LMOD3 nm:Gene_CFL2 nm:Gene_KBTBD13 nm:Gene_TNNT1 nm:Gene_TNNT3] ? ;
+  # Zygosity (column F)
+  gist:isCategorizedBy [nm:Zygosity_Homozygous nm:Zygosity_Heterozygous nm:Zygosity_CompoundHeterozygous nm:Zygosity_Hemizygous] ? ;
+  # Muscle biopsy performed (column R)
+  gist:isCategorizedBy [nm:MuscleBiopsy_Yes nm:MuscleBiopsy_No nm:MuscleBiopsy_Unknown] ? ;
+  # Muscle biopsy result (column S)
+  gist:isCategorizedBy [nm:BiopsyResult_RodsOrBodies nm:BiopsyResult_RodsOrBodiesAndType1FibreAtrophy nm:BiopsyResult_NoRodsButType1FibreAtrophy nm:BiopsyResult_RodsOrBodiesAndOtherFindings nm:BiopsyResult_NoRodsButOtherFindings nm:BiopsyResult_NoBiopsyDone] ? ;
+  # Nature of first symptom(s) (column W)
+  gist:isCategorizedBy [nm:FirstSymptom_SkeletalMuscleOnly nm:FirstSymptom_RespiratoryOnly nm:FirstSymptom_BulbarOnly nm:FirstSymptom_SkeletalMuscleAndRespiratory nm:FirstSymptom_SkeletalMuscleAndBulbar nm:FirstSymptom_RespiratoryAndBulbar nm:FirstSymptom_SkeletalMuscleRespiratoryAndBulbar nm:FirstSymptom_FamilyHistoryAlone nm:FirstSymptom_Other] ? ;
+  # Family history (column AD)
+  gist:isCategorizedBy [nm:FamilyHistory_Yes nm:FamilyHistory_No nm:FamilyHistory_Possibly nm:FamilyHistory_Unknown] ? ;
+  # Ever achieved ambulation (walks 10m independently) (column AE)
+  gist:isCategorizedBy [nm:EverAmbulant_Yes nm:EverAmbulant_No nm:EverAmbulant_NotApplicable] ? ;
+  # Ambulant at baseline visit (column AI)
+  gist:isCategorizedBy [nm:AmbulantAtBaseline_Yes nm:AmbulantAtBaseline_No] ? ;
+  # Ever achieved independent sitting (column AM)
+  gist:isCategorizedBy [nm:EverSatIndependently_Yes nm:EverSatIndependently_No nm:EverSatIndependently_NotApplicable] ? ;
+  # Independently sitting at baseline visit (column AQ)
+  gist:isCategorizedBy [nm:SittingAtBaseline_Yes nm:SittingAtBaseline_No] ? ;
+  # Type of ventilation (column AX)
+  gist:isCategorizedBy [nm:Ventilation_None nm:Ventilation_NonInvasive nm:Ventilation_Invasive] ? ;
+  # Previously required ventilation (column AY)
+  gist:isCategorizedBy [nm:PreviousVentilation_Yes nm:PreviousVentilation_No] ? ;
+  # Requirement for tube feeding at baseline visit (column AZ)
+  gist:isCategorizedBy [nm:TubeFedAtBaseline_Yes nm:TubeFedAtBaseline_No] ? ;
+  # Previously tube fed (column BC)
+  gist:isCategorizedBy [nm:PreviousTubeFeeding_Yes nm:PreviousTubeFeeding_No] ? ;
+  # Presence of scoliosis at baseline visit (column BF)
+  gist:isCategorizedBy [nm:ScoliosisAtBaseline_Yes nm:ScoliosisAtBaseline_No] ? ;
+  # Ever had spinal surgery (column BI)
+  gist:isCategorizedBy [nm:SpinalSurgery_Yes nm:SpinalSurgery_No] ? ;
+  # Make of grip dynamometer (column BR)
+  gist:isCategorizedBy [nm:GripDeviceMake_JamarPerformanceHealth nm:GripDeviceMake_BiometricsLtd nm:GripDeviceMake_NorthCoastMedical nm:GripDeviceMake_FabricationEnterprises nm:GripDeviceMake_TakeiScientificInstruments nm:GripDeviceMake_KERN nm:GripDeviceMake_MIEMedicalResearch nm:GripDeviceMake_MyogripAteliersLaumonier nm:GripDeviceMake_Citec nm:GripDeviceMake_MicroFETHogganScientific nm:GripDeviceMake_Other] ? ;
+  # Model of grip dynamometer (column BS)
+  gist:isCategorizedBy [nm:GripDeviceModel_HydraulicHandDynamometer nm:GripDeviceModel_SmartHandDynamometer nm:GripDeviceModel_G200HandGrip nm:GripDeviceModel_G100HandGrip nm:GripDeviceModel_BaselineHydraulicHandDynamometer nm:GripDeviceModel_BaselineDigitalSmedleyDynamometer nm:GripDeviceModel_5401GripD nm:GripDeviceModel_5001GripA nm:GripDeviceModel_MAPHandGrip nm:GripDeviceModel_MIEDigitalGripAnalyser nm:GripDeviceModel_CITECHandHeld nm:GripDeviceModel_Other] ? ;
+  # Make of pinch dynamometer (column BV)
+  gist:isCategorizedBy [nm:PinchDeviceMake_JamarPerformanceHealth nm:PinchDeviceMake_BiometricsLtd nm:PinchDeviceMake_NorthCoastMedical nm:PinchDeviceMake_FabricationEnterprisesBaseline nm:PinchDeviceMake_TakeiScientificInstruments nm:PinchDeviceMake_MIEMedicalResearch nm:PinchDeviceMake_AteliersLaumonier nm:PinchDeviceMake_CITEC nm:PinchDeviceMake_BLEngineering nm:PinchDeviceMake_MicroFETHogganScientific nm:PinchDeviceMake_Other] ? ;
+  # Model of pinch dynamometer (column BW)
+  gist:isCategorizedBy [nm:PinchDeviceModel_HydraulicPinchGauge nm:PinchDeviceModel_DigitalPinchGauge nm:PinchDeviceModel_MechanicalPinchGauge nm:PinchDeviceModel_Pinchmeter nm:PinchDeviceModel_PinchAnalyser nm:PinchDeviceModel_MyoPinch nm:PinchDeviceModel_PinchStrengthMeter nm:PinchDeviceModel_CITECHandHeld nm:PinchDeviceModel_Other] ? ;
+  # Functional status at baseline visit (derived at upload)
+  gist:isCategorizedBy [nm:CurrentFunction_Walker nm:CurrentFunction_Sitter nm:CurrentFunction_NonSitter] ? ;
+  # Numeric fields, one magnitude per field (see the shapes below)
+  gist:hasMagnitude (
+    @nm:BaselineAgeMagnitude OR  # Age at baseline visit (columns A+B)
+    @nm:NumberOfVariantsMagnitude OR  # Number of variants (0-4) (column G)
+    @nm:FirstSymptomAgeMagnitude OR  # Age of first symptom (onset of disease) (columns T+U)
+    @nm:PresentationAgeMagnitude OR  # Age of presentation to medical services (columns X+Y)
+    @nm:DiagnosisAgeMagnitude OR  # Age of diagnosis (usually date of genetic report) (columns AA+AB)
+    @nm:AmbulationAchievedAgeMagnitude OR  # Age ambulation achieved (columns AF+AG)
+    @nm:AmbulationLostAgeMagnitude OR  # Age ambulation lost (columns AJ+AK)
+    @nm:SittingAchievedAgeMagnitude OR  # Age independent sitting achieved (columns AN+AO)
+    @nm:SittingLostAgeMagnitude OR  # Age independent sitting lost (columns AR+AS)
+    @nm:VentilationHoursOnMagnitude OR  # Time on ventilation per day (hours) (column AU)
+    @nm:VentilationHoursOffMagnitude OR  # Time off ventilation per day (hours) (column AV)
+    @nm:TubeFeedingAgeMagnitude OR  # Age tube feeding commenced (decimal years) (column BA)
+    @nm:CEDASScoreMagnitude OR  # CEDAS/FOIS level (1-6) (column BB)
+    @nm:WeightMagnitude OR  # Weight at baseline visit (kg) (column BD)
+    @nm:HeightMagnitude OR  # Height at baseline visit (cm) (column BE)
+    @nm:CobbAngleMagnitude OR  # Cobb angle (degrees) (column BG)
+    @nm:CobbAngleAgeMagnitude OR  # Age Cobb angle measured (decimal years) (column BH)
+    @nm:SpinalSurgeryAgeMagnitude OR  # Age of spinal surgery (decimal years) (column BJ)
+    @nm:CHOPINTENDTotalMagnitude OR  # CHOP INTEND total score of best side (0-64) (column BK)
+    @nm:MFM32TotalMagnitude OR  # MFM32 total raw score (0-96) (column BL)
+    @nm:MFM32D1Magnitude OR  # MFM32 D1 raw score (0-39) (column BM)
+    @nm:MFM32D2Magnitude OR  # MFM32 D2 raw score (0-36) (column BN)
+    @nm:MFM32D3Magnitude OR  # MFM32 D3 raw score (0-21) (column BO)
+    @nm:GripStrengthRightMagnitude OR  # Grip strength best valid value, right hand (kg) (column BP)
+    @nm:GripStrengthLeftMagnitude OR  # Grip strength best valid value, left hand (kg) (column BQ)
+    @nm:PinchStrengthRightMagnitude OR  # Pinch strength best valid value, right hand (kg) (column BT)
+    @nm:PinchStrengthLeftMagnitude OR  # Pinch strength best valid value, left hand (kg) (column BU)
+    @nm:HeightZScoreMagnitude OR  # Height-for-age Z-score at baseline (UK-WHO reference) (derived at upload)
+    @nm:WeightZScoreMagnitude OR  # Weight-for-age Z-score at baseline (UK-WHO reference) (derived at upload)
+    @nm:AmbulationGainEventMagnitude OR  # Attaining ambulation: Kaplan-Meier event indicator (1 = achieved, 0 = censored) (derived at upload)
+    @nm:AmbulationGainTimeMagnitude  # Attaining ambulation: Kaplan-Meier time (years) (derived at upload)
+  ) * ;
+  # Variant 1 (columns H-L) and variant 2 (columns M-Q)
+  gist:hasPart @nm:GeneticVariantShape {0,2} ;
 }
 
-nm:MFMAssessmentEventShape {
-  a [gist:Determination] ;
-  gist:isCategorizedBy [nm:AssessmentType_MFM32] ? ;
-  gist:hasMagnitude @nm:TimeFromBaselineMagnitude ? ;
-  gist:hasParticipant @ox:PersonShape ? ;
-  gist:produces @nm:AssessmentResult ? ;
+nm:GeneticVariantShape {
+  a [nm:GeneticVariant] ;
+  gist:isCategorizedBy [nm:VariantPosition_1 nm:VariantPosition_2] ;
+  # HGVS nomenclature: RefSeq transcript (with version), c. and p. descriptions
+  gist:containedText xsd:string ? ;
+  # Variant type
+  gist:isCategorizedBy [nm:VariantType_SNV nm:VariantType_Insertion nm:VariantType_Deletion nm:VariantType_Duplication nm:VariantType_CNV nm:VariantType_Unknown] ? ;
+  # Variant consequence
+  gist:isCategorizedBy [nm:VariantConsequence_Missense nm:VariantConsequence_Nonsense nm:VariantConsequence_Frameshift nm:VariantConsequence_InFrame nm:VariantConsequence_SpliceAltering nm:VariantConsequence_Synonymous nm:VariantConsequence_Splice nm:VariantConsequence_Unknown] ? ;
+  # Loss of function predicted
+  gist:isCategorizedBy [nm:LossOfFunction_Yes nm:LossOfFunction_No nm:LossOfFunction_Unknown nm:LossOfFunction_Other] ? ;
+  # Pathogenicity
+  gist:isCategorizedBy [nm:Pathogenicity_Pathogenic nm:Pathogenicity_LikelyPathogenic nm:Pathogenicity_UncertainSignificance nm:Pathogenicity_LikelyBenign nm:Pathogenicity_Benign nm:Pathogenicity_Unknown] ? ;
 }
 
-nm:KaplanMeierObservationShape {
-  a [gist:Determination] ;
-  gist:isCategorizedBy [nm:AssessmentType_KaplanMeier] ? ;
-  gist:hasParticipant @ox:PersonShape ? ;
-  gist:hasMagnitude @ox:KaplanMeierEventMagnitude ? ;
-  gist:hasMagnitude @ox:KaplanMeierTimeMagnitude ? ;
-}
-
-nm:AssessmentResult {
-  a [gist:Content] ;
-  gist:isAbout [nm:Concept_MotorFunction] ? ;
-  gist:hasMagnitude @nm:MFMScoreMagnitude ? ;
-}
-
-nm:TimeFromBaselineMagnitude {
+# Age at baseline visit
+nm:BaselineAgeMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [nm:Aspect_DurationSinceStudyEnrollment] ? ;
-  gist:hasUnitOfMeasure [gist:Unit_Year] ? ;
-  gist:numericValue xsd:decimal ? ;
+  gist:hasAspect [nm:Aspect_AgeAtBaselineVisit] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }
 
-nm:MFMScoreMagnitude {
+# Number of variants (0-4)
+nm:NumberOfVariantsMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [nm:Aspect_MFM32_VisitScore] ? ;
-  gist:numericValue xsd:integer ? ;
+  gist:hasAspect [nm:Aspect_NumberOfVariants] ;
+  gist:numericValue xsd:decimal ;
 }
 
-ox:TotalMFMMagnitude {
+# Age of first symptom (onset of disease)
+nm:FirstSymptomAgeMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [nm:Aspect_MFM32_AggregateScore] ? ;
-  gist:numericValue xsd:integer ? ;
+  gist:hasAspect [nm:Aspect_AgeAtFirstSymptom] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }
 
-ox:KaplanMeierEventMagnitude {
+# Age of presentation to medical services
+nm:PresentationAgeMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [nm:Aspect_KaplanMeierEventIndicator] ? ;
-  gist:numericValue xsd:integer ? ;
+  gist:hasAspect [nm:Aspect_AgeAtPresentation] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }
 
-ox:KaplanMeierTimeMagnitude {
+# Age of diagnosis (usually date of genetic report)
+nm:DiagnosisAgeMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [nm:Aspect_KaplanMeierTimeToEvent] ? ;
-  gist:hasUnitOfMeasure [gist:Unit_Year] ? ;
-  gist:numericValue xsd:decimal ? ;
+  gist:hasAspect [nm:Aspect_AgeAtDiagnosis] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }
 
-ox:BaselineAgeMagnitude {
+# Age ambulation achieved
+nm:AmbulationAchievedAgeMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [gist:Aspect_Age] ? ;
-  gist:hasUnitOfMeasure [gist:Unit_Year] ? ;
-  gist:numericValue xsd:decimal ? ;
+  gist:hasAspect [nm:Aspect_AgeAtAmbulationAchieved] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }
 
-ox:LoAAgeMagnitude {
+# Age ambulation lost
+nm:AmbulationLostAgeMagnitude {
   a [gist:Magnitude] ;
-  gist:hasAspect [nm:Aspect_AgeAtLossOfAmbulation] ? ;
-  gist:hasUnitOfMeasure [gist:Unit_Year] ? ;
-  gist:numericValue xsd:decimal ? ;
+  gist:hasAspect [nm:Aspect_AgeAtLossOfAmbulation] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }
 
-ox:IDShape {
-  a [gist:ID] ;
-  gist:uniqueText xsd:string ? ;
+# Age independent sitting achieved
+nm:SittingAchievedAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AgeAtIndependentSittingAchieved] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Age independent sitting lost
+nm:SittingLostAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AgeAtLossOfIndependentSitting] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Time on ventilation per day (hours)
+nm:VentilationHoursOnMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_DailyHoursOnVentilation] ;
+  gist:hasUnitOfMeasure [ox:Unit_Hour] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Time off ventilation per day (hours)
+nm:VentilationHoursOffMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_DailyHoursOffVentilation] ;
+  gist:hasUnitOfMeasure [ox:Unit_Hour] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Age tube feeding commenced (decimal years)
+nm:TubeFeedingAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AgeAtTubeFeedingCommenced] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# CEDAS/FOIS level (1-6)
+nm:CEDASScoreMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_CEDASScore] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Weight at baseline visit (kg)
+nm:WeightMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_WeightAtBaselineVisit] ;
+  gist:hasUnitOfMeasure [ox:Unit_Kilogram] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Height at baseline visit (cm)
+nm:HeightMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_HeightAtBaselineVisit] ;
+  gist:hasUnitOfMeasure [ox:Unit_Centimetre] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Cobb angle (degrees)
+nm:CobbAngleMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_CobbAngle] ;
+  gist:hasUnitOfMeasure [ox:Unit_Degree] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Age Cobb angle measured (decimal years)
+nm:CobbAngleAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AgeAtCobbAngleMeasurement] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Age of spinal surgery (decimal years)
+nm:SpinalSurgeryAgeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AgeAtSpinalSurgery] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# CHOP INTEND total score of best side (0-64)
+nm:CHOPINTENDTotalMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_CHOPINTEND_TotalBestSide] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# MFM32 total raw score (0-96)
+nm:MFM32TotalMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_MFM32_AggregateScore] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# MFM32 D1 raw score (0-39)
+nm:MFM32D1Magnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_MFM32_D1Score] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# MFM32 D2 raw score (0-36)
+nm:MFM32D2Magnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_MFM32_D2Score] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# MFM32 D3 raw score (0-21)
+nm:MFM32D3Magnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_MFM32_D3Score] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Grip strength best valid value, right hand (kg)
+nm:GripStrengthRightMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_GripStrengthRight] ;
+  gist:hasUnitOfMeasure [ox:Unit_Kilogram] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Grip strength best valid value, left hand (kg)
+nm:GripStrengthLeftMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_GripStrengthLeft] ;
+  gist:hasUnitOfMeasure [ox:Unit_Kilogram] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Pinch strength best valid value, right hand (kg)
+nm:PinchStrengthRightMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_PinchStrengthRight] ;
+  gist:hasUnitOfMeasure [ox:Unit_Kilogram] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Pinch strength best valid value, left hand (kg)
+nm:PinchStrengthLeftMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_PinchStrengthLeft] ;
+  gist:hasUnitOfMeasure [ox:Unit_Kilogram] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Height-for-age Z-score at baseline (UK-WHO reference)
+nm:HeightZScoreMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_HeightForAgeZScore_UKWHO] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Weight-for-age Z-score at baseline (UK-WHO reference)
+nm:WeightZScoreMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_WeightForAgeZScore_UKWHO] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Attaining ambulation: Kaplan-Meier event indicator (1 = achieved, 0 = censored)
+nm:AmbulationGainEventMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AmbulationGainEvent] ;
+  gist:numericValue xsd:decimal ;
+}
+
+# Attaining ambulation: Kaplan-Meier time (years)
+nm:AmbulationGainTimeMagnitude {
+  a [gist:Magnitude] ;
+  gist:hasAspect [nm:Aspect_AmbulationGainTime] ;
+  gist:hasUnitOfMeasure [gist:Unit_Year] ;
+  gist:numericValue xsd:decimal ;
 }

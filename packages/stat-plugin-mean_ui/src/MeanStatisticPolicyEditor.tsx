@@ -11,6 +11,7 @@ import {
   createEmptyGraphPath,
   ensureGraphPathIds,
   GraphPathFieldEditor,
+  GroupByGraphPathsEditor,
   NumericTextInput,
 } from "@oxfordia/stat-plugin_ui";
 
@@ -34,6 +35,7 @@ function createMeanAllowedPath(): MeanAllowedPath {
   return {
     "@id": `#${createId("mean-allowed-path")}`,
     graphPath: ensureGraphPathIds(createEmptyGraphPath()),
+    groupByGraphPath: set(),
     minCount: 1,
   };
 }
@@ -134,6 +136,23 @@ export function MeanStatisticPolicyEditor({
               gpOptions={gpOptions}
             />
           </View>
+
+          <GroupByGraphPathsEditor
+            value={toArray(path.groupByGraphPath)}
+            onChange={(groupByPaths) =>
+              onChange({
+                ...policy,
+                allowedPath: set(
+                  ...allowedPaths.map((currentPath, currentIndex) =>
+                    currentIndex === index
+                      ? { ...currentPath, groupByGraphPath: set(...groupByPaths) }
+                      : currentPath,
+                  ),
+                ),
+              })
+            }
+            gpOptions={gpOptions}
+          />
 
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Min Count</Text>

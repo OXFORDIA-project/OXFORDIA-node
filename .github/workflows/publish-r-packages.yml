@@ -1,0 +1,193 @@
+name: Publish R Packages
+
+# Publishes the Oxfordia R packages to the CRAN-style repositories on gh-pages
+# and hands the tarballs and the standalone smoke test back to the caller as
+# the `r-packages` artifact, for the GitHub release.
+#
+#   release: https://oxfordia-project.github.io/OXFORDIA-node/r
+#   next:    https://oxfordia-project.github.io/OXFORDIA-node/r-next
+#
+# R versions must be purely numeric, so a pod version such as 0.0.1-alpha.7
+# cannot be used as is. The R version is <major.minor.patch>.<run number>:
+# the pod version without its pre-release label, plus the caller's run number,
+# which always increases within each channel. The DESCRIPTION files in the repo
+# stay at their development version; this workflow stamps them at build time.
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build (a release tag such as v0.1.0, or a commit SHA for next).
+        type: string
+        required: true
+      channel:
+        description: "release: publishes to r/. next: publishes to r-next/, keeping only the newest build."
+        type: string
+        required: true
+    outputs:
+      r_version:
+        description: The R package version that was published.
+        value: ${{ jobs.publish-r-packages.outputs.r_version }}
+
+permissions:
+  contents: write
+
+jobs:
+  publish-r-packages:
+    name: Build and Publish R Packages
+    runs-on: ubuntu-latest
+    outputs:
+      r_version: ${{ steps.meta.outputs.r_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Derive metadata
+        id: meta
+        run: |
+          case "${CHANNEL}" in
+            release)
+              pod_version="${REF#v}"
+              repo_dir=r
+              ;;
+            next)
+              # next builds are stamped 0.0.0-next.<sha>; base them on the
+              # last release recorded in package.json instead.
+              pod_version="$(node -p "require('./package.json').version")"
+              repo_dir=r-next
+              ;;
+            *)
+              echo "Unknown channel: ${CHANNEL}" >&2
+              exit 1
+              ;;
+          esac
+          base="${pod_version%%-*}"
+          if [[ ! "${base}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Cannot derive an R version from ${pod_version}" >&2
+            exit 1
+          fi
+          r_version="${base}.${GITHUB_RUN_NUMBER}"
+          echo "r_version=${r_version}" >> "$GITHUB_OUTPUT"
+          echo "repo_dir=${repo_dir}" >> "$GITHUB_OUTPUT"
+          echo "repo_url=https://oxfordia-project.github.io/OXFORDIA-node/${repo_dir}" >> "$GITHUB_OUTPUT"
+          echo "R packages ${r_version} (pod ${pod_version}) -> ${repo_dir}/"
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          REF: ${{ inputs.ref }}
+
+      - name: Stamp R package versions
+        run: bash scripts/release-r.sh set "${{ steps.meta.outputs.r_version }}"
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      # A re-run of the same workflow run has the same run number, so the
+      # version may already be published; reuse it instead of failing.
+      - name: Check for an existing publish
+        id: existing
+        run: |
+          if [[ -f "gh-pages/${REPO_DIR}/src/contrib/oxfordiar_${VERSION}.tar.gz" ]]; then
+            echo "R packages ${VERSION} are already published; reusing them."
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          REPO_DIR: ${{ steps.meta.outputs.repo_dir }}
+          VERSION: ${{ steps.meta.outputs.r_version }}
+
+      - name: Build R repository
+        if: steps.existing.outputs.published != 'true'
+        run: |
+          Rscript scripts/build-r-repo.R \
+            ${{ inputs.channel == 'next' && '--prune' || '' }} \
+            "gh-pages/${{ steps.meta.outputs.repo_dir }}"
+
+      - name: Install from the built repository
+        run: |
+          Rscript -e '
+            lib <- tempfile("lib-"); dir.create(lib)
+            packages <- c(
+              "solidauthr", "oxfordiar", "oxfordiar.data.nemaline",
+              "oxfordiar.data.legacynemaline", "oxfordiar.stat.count",
+              "oxfordiar.stat.mean", "oxfordiar.stat.standarddeviation",
+              "oxfordiar.stat.kaplanmeier"
+            )
+            install.packages(
+              packages,
+              lib = lib,
+              repos = c(
+                oxfordia = paste0("file://", normalizePath(Sys.getenv("REPO"))),
+                getOption("repos")
+              )
+            )
+            for (package in packages) {
+              library(package, lib.loc = lib, character.only = TRUE)
+              stopifnot(packageVersion(package, lib.loc = lib) == Sys.getenv("VERSION"))
+            }
+          '
+        env:
+          REPO: gh-pages/${{ steps.meta.outputs.repo_dir }}
+          VERSION: ${{ steps.meta.outputs.r_version }}
+
+      - name: Stage release assets
+        run: |
+          mkdir -p build/r
+          cp "gh-pages/${REPO_DIR}"/src/contrib/*_"${VERSION}".tar.gz build/r/
+          cp packages/oxfordiar/scripts/smoke-test-next.R build/r/
+          cp packages/oxfordiar/.env.example build/r/smoke-test.env.example
+          ls build/r
+        env:
+          REPO_DIR: ${{ steps.meta.outputs.repo_dir }}
+          VERSION: ${{ steps.meta.outputs.r_version }}
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: r-packages
+          path: build/r/
+
+      - name: Push R repository to gh-pages
+        if: steps.existing.outputs.published != 'true'
+        run: |
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${REPO_DIR}"
+          git commit -m "Publish R packages ${VERSION} to ${REPO_DIR}/"
+          # Retry in case another workflow (e.g. the Helm index) pushed first.
+          for _ in 1 2 3 4 5; do
+            if git push origin HEAD:gh-pages; then
+              exit 0
+            fi
+            git pull --rebase origin gh-pages
+          done
+          exit 1
+        env:
+          REPO_DIR: ${{ steps.meta.outputs.repo_dir }}
+          VERSION: ${{ steps.meta.outputs.r_version }}
+
+      - name: Verify R repository
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf "${REPO_URL}/src/contrib/PACKAGES" \
+              | grep -A1 '^Package: oxfordiar$' | grep -q "^Version: ${VERSION}$"; then
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "GitHub Pages did not serve oxfordiar ${VERSION} at ${REPO_URL}/src/contrib/PACKAGES." >&2
+          echo "Check Settings > Pages: source must be the gh-pages branch." >&2
+          exit 1
+        env:
+          REPO_URL: ${{ steps.meta.outputs.repo_url }}
+          VERSION: ${{ steps.meta.outputs.r_version }}

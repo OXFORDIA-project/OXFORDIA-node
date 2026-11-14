@@ -8,7 +8,7 @@ const GIST_PERSON = 'https://w3id.org/semanticarts/ns/ontology/gist/Person';
 
 export const NemalineConfig: ResourceViewConfig = {
   name: 'nemaline',
-  displayName: 'Nemaline Assessments',
+  displayName: 'Nemaline Pilot Participants',
   displayIcon: Stethoscope,
   view: NemalineView,
   canDisplay: (_targetUri, targetResource, dataset) => {

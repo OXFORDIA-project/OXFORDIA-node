@@ -31,11 +31,11 @@ import {
   getGraphPathShortcutsForDataSchema,
   resolveGraphPathShortcut,
 } from '@oxfordia/data-plugin_core';
-import { nemalineDataPlugin } from '@oxfordia/data-plugin-nemaline_core';
+import { legacyNemalineDataPlugin } from '@oxfordia/data-plugin-legacy-nemaline_core';
 import { QueryTextOutput } from './QueryTextSurface';
 
 const DEFAULT_RESOURCE_URI = 'http://localhost:3000/admin/FakeData2.ttl';
-const DATA_SCHEMA_NAME = 'nemaline';
+const DATA_SCHEMA_NAME = 'legacy-nemaline';
 const GROUP_BY_NONE = '__none__';
 const KAPLAN_MEIER_ENDPOINT = '/.api/stat/kaplan-meier';
 
@@ -48,12 +48,12 @@ type KaplanMeierQueryDraft = {
 
 function createDefaultKaplanMeierQueryDraft(): KaplanMeierQueryDraft {
   const timeShortcut = findGraphPathShortcutByName(
-    [nemalineDataPlugin],
+    [legacyNemalineDataPlugin],
     DATA_SCHEMA_NAME,
     'KaplanMeierTime',
   );
   const eventShortcut = findGraphPathShortcutByName(
-    [nemalineDataPlugin],
+    [legacyNemalineDataPlugin],
     DATA_SCHEMA_NAME,
     'KaplanMeierEvent',
   );
@@ -71,7 +71,7 @@ function createDefaultKaplanMeierQueryDraft(): KaplanMeierQueryDraft {
 export function KaplanMeierObservationsTester() {
   const { fetch } = useSolidAuth();
   const graphPathShortcuts = useMemo(
-    () => getGraphPathShortcutsForDataSchema([nemalineDataPlugin], DATA_SCHEMA_NAME),
+    () => getGraphPathShortcutsForDataSchema([legacyNemalineDataPlugin], DATA_SCHEMA_NAME),
     [],
   );
   const [queryDraft, setQueryDraft] = useState<KaplanMeierQueryDraft>(
@@ -82,18 +82,18 @@ export function KaplanMeierObservationsTester() {
   const [isSendingQuery, setIsSendingQuery] = useState<boolean>(false);
 
   const selectedTimeShortcut = resolveGraphPathShortcut(
-    [nemalineDataPlugin],
+    [legacyNemalineDataPlugin],
     DATA_SCHEMA_NAME,
     queryDraft.timePath,
   );
   const selectedEventShortcut = resolveGraphPathShortcut(
-    [nemalineDataPlugin],
+    [legacyNemalineDataPlugin],
     DATA_SCHEMA_NAME,
     queryDraft.eventPath,
   );
   const selectedGroupByShortcut = queryDraft.groupByPath
     ? resolveGraphPathShortcut(
-        [nemalineDataPlugin],
+        [legacyNemalineDataPlugin],
         DATA_SCHEMA_NAME,
         queryDraft.groupByPath,
       )
@@ -207,7 +207,7 @@ export function KaplanMeierObservationsTester() {
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent style={styles.dropdownContent}>
-              <DropdownMenuLabel>Nemaline shortcuts</DropdownMenuLabel>
+              <DropdownMenuLabel>Legacy nemaline shortcuts</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
                 {graphPathShortcuts.map((shortcut) => (
@@ -241,7 +241,7 @@ export function KaplanMeierObservationsTester() {
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent style={styles.dropdownContent}>
-              <DropdownMenuLabel>Nemaline shortcuts</DropdownMenuLabel>
+              <DropdownMenuLabel>Legacy nemaline shortcuts</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
                 {graphPathShortcuts.map((shortcut) => (

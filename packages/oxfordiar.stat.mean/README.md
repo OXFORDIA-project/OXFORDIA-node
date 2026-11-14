@@ -8,11 +8,20 @@ strings.
 
 ## Install
 
-The Oxfordia R packages are not on CRAN yet. See the
-[`oxfordiar` install instructions](../oxfordiar/README.md#install) for
-installing from GitHub or from a local clone. They install this package along
-with `solidauthr`, `oxfordiar` and the other Oxfordia packages, in the right
-order.
+Install from the Oxfordia R repository (not CRAN; no clone needed):
+
+```r
+install.packages(
+  c("solidauthr", "oxfordiar", "oxfordiar.data.nemaline", "oxfordiar.stat.mean"),
+  repos = c(
+    oxfordia = "https://oxfordia-project.github.io/OXFORDIA-node/r",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+```
+
+See the [`oxfordiar` install instructions](../oxfordiar/README.md#install) for
+the full package set, release tarballs and installing from a local clone.
 
 ## Quick Start
 
@@ -75,6 +84,29 @@ Each entry in `result$by_target` is a data frame with these columns:
 - `statistic`
 - `mean`
 - `count`
+
+## Grouping
+
+Pass `group_by` (one shortcut, or a list of two) to break the result down,
+for example by causative gene, or by gene and gender:
+
+```r
+result <- ox_mean(
+  ox_nemaline_shortcut("BaselineAge"),
+  targets = targets,
+  group_by = list(
+    ox_nemaline_shortcut("CausativeGene"),
+    ox_nemaline_shortcut("GenderAssignedAtBirth")
+  )
+)
+```
+
+`result$data` has one row per group: a column per group-by (named after the
+shortcut, holding the label), the combined statistic, `sites` (targets that
+reported the group) and `suppressed_sites` (targets that withheld it because
+it fell below their minimum count; such combined values are partial).
+`result$per_site` has the same rows for each target. Each group-by must be
+allowed for the shortcut by the target's statistic access rule.
 
 ## Examples
 

@@ -10,13 +10,17 @@ import {
 import type { JSONSchema4 } from "json-schema";
 import {
   executeStatisticSparqlQuery,
+  groupValueLabel,
   parseNumericBindingValue,
   parseStringBindingValue,
   type StatisticPluginServerGlobals,
   type QueryPathBinding,
   type QuerySelectField,
 } from "@oxfordia/stat-plugin_server";
-import { evaluateKaplanMeierStatisticAccessRule } from "./evaluateKaplanMeierStatisticAccessRule";
+import {
+  evaluateKaplanMeierStatisticAccessRule,
+  evaluateKaplanMeierStatisticAccessRulePostQuery,
+} from "./evaluateKaplanMeierStatisticAccessRule";
 
 export interface KaplanMeierQuery {
   resourceUri: string;
@@ -128,12 +132,14 @@ export const kaplanMeierPlugin: StatisticApiPlugin<
     );
   },
 
-  evaluateStatisticAccessRulePostQuery(
-    _query,
-    _statisticAccessRule,
-    _output,
-  ): true | Error {
-    return true;
+  evaluateStatisticAccessRulePostQuery(query, statisticAccessRule, output) {
+    return evaluateKaplanMeierStatisticAccessRulePostQuery(
+      query.timePath,
+      query.eventPath,
+      query.groupByPath,
+      statisticAccessRule,
+      output,
+    );
   },
 
   async performQuery(query, globals): Promise<KaplanMeierOutput> {
@@ -169,10 +175,8 @@ function kaplanMeierGroupLabel(value: string): string {
     return "Ambulant";
   }
 
-  return last
-    .replace(/[_-]+/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .trim();
+  // Same labels as grouped count/mean/standard deviation: "…/Gene_NEB" → "NEB".
+  return groupValueLabel(value);
 }
 
 function buildKaplanMeierObservationGroups(

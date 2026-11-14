@@ -13,5 +13,9 @@
     {
       "path": "../data-plugin_core"
     }
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.ts"
   ]
 }

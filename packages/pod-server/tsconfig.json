@@ -10,6 +10,9 @@
   ],
   "references": [
     {
+      "path": "../data-plugin-legacy-nemaline_core"
+    },
+    {
       "path": "../data-plugin-nemaline_core"
     },
     {
@@ -17,6 +20,12 @@
     },
     {
       "path": "../stat-plugin-mean_server"
+    },
+    {
+      "path": "../stat-plugin-count_server"
+    },
+    {
+      "path": "../stat-plugin-standard-deviation_server"
     },
     {
       "path": "../stat-plugin-kaplan-meier_server"

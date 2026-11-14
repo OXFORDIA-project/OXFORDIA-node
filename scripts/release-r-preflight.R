@@ -17,10 +17,14 @@ package_dirs <- file.path(
   root_dir,
   "packages",
   c(
+    "solidauthr",
     "oxfordiar",
     "oxfordiar.data.nemaline",
+    "oxfordiar.data.legacynemaline",
     "oxfordiar.stat.mean",
-    "oxfordiar.stat.kaplanmeier"
+    "oxfordiar.stat.kaplanmeier",
+    "oxfordiar.stat.count",
+    "oxfordiar.stat.standarddeviation"
   )
 )
 

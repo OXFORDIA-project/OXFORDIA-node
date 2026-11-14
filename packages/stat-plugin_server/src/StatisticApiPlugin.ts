@@ -6,6 +6,15 @@ export type StatisticQuery = {
   resourceUri: string;
 };
 
+/**
+ * Outcome of post-query disclosure control:
+ * - `true`: release the output as-is
+ * - `Error`: release nothing (the message becomes the 403 body)
+ * - `{ release }`: release this redacted output instead, e.g. a grouped
+ *   result with small cells suppressed
+ */
+export type StatisticPostQueryResult<Output> = true | Error | { release: Output };
+
 export interface StatisticApiPlugin<
   Query extends StatisticQuery,
   Output,
@@ -23,7 +32,7 @@ export interface StatisticApiPlugin<
     query: Query,
     statisticAccessRule: StatisticAccessRule,
     output: Output,
-  ): true | Error;
+  ): StatisticPostQueryResult<Output>;
 }
 
 export type AnyStatisticApiPlugin<Globals = unknown> = StatisticApiPlugin<
