@@ -1,4 +1,4 @@
-import { LdoJsonldContext, LdSet } from "@ldo/ldo";
+import type { LdoJsonldContext, LdSet } from "@ldo/ldo";
 
 /**
  * =============================================================================
@@ -22,6 +22,7 @@ export interface MeanAllowedPath {
   "@id"?: string;
   "@context"?: LdoJsonldContext;
   graphPath: GraphPath;
+  groupByGraphPath?: LdSet<GraphPath>;
   minCount: number;
 }
 

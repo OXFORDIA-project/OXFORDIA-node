@@ -31,11 +31,11 @@ import {
   getGraphPathShortcutsForDataSchema,
   resolveGraphPathShortcut,
 } from '@oxfordia/data-plugin_core';
-import { nemalineDataPlugin } from '@oxfordia/data-plugin-nemaline_core';
+import { legacyNemalineDataPlugin } from '@oxfordia/data-plugin-legacy-nemaline_core';
 import { QueryTextEditor, QueryTextOutput } from './QueryTextSurface';
 
 const DEFAULT_RESOURCE_URI = 'http://localhost:3000/admin/FakeData2.ttl';
-const DATA_SCHEMA_NAME = 'nemaline';
+const DATA_SCHEMA_NAME = 'legacy-nemaline';
 const MEAN_ENDPOINT = '/.api/stat/mean';
 
 type MeanQueryDraft = {
@@ -86,7 +86,7 @@ function parseMeanQueryDraft(queryText: string): {
 
 function createDefaultMeanQueryDraft(): MeanQueryDraft {
   const baselineAgeShortcut = findGraphPathShortcutByName(
-    [nemalineDataPlugin],
+    [legacyNemalineDataPlugin],
     DATA_SCHEMA_NAME,
     'BaselineAge',
   );
@@ -138,7 +138,7 @@ function createDefaultMeanQueryDraft(): MeanQueryDraft {
 export function MeanQueryTester() {
   const { fetch } = useSolidAuth();
   const graphPathShortcuts = useMemo(
-    () => getGraphPathShortcutsForDataSchema([nemalineDataPlugin], DATA_SCHEMA_NAME),
+    () => getGraphPathShortcutsForDataSchema([legacyNemalineDataPlugin], DATA_SCHEMA_NAME),
     [],
   );
   const [lastValidDraft, setLastValidDraft] = useState<MeanQueryDraft>(
@@ -154,7 +154,7 @@ export function MeanQueryTester() {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState<boolean>(false);
 
   const selectedShortcut = resolveGraphPathShortcut(
-    [nemalineDataPlugin],
+    [legacyNemalineDataPlugin],
     DATA_SCHEMA_NAME,
     lastValidDraft.graphPath,
   );
@@ -299,7 +299,7 @@ export function MeanQueryTester() {
                 <Button text={shortcutLabel} variant="secondary" style={styles.shortcutTrigger} />
               </DropdownMenuTrigger>
               <DropdownMenuContent style={styles.dropdownContent}>
-                <DropdownMenuLabel>Nemaline shortcuts</DropdownMenuLabel>
+                <DropdownMenuLabel>Legacy nemaline shortcuts</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {graphPathShortcuts.map((shortcut) => (
                   <DropdownMenuItem

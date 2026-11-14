@@ -1,5 +1,5 @@
 import { set, type ShapeType } from "@ldo/ldo";
-import { findGraphPathShortcutByName } from "@oxfordia/data-plugin_core";
+import { findGraphPathShortcutByName, graphPathForLdo } from "@oxfordia/data-plugin_core";
 import { angelmanDataPlugin } from "@oxfordia/data-plugin-angelman_core";
 import {
   DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
@@ -48,7 +48,7 @@ function requireAngelmanGraphPath(shortcutName: string) {
   if (!shortcut) {
     throw new Error(`Missing angelman graph path shortcut '${shortcutName}'.`);
   }
-  return shortcut.graphPath;
+  return graphPathForLdo(shortcut.graphPath);
 }
 
 function createDefaultMeanAllowedPath(

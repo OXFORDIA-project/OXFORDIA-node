@@ -6,7 +6,10 @@ import type {
 import {
   graphPathDebugString,
   graphPathsAreEqual,
+  readProperty,
   toCollectionArray,
+  toRecord,
+  type StatisticPostQueryResult,
 } from "@oxfordia/stat-plugin_server";
 
 function summarizeGraphPath(graphPath: GraphPath): string {
@@ -114,4 +117,78 @@ export function evaluateKaplanMeierStatisticAccessRule(
     );
   }
   return true;
+}
+
+const STATP_K_ANONYMITY_KEY = "https://oxfordia.setmeld.com/statistics#k-anonymity";
+
+function readAllowedPathKAnonymity(allowedPath: KaplanMeierAllowedPath): number {
+  const record = toRecord(allowedPath as unknown);
+  const raw = record
+    ? readProperty<number>(record, "kAnonymity", STATP_K_ANONYMITY_KEY)
+    : allowedPath.kAnonymity;
+  if (typeof raw !== "number" || !Number.isFinite(raw)) {
+    return Number.NaN;
+  }
+  return Math.max(0, Math.floor(raw));
+}
+
+interface KaplanMeierResultLike {
+  observations: { group?: string }[];
+  groups?: { group: string; observations: unknown[] }[];
+}
+
+/**
+ * Disclosure control: every released curve must be built from at least
+ * k-anonymity participants. Ungrouped results below k are withheld; in a
+ * grouped result the groups below k (and their observations) are dropped.
+ */
+export function evaluateKaplanMeierStatisticAccessRulePostQuery<Output extends KaplanMeierResultLike>(
+  queryTimePath: GraphPath,
+  queryEventPath: GraphPath,
+  queryGroupByPath: GraphPath | undefined,
+  statisticAccessRule: KaplanMeierStatisticAccessRule,
+  output: Output,
+): StatisticPostQueryResult<Output> {
+  const match = findMatchingKaplanMeierAllowedPath(
+    queryTimePath,
+    queryEventPath,
+    queryGroupByPath,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  if (!match) {
+    return new Error("Requested paths are not allowed by kaplan-meier statistic policy.");
+  }
+  const k = readAllowedPathKAnonymity(match);
+  if (!Number.isFinite(k)) {
+    return new Error(
+      "Kaplan-Meier statistic policy is missing a valid k-anonymity for the matched allowed path.",
+    );
+  }
+
+  if (!output.groups) {
+    if (output.observations.length < k) {
+      return new Error(
+        `Observation count (${output.observations.length}) is below the policy k-anonymity (${k}) for this kaplan-meier statistic.`,
+      );
+    }
+    return true;
+  }
+
+  const released = output.groups.filter((group) => group.observations.length >= k);
+  if (released.length === output.groups.length) return true;
+  if (released.length === 0) {
+    return new Error(
+      `Every group has fewer observations than the policy k-anonymity (${k}) for this kaplan-meier statistic.`,
+    );
+  }
+  const releasedGroups = new Set(released.map((group) => group.group));
+  return {
+    release: {
+      ...output,
+      groups: released,
+      observations: output.observations.filter(
+        (observation) => releasedGroups.has(observation.group ?? "Ungrouped"),
+      ),
+    },
+  };
 }

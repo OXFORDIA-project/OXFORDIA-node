@@ -8,23 +8,32 @@ as plain strings.
 
 ## Install
 
-The Oxfordia R packages are not on CRAN yet. See the
-[`oxfordiar` install instructions](../oxfordiar/README.md#install) for
-installing from GitHub or from a local clone. They install this package along
-with `solidauthr`, `oxfordiar` and the other Oxfordia packages, in the right
-order.
+Install from the Oxfordia R repository (not CRAN; no clone needed):
+
+```r
+install.packages(
+  c("solidauthr", "oxfordiar", "oxfordiar.data.nemaline", "oxfordiar.stat.kaplanmeier"),
+  repos = c(
+    oxfordia = "https://oxfordia-project.github.io/OXFORDIA-node/r",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+```
+
+See the [`oxfordiar` install instructions](../oxfordiar/README.md#install) for
+the full package set, release tarballs and installing from a local clone.
 
 ## Quick Start
 
 ```r
 library(oxfordiar)
-library(oxfordiar.data.nemaline)
+library(oxfordiar.data.legacynemaline)
 library(oxfordiar.stat.kaplanmeier)
 
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
-  group_by = ox_nemaline_shortcut("ClusterCategory"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
+  group_by = ox_legacy_nemaline_shortcut("ClusterCategory"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -90,13 +99,13 @@ split by group label across all successful targets.
 
 ```r
 library(oxfordiar)
-library(oxfordiar.data.nemaline)
+library(oxfordiar.data.legacynemaline)
 library(oxfordiar.stat.kaplanmeier)
 
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
-  group_by = ox_nemaline_shortcut("ClusterCategory"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
+  group_by = ox_legacy_nemaline_shortcut("ClusterCategory"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -110,8 +119,8 @@ result$grouped
 
 ```r
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -149,9 +158,9 @@ result$data
 
 ```r
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
-  group_by = ox_nemaline_shortcut("ClusterCategory"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
+  group_by = ox_legacy_nemaline_shortcut("ClusterCategory"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl"),
     ox_target("site_b", "https://pod.example.org/bob/data.ttl")

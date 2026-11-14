@@ -104,10 +104,21 @@ jobs:
       ref: ${{ github.event.release.tag_name }}
       channel: release
 
+  publish-r-packages:
+    name: Publish R Packages
+    if: github.event.release.prerelease == false
+    uses: ./.github/workflows/publish-r-packages.yml
+    permissions:
+      contents: write
+    with:
+      ref: ${{ github.event.release.tag_name }}
+      channel: release
+
+  # Runs after publish-r-packages so the two gh-pages pushes never race.
   publish-release:
     name: Build and Publish Release Assets
     if: github.event.release.prerelease == false
-    needs: [build-deb, publish-docker]
+    needs: [build-deb, publish-docker, publish-r-packages]
     runs-on: ubuntu-latest
 
     steps:
@@ -134,6 +145,12 @@ jobs:
       - name: Flatten Debian artifacts
         run: |
           find build -mindepth 2 -type f -name '*.deb' -exec mv {} build/ \;
+
+      - name: Download R package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: r-packages
+          path: build/r
 
       # Unversioned copies let docs link to releases/latest/download/<name>,
       # so install instructions never go stale.
@@ -174,6 +191,7 @@ jobs:
             oxfordia-pod-init.sh
             oxfordia-pod-idp-init.sh
             build/chart/pod-server-${{ steps.meta.outputs.version }}.tgz
+            build/r/*
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4

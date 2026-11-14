@@ -1,8 +1,8 @@
 Package: oxfordiar.data.nemaline
 Type: Package
-Title: Nemaline Shortcut Catalog for Oxfordia R
+Title: Nemaline Pilot Shortcut Catalog for Oxfordia R
 Version: 0.0.0.9000
-Description: Nemaline dataset shortcuts for Oxfordia R. Provides
+Description: Nemaline pilot analysis dataset shortcuts for Oxfordia R. Provides
     shortcut objects that resolve named nemaline variables into
     graph-path definitions.
 Authors@R: person(

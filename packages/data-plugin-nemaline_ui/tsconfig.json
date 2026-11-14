@@ -7,7 +7,12 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/**/*.json"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.ts"
   ],
   "references": [
     {
@@ -27,6 +32,12 @@
     },
     {
       "path": "../data-plugin-nemaline_core"
+    },
+    {
+      "path": "../stat-plugin-count_core"
+    },
+    {
+      "path": "../stat-plugin-standard-deviation_core"
     }
   ]
 }
