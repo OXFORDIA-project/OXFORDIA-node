@@ -3,8 +3,9 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# solidauthr is not included: it is released to CRAN separately, and
+# oxfordiar depends on the CRAN version.
 PACKAGES=(
-  "packages/solidauthr"
   "packages/oxfordiar"
   "packages/oxfordiar.data.nemaline"
   "packages/oxfordiar.data.legacynemaline"
@@ -79,7 +80,6 @@ set_version() {
     set_description_version "$(description_path "$package")" "$version"
   done
 
-  set_import_version "$(description_path packages/oxfordiar)" solidauthr "$version"
   for package in "${DEPENDENT_PACKAGES[@]}"; do
     set_import_version "$(description_path "$package")" oxfordiar "$version"
   done
