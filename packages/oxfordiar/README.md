@@ -31,7 +31,8 @@ need a clone of this repo, Node, or GitHub credentials; plain
 #### From the Oxfordia R repository (recommended)
 
 Requires R 4.1 or newer. Add the Oxfordia repository alongside CRAN, which
-supplies the third-party dependencies (`httr2`, `jose`, `jsonlite`):
+supplies `solidauthr` (the Solid authentication package, published to CRAN on
+its own) and the third-party dependencies (`httr2`, `jose`, `jsonlite`):
 
 ```r
 install.packages(
@@ -108,15 +109,14 @@ Every pod release on the
 [releases page](https://github.com/OXFORDIA-project/OXFORDIA-node/releases)
 has one `.tar.gz` per R package among its assets, named
 `<package>_<r-version>.tar.gz`. Download the ones you need and install them in
-dependency order, `solidauthr` first, then `oxfordiar`, then the data and
-statistic packages:
+dependency order, `oxfordiar` first, then the data and statistic packages.
+`solidauthr` is not among them; it comes from CRAN:
 
 ```r
-install.packages(c("httr2", "jose", "jsonlite"))  # dependencies, from CRAN
+install.packages(c("solidauthr", "jsonlite"))  # dependencies, from CRAN
 
 version <- "0.0.1.42" # the R version from the release's assets
 for (pkg in c(
-  "solidauthr",
   "oxfordiar",
   "oxfordiar.data.nemaline",
   "oxfordiar.stat.count",
@@ -598,13 +598,15 @@ install.packages("oxfordiar.stat.mean", repos = c(
 ```
 
 `scripts/release-r.sh set <version>` sets every `DESCRIPTION` version and
-rewrites the inter-package imports to `oxfordiar (>= <version>)` and
-`solidauthr (>= <version>)`. CI uses it; you only need it locally to test a
-specific version.
+rewrites the inter-package imports to `oxfordiar (>= <version>)`. CI uses
+it; you only need it locally to test a specific version.
 
-These packages are released together, with one shared version:
+These packages are released together, with one shared version.
+`packages/solidauthr` is not published here: it is released to CRAN
+separately, and `oxfordiar` depends on the CRAN version
+(`solidauthr (>= 0.1.2)`). Raise that minimum when `oxfordiar` needs a newer
+`solidauthr` feature, after the new version is on CRAN.
 
-- `solidauthr`
 - `oxfordiar`
 - `oxfordiar.data.nemaline`
 - `oxfordiar.data.legacynemaline`

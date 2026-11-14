@@ -29,8 +29,8 @@ if (!file.exists(file.path(root_dir, "scripts", "build-r-repo.R"))) {
 }
 
 # Dependency order; also the full set of packages that are published.
+# solidauthr is not here: it is published to CRAN on its own.
 packages <- c(
-  "solidauthr",
   "oxfordiar",
   "oxfordiar.data.nemaline",
   "oxfordiar.data.legacynemaline",
