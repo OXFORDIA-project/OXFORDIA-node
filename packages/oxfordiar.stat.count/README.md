@@ -22,7 +22,7 @@ library(oxfordiar.data.nemaline)
 library(oxfordiar.stat.count)
 
 result <- ox_count(
-  shortcut = ox_nemaline_shortcut("PersonId"),
+  shortcut = ox_nemaline_shortcut("Participant"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -49,7 +49,7 @@ Arguments:
 Behavior:
 
 - `shortcut` may be a shortcut object from a data package such as
-  `ox_nemaline_shortcut("PersonId")`
+  `ox_nemaline_shortcut("Participant")`
 - `shortcut` may also be a manually constructed `ox_graph_path()`
 - plain strings such as `"PersonId"` are rejected on purpose
 - each pod counts the distinct nodes or values the graph path resolves to
@@ -80,6 +80,29 @@ Each entry in `result$by_target` is a data frame with these columns:
 
 - `count`
 
+## Grouping
+
+Pass `group_by` (one shortcut, or a list of two) to break the result down,
+for example by causative gene, or by gene and gender:
+
+```r
+result <- ox_count(
+  ox_nemaline_shortcut("Participant"),
+  targets = targets,
+  group_by = list(
+    ox_nemaline_shortcut("CausativeGene"),
+    ox_nemaline_shortcut("GenderAssignedAtBirth")
+  )
+)
+```
+
+`result$data` has one row per group: a column per group-by (named after the
+shortcut, holding the label), the combined statistic, `sites` (targets that
+reported the group) and `suppressed_sites` (targets that withheld it because
+it fell below their minimum count; such combined values are partial).
+`result$per_site` has the same rows for each target. Each group-by must be
+allowed for the shortcut by the target's statistic access rule.
+
 ## Examples
 
 ### Count Over a Nemaline Shortcut
@@ -95,7 +118,7 @@ targets <- ox_targets(
 )
 
 result <- ox_count(
-  shortcut = ox_nemaline_shortcut("PersonId"),
+  shortcut = ox_nemaline_shortcut("Participant"),
   targets = targets
 )
 
@@ -138,7 +161,7 @@ result$data
 
 ```r
 result <- ox_count(
-  shortcut = ox_nemaline_shortcut("PersonId"),
+  shortcut = ox_nemaline_shortcut("Participant"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl"),
     ox_target("site_b", "https://pod.example.org/bob/data.ttl")
@@ -154,7 +177,7 @@ result$errors
 
 ```r
 result <- ox_count(
-  shortcut = ox_nemaline_shortcut("PersonId"),
+  shortcut = ox_nemaline_shortcut("Participant"),
   targets = ox_targets(
     ox_target(
       name = "site_a",

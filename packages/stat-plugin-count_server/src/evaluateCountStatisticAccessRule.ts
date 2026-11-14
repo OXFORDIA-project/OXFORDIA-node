@@ -4,11 +4,20 @@ import type {
   CountAllowedPath,
 } from "@oxfordia/stat-plugin-count_core";
 import {
-  findMatchingAllowedPath,
+  evaluateGroupedAllowedPath,
   readProperty,
+  suppressGroups,
   toCollectionArray,
   toRecord,
+  type StatisticGroup,
+  type StatisticPostQueryResult,
 } from "@oxfordia/stat-plugin_server";
+
+/** Ungrouped results carry `count`; grouped results carry `groups` only. */
+export interface CountResult {
+  count?: number;
+  groups?: StatisticGroup<{ count: number }>[];
+}
 
 const STATP_MIN_COUNT_KEY = "https://oxfordia.setmeld.com/statistics#minCount";
 
@@ -26,45 +35,51 @@ function readAllowedPathMinCount(allowedPath: CountAllowedPath): number {
 export function evaluateCountStatisticAccessRule(
   queryGraphPath: GraphPath,
   statisticAccessRule: CountStatisticAccessRule,
+  groupByPaths: GraphPath[] = [],
 ): true | Error {
-  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
-  if (allowedPaths.length === 0) {
-    return new Error("No allowed graph paths are configured for count.");
-  }
-  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
-  if (!match) {
-    return new Error(
-      "Requested graphPath is not allowed by count statistic policy.",
-    );
-  }
-  return true;
+  const match = evaluateGroupedAllowedPath(
+    "count",
+    queryGraphPath,
+    groupByPaths,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  return match instanceof Error ? match : true;
 }
 
 /**
- * Small-cell suppression: the count is itself the released value, so it is
- * withheld entirely when it falls below the policy's minCount.
+ * Small-cell suppression: the count is itself the released value. An
+ * ungrouped count below minCount is withheld entirely; in a grouped count only
+ * the cells below minCount are suppressed. Grouped results carry no total, so
+ * a suppressed cell can't be recovered by subtraction.
  */
 export function evaluateCountStatisticAccessRulePostQuery(
   queryGraphPath: GraphPath,
   statisticAccessRule: CountStatisticAccessRule,
-  output: { count: number },
-): true | Error {
-  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
-  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
-  if (!match) {
-    return new Error(
-      "Requested graphPath is not allowed by count statistic policy.",
-    );
-  }
+  output: CountResult,
+  groupByPaths: GraphPath[] = [],
+): StatisticPostQueryResult<CountResult> {
+  const match = evaluateGroupedAllowedPath(
+    "count",
+    queryGraphPath,
+    groupByPaths,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  if (match instanceof Error) return match;
   const minCount = readAllowedPathMinCount(match);
   if (!Number.isFinite(minCount)) {
     return new Error(
       "Count statistic policy is missing a valid minCount for the matched allowed path.",
     );
   }
-  if (output.count < minCount) {
+  if (output.groups) {
+    return {
+      release: { groups: suppressGroups(output.groups, (group) => group.count >= minCount) },
+    };
+  }
+  const count = output.count ?? 0;
+  if (count < minCount) {
     return new Error(
-      `Count (${output.count}) is below the policy minimum (${minCount}) for this count statistic.`,
+      `Count (${count}) is below the policy minimum (${minCount}) for this count statistic.`,
     );
   }
   return true;

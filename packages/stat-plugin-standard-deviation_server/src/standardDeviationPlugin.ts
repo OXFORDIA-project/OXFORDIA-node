@@ -10,12 +10,20 @@ import {
 import {
   evaluateStandardDeviationStatisticAccessRule,
   evaluateStandardDeviationStatisticAccessRulePostQuery,
+  type StandardDeviationResult,
+  type StandardDeviationSummary,
 } from "./evaluateStandardDeviationStatisticAccessRule";
 import type { JSONSchema4 } from "json-schema";
 import type { StatisticPluginServerGlobals } from "@oxfordia/stat-plugin_server";
 import {
+  buildGroupByQueryParts,
   executeStatisticSparqlQuery,
+  groupByPathsJsonSchema,
+  normalizeGroupByPathsQuery,
   parseNumericBindingValue,
+  readGroupByPaths,
+  readGroupKey,
+  type StatisticGroup,
 } from "@oxfordia/stat-plugin_server";
 
 const XSD_DOUBLE = "http://www.w3.org/2001/XMLSchema#double";
@@ -23,15 +31,10 @@ const XSD_DOUBLE = "http://www.w3.org/2001/XMLSchema#double";
 export interface StandardDeviationQuery {
   resourceUri: string;
   graphPath: GraphPath;
+  groupByPaths?: GraphPath[];
 }
 
-export interface StandardDeviationOutput {
-  /** Sample (n - 1) standard deviation; null when fewer than two values. */
-  standardDeviation: number | null;
-  mean: number;
-  count: number;
-  distinctCount: number;
-}
+export type StandardDeviationOutput = StandardDeviationResult;
 
 const standardDeviationQuerySchema: JSONSchema4 = {
   type: "object",
@@ -44,8 +47,11 @@ const standardDeviationQuerySchema: JSONSchema4 = {
       minLength: 1,
     },
     graphPath: graphPathJsonSchema,
+    groupByPaths: groupByPathsJsonSchema,
   },
 };
+
+const SUBJECT_VAR = "?subject";
 
 export const standardDeviationPlugin: StatisticApiPlugin<
   StandardDeviationQuery,
@@ -55,6 +61,7 @@ export const standardDeviationPlugin: StatisticApiPlugin<
 > = {
   ...standardDeviationStatisticPlugin,
   querySchema: standardDeviationQuerySchema,
+  normalizeQuery: normalizeGroupByPathsQuery,
   evaluateStatisticAccessRulePreQuery(
     query,
     statisticAccessRule,
@@ -62,20 +69,22 @@ export const standardDeviationPlugin: StatisticApiPlugin<
     return evaluateStandardDeviationStatisticAccessRule(
       query.graphPath,
       statisticAccessRule,
+      readGroupByPaths(query),
     );
   },
-  evaluateStatisticAccessRulePostQuery(
-    query,
-    statisticAccessRule,
-    output,
-  ): true | Error {
+  evaluateStatisticAccessRulePostQuery(query, statisticAccessRule, output) {
     return evaluateStandardDeviationStatisticAccessRulePostQuery(
       query.graphPath,
       statisticAccessRule,
       output,
+      readGroupByPaths(query),
     );
   },
   async performQuery(query, globals): Promise<StandardDeviationOutput> {
+    const groupByPaths = readGroupByPaths(query);
+    if (groupByPaths.length > 0) {
+      return { groups: await executeGroupedQuery(query, groupByPaths, globals) };
+    }
     const summary = await executeSummaryQuery({
       resourceUri: query.resourceUri,
       graphPath: query.graphPath,
@@ -193,4 +202,66 @@ async function executeSumSquaredDeviationsQuery(params: {
   const firstRow = rows[0];
   if (!firstRow) return undefined;
   return parseNumericBindingValue(firstRow, "sumSquaredDeviations");
+}
+
+/** Two-pass sample statistics, matching the ungrouped SPARQL computation. */
+export function summarizeValues(values: number[]): StandardDeviationSummary | undefined {
+  const count = values.length;
+  if (count === 0) return undefined;
+  const mean = values.reduce((sum, value) => sum + value, 0) / count;
+  const sumSquaredDeviations = values.reduce((sum, value) => sum + (value - mean) ** 2, 0);
+  return {
+    standardDeviation: count < 2 ? null : Math.sqrt(sumSquaredDeviations / (count - 1)),
+    mean,
+    count,
+    distinctCount: new Set(values).size,
+  };
+}
+
+/**
+ * Grouped standard deviation. Each group's second pass needs that group's
+ * mean, so the values are fetched (they stay inside the pod) and summarised
+ * per group here rather than in SPARQL.
+ */
+async function executeGroupedQuery(
+  query: StandardDeviationQuery,
+  groupByPaths: GraphPath[],
+  globals: StatisticPluginServerGlobals,
+): Promise<StatisticGroup<StandardDeviationSummary>[]> {
+  const groupBy = buildGroupByQueryParts(groupByPaths, SUBJECT_VAR);
+  const rows = await executeStatisticSparqlQuery({
+    resourceUri: query.resourceUri,
+    pathBindings: [
+      {
+        key: "value",
+        graphPath: query.graphPath,
+        startVar: SUBJECT_VAR,
+        requireNumeric: true,
+      },
+      ...groupBy.pathBindings,
+    ],
+    selectFields: [
+      ...groupBy.selectFields,
+      { alias: "value", expression: (pathVars) => pathVars.value ?? "?value" },
+    ],
+    globals,
+  });
+
+  const byGroup = new Map<string, { key: { values: string[]; labels: string[] }; values: number[] }>();
+  for (const row of rows) {
+    const key = readGroupKey(row, groupByPaths.length);
+    const value = parseNumericBindingValue(row, "value");
+    if (!key || value === undefined) continue;
+    const id = JSON.stringify(key.values);
+    const entry = byGroup.get(id) ?? { key, values: [] };
+    entry.values.push(value);
+    byGroup.set(id, entry);
+  }
+
+  const groups: StatisticGroup<StandardDeviationSummary>[] = [];
+  for (const { key, values } of byGroup.values()) {
+    const summary = summarizeValues(values);
+    if (summary) groups.push({ ...key, ...summary });
+  }
+  return groups;
 }

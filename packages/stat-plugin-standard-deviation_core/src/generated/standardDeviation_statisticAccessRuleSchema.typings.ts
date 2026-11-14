@@ -22,6 +22,7 @@ export interface StandardDeviationAllowedPath {
   "@id"?: string;
   "@context"?: LdoJsonldContext;
   graphPath: GraphPath;
+  groupByGraphPath?: LdSet<GraphPath>;
   minCount: number;
   minDistinctValues: number;
 }

@@ -31,8 +31,11 @@ local_packages <- c(
   "solidauthr",
   "oxfordiar",
   "oxfordiar.data.nemaline",
+  "oxfordiar.data.legacynemaline",
   "oxfordiar.stat.mean",
-  "oxfordiar.stat.kaplanmeier"
+  "oxfordiar.stat.kaplanmeier",
+  "oxfordiar.stat.count",
+  "oxfordiar.stat.standarddeviation"
 )
 
 for (package_name in local_packages) {

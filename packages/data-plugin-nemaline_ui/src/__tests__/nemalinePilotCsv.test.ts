@@ -14,7 +14,20 @@ import {
   PilotCsvFormatError,
 } from "../nemalinePilotCsv";
 import { DERIVED_NUMERIC_FIELDS, NUMERIC_COLUMNS } from "../pilotColumns";
-import { createNemalineDefaultStatisticAccessRuleDocument } from "../defaultStatisticAccessRule";
+import {
+  createNemalineDefaultStatisticAccessRuleDocument,
+  nemalineDefaultStatisticAccessRuleDocumentShapeType,
+} from "../defaultStatisticAccessRule";
+import type { LdoBase, ShapeType } from "@ldo/ldo";
+import { findGraphPathShortcutByName } from "@oxfordia/data-plugin_core";
+import { countStatisticPlugin } from "@oxfordia/stat-plugin-count_core";
+import { meanStatisticPlugin } from "@oxfordia/stat-plugin-mean_core";
+import { standardDeviationStatisticPlugin } from "@oxfordia/stat-plugin-standard-deviation_core";
+import { kaplanMeierStatisticPlugin } from "@oxfordia/stat-plugin-kaplan-meier_core";
+import { evaluateCountStatisticAccessRule } from "@oxfordia/stat-plugin-count_server";
+import { evaluateMeanStatisticAccessRule } from "@oxfordia/stat-plugin-mean_server";
+import { evaluateStandardDeviationStatisticAccessRule } from "@oxfordia/stat-plugin-standard-deviation_server";
+import { evaluateKaplanMeierStatisticAccessRule } from "@oxfordia/stat-plugin-kaplan-meier_server";
 import { ldArr, toParticipantRow } from "../participantRows";
 import { ukWhoZScore } from "../lmsZScore";
 
@@ -229,27 +242,64 @@ describe("convertPilotCsv", () => {
 });
 
 describe("createNemalineDefaultStatisticAccessRuleDocument", () => {
-  const rule = createNemalineDefaultStatisticAccessRuleDocument(
-    "https://pod.example/data/x.statistic-access-rule.ttl",
-  );
+  const RULE_URI = "https://pod.example/data/x.statistic-access-rule.ttl";
+  const rule = createNemalineDefaultStatisticAccessRuleDocument(RULE_URI);
   const policies = [...rule.hasStatisticPolicy!] as unknown as {
     statisticName: string;
     allowedPath: Set<Record<string, unknown>>;
   }[];
   const policy = (name: string) => [...policies.find((p) => p.statisticName === name)!.allowedPath];
 
-  it("allows the mean of every numeric and derived field with a minimum count of 3", () => {
+  it("grants count, mean, standard deviation and Kaplan-Meier", () => {
     expect(rule.dataSchema).toBe("nemaline");
-    const paths = policy("mean");
-    expect(paths).toHaveLength(NUMERIC_COLUMNS.length + DERIVED_NUMERIC_FIELDS.length);
-    expect(paths.every((p) => p.minCount === 3)).toBe(true);
+    expect(policies.map((p) => p.statisticName).sort()).toEqual(
+      ["count", "kaplan-meier", "mean", "standard-deviation"],
+    );
+    expect(policy("mean")).toHaveLength(NUMERIC_COLUMNS.length + DERIVED_NUMERIC_FIELDS.length);
+    expect(policy("standard-deviation")).toHaveLength(NUMERIC_COLUMNS.length + DERIVED_NUMERIC_FIELDS.length);
+    expect(policy("mean").every((p) => p.minCount === 3)).toBe(true);
+    const [km] = policy("kaplan-meier") as { timeGraphPath: { name: string }; kAnonymity: number }[];
+    expect(km.timeGraphPath.name).toBe("AmbGainTime");
+    expect(km.kAnonymity).toBe(3);
   });
 
-  it("allows Kaplan-Meier on age at attaining ambulation", () => {
-    const [path] = policy("kaplan-meier") as { timeGraphPath: { name: string }; eventGraphPath: { name: string }; kAnonymity: number }[];
-    expect(path.timeGraphPath.name).toBe("AmbGainTime");
-    expect(path.eventGraphPath.name).toBe("AmbGainEvent");
-    expect(path.kAnonymity).toBe(3);
+  describe("read back from RDF by the server evaluators", () => {
+    const dataset = createLdoDataset();
+    dataset.usingType(nemalineDefaultStatisticAccessRuleDocumentShapeType).fromJson(rule);
+    const shortcut = (name: string) =>
+      findGraphPathShortcutByName([nemalineDataPlugin], "nemaline", name)!.graphPath;
+    const read = <T>(plugin: { statisticAccessRuleShapeType: ShapeType<T> }, fragment: string) =>
+      dataset.usingType(plugin.statisticAccessRuleShapeType as ShapeType<LdoBase>).fromSubject(`${RULE_URI}#${fragment}`) as unknown as T;
+
+    it("allows the participant counts the smoke test asks for", () => {
+      const countRule = read(countStatisticPlugin, "count-policy");
+      const participant = shortcut("Participant");
+      expect(evaluateCountStatisticAccessRule(participant, countRule)).toBe(true);
+      expect(evaluateCountStatisticAccessRule(participant, countRule, [shortcut("CausativeGene")])).toBe(true);
+      expect(
+        evaluateCountStatisticAccessRule(participant, countRule, [shortcut("CausativeGene"), shortcut("GenderAssignedAtBirth")]),
+      ).toBe(true);
+      expect(evaluateCountStatisticAccessRule(participant, countRule, [shortcut("CausativeGene"), shortcut("CurrentFN")])).toBe(true);
+      // Free-text HGVS is not a permitted breakdown.
+      expect(evaluateCountStatisticAccessRule(participant, countRule, [shortcut("Variant1HGVS")])).toBeInstanceOf(Error);
+    });
+
+    it("allows grouped means and standard deviations by stratifier only", () => {
+      const meanRule = read(meanStatisticPlugin, "mean-policy");
+      const sdRule = read(standardDeviationStatisticPlugin, "standard-deviation-policy");
+      for (const field of ["BaselineAge", "ZScoreH"]) {
+        expect(evaluateMeanStatisticAccessRule(shortcut(field), meanRule, [shortcut("CausativeGene")])).toBe(true);
+        expect(evaluateStandardDeviationStatisticAccessRule(shortcut(field), sdRule, [shortcut("CausativeGene")])).toBe(true);
+      }
+      expect(evaluateMeanStatisticAccessRule(shortcut("BaselineAge"), meanRule, [shortcut("BiopsyResult")])).toBeInstanceOf(Error);
+    });
+
+    it("allows the stratified Kaplan-Meier curve", () => {
+      const kmRule = read(kaplanMeierStatisticPlugin, "kaplan-meier-policy");
+      expect(
+        evaluateKaplanMeierStatisticAccessRule(shortcut("AmbGainTime"), shortcut("AmbGainEvent"), shortcut("CausativeGene"), kmRule),
+      ).toBe(true);
+    });
   });
 });
 

@@ -1,11 +1,11 @@
-import { LdoJsonldContext } from "@ldo/ldo";
+import type { LdoJsonldContext } from "@ldo/ldo";
 
 /**
  * =============================================================================
- * mean_statisticAccessRuleSchemaContext: JSONLD Context for mean_statisticAccessRuleSchema
+ * meanStatisticAccessRuleSchemaContext: JSONLD Context for mean_statisticAccessRuleSchema
  * =============================================================================
  */
-export const mean_statisticAccessRuleSchemaContext: LdoJsonldContext = {
+export const meanStatisticAccessRuleSchemaContext: LdoJsonldContext = {
   allowedPath: {
     "@id": "https://oxfordia.setmeld.com/statistics#allowedPath",
     "@type": "@id",
@@ -107,6 +107,11 @@ export const mean_statisticAccessRuleSchemaContext: LdoJsonldContext = {
   target: {
     "@id": "https://oxfordia.setmeld.com/statistics#target",
     "@type": "@id",
+  },
+  groupByGraphPath: {
+    "@id": "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
+    "@type": "@id",
+    "@isCollection": true,
   },
   minCount: {
     "@id": "https://oxfordia.setmeld.com/statistics#minCount",

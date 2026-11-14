@@ -41,6 +41,15 @@ export const countStatisticAccessRuleSchemaSchema: Schema = {
             },
             {
               type: "TripleConstraint",
+              predicate:
+                "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
+              valueExpr:
+                "https://oxfordia.setmeld.com/statistics#GraphPathShape",
+              min: 0,
+              max: -1,
+            },
+            {
+              type: "TripleConstraint",
               predicate: "https://oxfordia.setmeld.com/statistics#minCount",
               valueExpr: {
                 type: "NodeConstraint",

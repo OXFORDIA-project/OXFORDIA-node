@@ -12,7 +12,8 @@ Common Oxfordia runtime for R.
 
 Use statistic-specific packages for actual analyses:
 
-- [`oxfordiar.data.nemaline`](../oxfordiar.data.nemaline/README.md) for nemaline shortcuts
+- [`oxfordiar.data.nemaline`](../oxfordiar.data.nemaline/README.md) for nemaline pilot shortcuts
+- [`oxfordiar.data.legacynemaline`](../oxfordiar.data.legacynemaline/README.md) for the original nemaline shortcuts
 - [`oxfordiar.stat.mean`](../oxfordiar.stat.mean/README.md) for mean queries
 - [`oxfordiar.stat.kaplanmeier`](../oxfordiar.stat.kaplanmeier/README.md) for Kaplan-Meier queries
 

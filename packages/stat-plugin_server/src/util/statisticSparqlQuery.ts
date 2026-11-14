@@ -35,6 +35,8 @@ export interface ExecuteStatisticSparqlQueryParams {
   selectFields: QuerySelectField[];
   globals: StatisticPluginServerGlobals;
   extraWherePatterns?: string[];
+  /** Path-binding keys whose terminal variables form the GROUP BY clause. */
+  groupByKeys?: string[];
 }
 
 function truncateForLog(value: string, maxChars = 4000): string {
@@ -108,7 +110,17 @@ export async function executeStatisticSparqlQuery(
     sparqlSelect = sparqlSelect.WHERE(toTemplateStringsArray(pattern));
   }
 
-  const query = sparqlSelect.build();
+  const groupByVars = (params.groupByKeys ?? []).map((key) => {
+    const variable = pathVars[key];
+    if (!variable) {
+      throw new Error(`groupByKeys references unknown path binding '${key}'.`);
+    }
+    return variable;
+  });
+  const query =
+    groupByVars.length > 0
+      ? `${sparqlSelect.build()}\nGROUP BY ${groupByVars.join(" ")}`
+      : sparqlSelect.build();
 
   try {
     const bindingsStream = await params.globals.sparqlFetcher.fetchBindings(

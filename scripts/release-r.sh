@@ -6,6 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGES=(
   "packages/oxfordiar"
   "packages/oxfordiar.data.nemaline"
+  "packages/oxfordiar.data.legacynemaline"
   "packages/oxfordiar.stat.mean"
   "packages/oxfordiar.stat.kaplanmeier"
   "packages/oxfordiar.stat.count"
@@ -14,6 +15,7 @@ PACKAGES=(
 
 DEPENDENT_PACKAGES=(
   "packages/oxfordiar.data.nemaline"
+  "packages/oxfordiar.data.legacynemaline"
   "packages/oxfordiar.stat.mean"
   "packages/oxfordiar.stat.kaplanmeier"
   "packages/oxfordiar.stat.count"

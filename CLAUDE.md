@@ -148,7 +148,8 @@ The repo uses **Nx** for build orchestration. TypeScript packages are configured
 #### R Packages
 
 - **`packages/oxfordiar`**: Common runtime for federated queries (auth, graph-path builders, query execution)
-- **`packages/oxfordiar.data.nemaline`**: R client for nemaline data queries
+- **`packages/oxfordiar.data.nemaline`**: R shortcut catalog for nemaline pilot data (copy of `data-plugin-nemaline_core/src/shortcuts.json`)
+- **`packages/oxfordiar.data.legacynemaline`**: R shortcut catalog for the legacy nemaline data
 - **`packages/oxfordiar.stat.mean`**: R client for mean statistics
 - **`packages/oxfordiar.stat.kaplanmeier`**: R client for Kaplan-Meier statistics
 - **`packages/oxfordiar.stat.count`**: R client for count statistics
@@ -244,8 +245,10 @@ interface StatisticApiPlugin<Query, Output, SAR, Globals> extends StatisticPlugi
 3. Access rule loaded from `{resourceUri}.statistic-access-rule.ttl`, policy entry matched by `statisticName`
 4. `evaluateStatisticAccessRulePreQuery` called
 5. `performQuery` called with SPARQL globals
-6. `evaluateStatisticAccessRulePostQuery` called on the result
+6. `evaluateStatisticAccessRulePostQuery` called on the result; it returns `true`, an `Error`, or `{ release }` with a redacted result (e.g. small cells of a grouped result suppressed)
 7. JSON response returned
+
+Count, mean and standard deviation accept optional `groupByPaths` (up to two); each must be in the matched allowed path's `groupByGraphPath` set, and `minCount` applies per cell. Shared helpers live in `stat-plugin_server/src/util/groupBy.ts`.
 
 #### Stat Plugin — UI (`@oxfordia/stat-plugin_ui`)
 

@@ -108,6 +108,11 @@ export const countStatisticAccessRuleSchemaContext: LdoJsonldContext = {
     "@id": "https://oxfordia.setmeld.com/statistics#target",
     "@type": "@id",
   },
+  groupByGraphPath: {
+    "@id": "https://oxfordia.setmeld.com/statistics#groupByGraphPath",
+    "@type": "@id",
+    "@isCollection": true,
+  },
   minCount: {
     "@id": "https://oxfordia.setmeld.com/statistics#minCount",
     "@type": "http://www.w3.org/2001/XMLSchema#integer",

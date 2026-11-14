@@ -79,3 +79,49 @@ test_that("count query rejects string shortcut names", {
     "ox_data_shortcut"
   )
 })
+
+test_that("grouped count sends groupByPaths and combines cells", {
+  targets <- oxfordiar::ox_targets(
+    oxfordiar::ox_target("site_a", "https://pod.example.org/a.ttl"),
+    oxfordiar::ox_target("site_b", "https://pod.example.org/b.ttl")
+  )
+  path <- oxfordiar::ox_graph_path(
+    start = oxfordiar::ox_node_filter(iri = "https://example.org/Person")
+  )
+  participant <- oxfordiar::ox_data_shortcut("Participant", path)
+  gene <- oxfordiar::ox_data_shortcut("CausativeGene", path)
+
+  testthat::local_mocked_bindings(
+    ox_perform_request = function(target, route, body, auth = NULL) {
+      expect_length(body$groupByPaths, 1)
+      text <- if (grepl("/a.ttl$", target$resource_uri)) {
+        paste0(
+          '{"groups":[{"values":["t:Gene_NEB"],"labels":["NEB"],"count":5},',
+          '{"values":["t:Gene_TPM2"],"labels":["TPM2"],"count":3}]}'
+        )
+      } else {
+        paste0(
+          '{"groups":[{"values":["t:Gene_NEB"],"labels":["NEB"],"count":4},',
+          '{"values":["t:Gene_TPM2"],"labels":["TPM2"],"suppressed":true}]}'
+        )
+      }
+      list(
+        url = "https://pod.example.org/.api/stat/count",
+        status = 200L,
+        auth_type = "none",
+        headers = list(),
+        body = jsonlite::fromJSON(text, simplifyVector = FALSE),
+        text = text
+      )
+    },
+    .package = "oxfordiar"
+  )
+
+  result <- ox_count(participant, targets = targets, group_by = gene)
+
+  expect_equal(result$data$CausativeGene, c("NEB", "TPM2"))
+  expect_equal(result$data$count, c(9L, 3L))
+  expect_equal(result$data$suppressed_sites, c(0L, 1L))
+  expect_equal(nrow(result$per_site), 4)
+  expect_equal(unique(result$per_site$target), c("site_a", "site_b"))
+})

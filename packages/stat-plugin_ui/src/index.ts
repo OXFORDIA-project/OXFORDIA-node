@@ -3,3 +3,4 @@ export * from "./graphPathEditing";
 export * from "./graphPathOptionResolver";
 export * from "./NumericTextInput";
 export * from "./types";
+export * from "./GroupByGraphPathsEditor";

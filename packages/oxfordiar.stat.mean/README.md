@@ -76,6 +76,29 @@ Each entry in `result$by_target` is a data frame with these columns:
 - `mean`
 - `count`
 
+## Grouping
+
+Pass `group_by` (one shortcut, or a list of two) to break the result down,
+for example by causative gene, or by gene and gender:
+
+```r
+result <- ox_mean(
+  ox_nemaline_shortcut("BaselineAge"),
+  targets = targets,
+  group_by = list(
+    ox_nemaline_shortcut("CausativeGene"),
+    ox_nemaline_shortcut("GenderAssignedAtBirth")
+  )
+)
+```
+
+`result$data` has one row per group: a column per group-by (named after the
+shortcut, holding the label), the combined statistic, `sites` (targets that
+reported the group) and `suppressed_sites` (targets that withheld it because
+it fell below their minimum count; such combined values are partial).
+`result$per_site` has the same rows for each target. Each group-by must be
+allowed for the shortcut by the target's statistic access rule.
+
 ## Examples
 
 ### Mean Over a Nemaline Shortcut

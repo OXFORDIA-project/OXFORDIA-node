@@ -6,3 +6,4 @@ export * from "./util/graphPathToSparqlBuilder";
 export * from "./util/ldoHelpers";
 export * from "./util/sparqlBindingParsers";
 export * from "./util/statisticSparqlQuery";
+export * from "./util/groupBy";

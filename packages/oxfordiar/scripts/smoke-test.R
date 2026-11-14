@@ -39,7 +39,7 @@ pkgload::load_all(
   quiet = TRUE
 )
 pkgload::load_all(
-  file.path(workspace_root, "packages", "oxfordiar.data.nemaline"),
+  file.path(workspace_root, "packages", "oxfordiar.data.legacynemaline"),
   export_all = FALSE,
   helpers = FALSE,
   quiet = TRUE
@@ -108,7 +108,10 @@ run_step <- function(name, expr) {
           "  ",
           field,
           ": ",
-          oxfordiar:::ox_render_debug_value(context[[field]], max_chars = 1200L),
+          oxfordiar:::ox_render_debug_value(
+            context[[field]],
+            max_chars = 1200L
+          ),
           "\n",
           sep = ""
         )
@@ -116,7 +119,10 @@ run_step <- function(name, expr) {
       if (!is.null(context$request_body)) {
         cat(
           "  request_body: ",
-          oxfordiar:::ox_render_debug_value(context$request_body, max_chars = 1200L),
+          oxfordiar:::ox_render_debug_value(
+            context$request_body,
+            max_chars = 1200L
+          ),
           "\n",
           sep = ""
         )
@@ -179,7 +185,7 @@ targets <- oxfordiar::ox_targets(
 mean_result <- run_step(
   "Mean query",
   oxfordiar.stat.mean::ox_mean(
-    shortcut = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+    shortcut = oxfordiar.data.legacynemaline::ox_legacy_nemaline_shortcut(Sys.getenv(
       "OX_MEAN_SHORTCUT"
     )),
     targets = targets,
@@ -197,13 +203,13 @@ cat("\n")
 kaplan_meier_result <- run_step(
   "Kaplan-Meier query",
   oxfordiar.stat.kaplanmeier::ox_kaplan_meier(
-    time = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+    time = oxfordiar.data.legacynemaline::ox_legacy_nemaline_shortcut(Sys.getenv(
       "OX_KAPLAN_MEIER_TIME_SHORTCUT"
     )),
-    event = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+    event = oxfordiar.data.legacynemaline::ox_legacy_nemaline_shortcut(Sys.getenv(
       "OX_KAPLAN_MEIER_EVENT_SHORTCUT"
     )),
-    group_by = oxfordiar.data.nemaline::ox_nemaline_shortcut(Sys.getenv(
+    group_by = oxfordiar.data.legacynemaline::ox_legacy_nemaline_shortcut(Sys.getenv(
       "OX_KAPLAN_MEIER_GROUP_SHORTCUT"
     )),
     targets = targets,
@@ -214,7 +220,9 @@ kaplan_meier_result <- run_step(
 print_kaplan_meier_groups <- function(result) {
   grouped <- if (is.null(result$grouped)) list() else result$grouped
 
-  if (length(grouped) == 0 && is.data.frame(result$data) && nrow(result$data) > 0) {
+  if (
+    length(grouped) == 0 && is.data.frame(result$data) && nrow(result$data) > 0
+  ) {
     grouped <- list("<ungrouped>" = result$data)
   }
 

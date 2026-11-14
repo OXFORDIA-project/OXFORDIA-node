@@ -284,6 +284,7 @@ export function createStatisticQueryHandler(globals: PodServerGlobals) {
 
       const postEvaluationErrors: string[] = [];
       let postAllowed = false;
+      let releasedResult: unknown = result;
       for (const matchingPolicy of policiesPassingPre) {
         const typedRule = dataset
           .usingType(plugin.statisticAccessRuleShapeType)
@@ -297,6 +298,10 @@ export function createStatisticQueryHandler(globals: PodServerGlobals) {
           postEvaluationErrors.push(policyResult.message);
           continue;
         }
+        if (policyResult !== true) {
+          // The policy allows a redacted version (e.g. small cells suppressed).
+          releasedResult = policyResult.release;
+        }
         postAllowed = true;
         break;
       }
@@ -309,7 +314,7 @@ export function createStatisticQueryHandler(globals: PodServerGlobals) {
         );
       }
 
-      res.json(result);
+      res.json(releasedResult);
     } catch (error) {
       globals.logger.error(
         renderStatisticQueryErrorLog({

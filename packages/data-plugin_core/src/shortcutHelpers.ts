@@ -89,3 +89,22 @@ export function graphPath(params: {
     target: params.target,
   };
 }
+
+function toLdoValue(value: unknown): unknown {
+  if (Array.isArray(value)) return set(...value.map(toLdoValue));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [key, toLdoValue(nested)]),
+    );
+  }
+  return value;
+}
+
+/**
+ * A copy of a graph path ready to write with LDO. Shortcut catalogs are plain
+ * JSON, and LDO's fromJson stores a plain array as an object keyed "0", "1", …
+ * rather than as a multi-valued property, so every array becomes an LdSet.
+ */
+export function graphPathForLdo(graphPath: GraphPath): GraphPath {
+  return toLdoValue(graphPath) as GraphPath;
+}

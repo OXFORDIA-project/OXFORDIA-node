@@ -166,7 +166,7 @@ The handler (`packages/pod-server-core/src/api/statistic/statisticQueryHandler.t
 2. `performQuery(query, globals)`
 3. `evaluateStatisticAccessRulePostQuery(query, rule, output)`: **disclosure control**. Is the result safe to release (counts ≥ `minCount`, k-anonymity per group, and so on)?
 
-When a check fails, `return new Error("...")`. Don't throw. The message becomes the 403 body, so make it specific. KM's evaluator is a good model: it tells the caller *which* path failed and uses `graphPathDebugString`, truncated, for context.
+When a check fails, `return new Error("...")`. Don't throw. Post-query may also return `{ release: redactedOutput }` to release a redacted result instead (`StatisticPostQueryResult`), e.g. a grouped result with small cells replaced by `{ values, labels, suppressed: true }`. The message becomes the 403 body, so make it specific. KM's evaluator is a good model: it tells the caller *which* path failed and uses `graphPathDebugString`, truncated, for context.
 
 Helpers from `@oxfordia/stat-plugin_server`:
 
@@ -178,7 +178,7 @@ Helpers from `@oxfordia/stat-plugin_server`:
 | `graphPathDebugString(gp)` | Readable path for error messages. |
 | `toRecord` + `readProperty(record, "minCount", FULL_IRI)` | Read numeric thresholds robustly (mean's `readAllowedPathMinCount`). Also clamp with `Math.max(0, Math.floor(raw))` and return `NaN` for missing values, then fail closed. |
 
-**Never ship a permissive check.** The post-query stage must enforce every threshold declared in your ShEx shape. (KM currently returns `true` from post-query and doesn't enforce `kAnonymity`. Don't copy that gap.) If an output has no count, compute one in `performQuery` so the post check has something to compare against.
+**Never ship a permissive check.** The post-query stage must enforce every threshold declared in your ShEx shape (KM enforces `kAnonymity` per group). If an output has no count, compute one in `performQuery` so the post check has something to compare against.
 
 ### 2c. `performQuery` via `executeStatisticSparqlQuery`
 
@@ -202,6 +202,7 @@ const rows = await executeStatisticSparqlQuery({
 - `requireNumeric: true` adds `FILTER(isNumeric(...))`.
 - Parse with `parseNumericBindingValue(row, alias)` and `parseStringBindingValue(row, alias)`. Triplestores may return `COUNT` as a decimal, so round it (mean does this).
 - If there's no usable data, `throw new Error(...)` from `performQuery`, as mean does when the count is 0.
+- **Group-by:** aggregate statistics share the helpers in `stat-plugin_server/src/util/groupBy.ts`: `groupByPathsJsonSchema` + `normalizeGroupByPathsQuery` for the optional `groupByPaths` input, `evaluateGroupedAllowedPath` against an allowed path's `groupByGraphPath *`, `buildGroupByQueryParts` + `groupByKeys` for the SPARQL `GROUP BY`, and `readGroupKey`/`suppressGroups` for per-cell disclosure control. Count, mean and standard deviation are the references.
 - Prefer aggregating in SPARQL. Return raw rows (as KM does) only when the statistic can't be combined server-side, and then make sure post-query disclosure control covers them.
 
 ### 2d. Assemble the plugin
@@ -348,6 +349,7 @@ ox_{snake} <- function(shortcut, targets, auth = oxfordiar::ox_auth_none(), fail
 
 - `ox_{snake}_parse_result(payload, target = NULL)` turns one pod's JSON into a `data.frame` with explicit types (`as.numeric`, `as.integer(round(...))`) and `NA` defaults through a local `%||%`.
 - `ox_{snake}_combine_results(rows)` pools results across pods **correctly for the statistic**. Mean count-weights the per-target means. Return a zero-row typed `data.frame` when `rows` is empty. Omit it only if row-binding is the correct combination (KM omits it and `ox_query` falls back to `ox_bind_rows_fill`).
+- For group-by, use `oxfordiar::ox_group_by_spec()`, `ox_parse_grouped_payload()` and `ox_combine_grouped()` (see `ox_count()`).
 - `ox_{snake}_path()` accepts only `ox_data_shortcut` or `ox_graph_path` objects and rejects bare strings with an error that mentions `ox_data_shortcut`.
 - Keep helpers unexported. Stay within the `.lintr` limits (80-character lines).
 

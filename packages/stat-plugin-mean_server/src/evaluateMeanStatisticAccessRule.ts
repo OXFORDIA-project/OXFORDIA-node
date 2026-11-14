@@ -4,11 +4,21 @@ import type {
   MeanAllowedPath,
 } from "@oxfordia/stat-plugin-mean_core";
 import {
-  findMatchingAllowedPath,
+  evaluateGroupedAllowedPath,
   readProperty,
+  suppressGroups,
   toCollectionArray,
   toRecord,
+  type StatisticGroup,
+  type StatisticPostQueryResult,
 } from "@oxfordia/stat-plugin_server";
+
+/** Ungrouped results carry `mean` and `count`; grouped results carry `groups`. */
+export interface MeanResult {
+  mean?: number;
+  count?: number;
+  groups?: StatisticGroup<{ mean: number; count: number }>[];
+}
 
 const STATP_MIN_COUNT_KEY = "https://oxfordia.setmeld.com/statistics#minCount";
 
@@ -26,41 +36,46 @@ function readAllowedPathMinCount(allowedPath: MeanAllowedPath): number {
 export function evaluateMeanStatisticAccessRule(
   queryGraphPath: GraphPath,
   statisticAccessRule: MeanStatisticAccessRule,
+  groupByPaths: GraphPath[] = [],
 ): true | Error {
-  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
-  if (allowedPaths.length === 0) {
-    return new Error("No allowed graph paths are configured for mean.");
-  }
-  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
-  if (!match) {
-    return new Error(
-      "Requested graphPath is not allowed by mean statistic policy.",
-    );
-  }
-  return true;
+  const match = evaluateGroupedAllowedPath(
+    "mean",
+    queryGraphPath,
+    groupByPaths,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  return match instanceof Error ? match : true;
 }
 
+/** minCount applies to the whole sample, or to each cell of a grouped result. */
 export function evaluateMeanStatisticAccessRulePostQuery(
   queryGraphPath: GraphPath,
   statisticAccessRule: MeanStatisticAccessRule,
-  output: { count: number },
-): true | Error {
-  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
-  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
-  if (!match) {
-    return new Error(
-      "Requested graphPath is not allowed by mean statistic policy.",
-    );
-  }
+  output: MeanResult,
+  groupByPaths: GraphPath[] = [],
+): StatisticPostQueryResult<MeanResult> {
+  const match = evaluateGroupedAllowedPath(
+    "mean",
+    queryGraphPath,
+    groupByPaths,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  if (match instanceof Error) return match;
   const minCount = readAllowedPathMinCount(match);
   if (!Number.isFinite(minCount)) {
     return new Error(
       "Mean statistic policy is missing a valid minCount for the matched allowed path.",
     );
   }
-  if (output.count < minCount) {
+  if (output.groups) {
+    return {
+      release: { groups: suppressGroups(output.groups, (group) => group.count >= minCount) },
+    };
+  }
+  const count = output.count ?? 0;
+  if (count < minCount) {
     return new Error(
-      `Sample count (${output.count}) is below the policy minimum (${minCount}) for this mean statistic.`,
+      `Sample count (${count}) is below the policy minimum (${minCount}) for this mean statistic.`,
     );
   }
   return true;

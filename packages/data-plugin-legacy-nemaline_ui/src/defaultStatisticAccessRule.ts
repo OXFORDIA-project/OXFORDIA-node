@@ -1,5 +1,5 @@
 import { set, type ShapeType } from "@ldo/ldo";
-import { findGraphPathShortcutByName } from "@oxfordia/data-plugin_core";
+import { findGraphPathShortcutByName, graphPathForLdo } from "@oxfordia/data-plugin_core";
 import { legacyNemalineDataPlugin } from "@oxfordia/data-plugin-legacy-nemaline_core";
 import {
   DEFAULT_STATISTIC_ACCESS_RULE_AGENTS,
@@ -51,7 +51,7 @@ function requireLegacyNemalineGraphPath(shortcutName: string) {
   if (!shortcut) {
     throw new Error(`Missing legacy-nemaline graph path shortcut '${shortcutName}'.`);
   }
-  return shortcut.graphPath;
+  return graphPathForLdo(shortcut.graphPath);
 }
 
 function createDefaultMeanAllowedPath(

@@ -1,6 +1,6 @@
 import type { StatisticPlugin } from "@oxfordia/stat-plugin_core";
-import { mean_statisticAccessRuleSchemaContext } from "./generated/mean_statisticAccessRuleSchema.context";
-import { mean_statisticAccessRuleSchemaSchema } from "./generated/mean_statisticAccessRuleSchema.schema";
+import { meanStatisticAccessRuleSchemaContext } from "./generated/mean_statisticAccessRuleSchema.context";
+import { meanStatisticAccessRuleSchemaSchema } from "./generated/mean_statisticAccessRuleSchema.schema";
 import { MeanStatisticAccessRuleShapeType } from "./generated/mean_statisticAccessRuleSchema.shapeTypes";
 import type { MeanStatisticAccessRule } from "./generated/mean_statisticAccessRuleSchema.typings";
 
@@ -12,8 +12,8 @@ export * from "./generated/mean_statisticAccessRuleSchema.typings";
 export const meanStatisticPlugin: StatisticPlugin<MeanStatisticAccessRule> = {
   name: "mean",
   route: "mean",
-  statisticAccessRuleSchema: mean_statisticAccessRuleSchemaSchema,
+  statisticAccessRuleSchema: meanStatisticAccessRuleSchemaSchema,
   statisticAccessRuleShapeType: MeanStatisticAccessRuleShapeType,
 };
 
-export const meanStatisticPluginContext = mean_statisticAccessRuleSchemaContext;
+export const meanStatisticPluginContext = meanStatisticAccessRuleSchemaContext;

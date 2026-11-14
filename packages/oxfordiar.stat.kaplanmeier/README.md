@@ -18,13 +18,13 @@ order.
 
 ```r
 library(oxfordiar)
-library(oxfordiar.data.nemaline)
+library(oxfordiar.data.legacynemaline)
 library(oxfordiar.stat.kaplanmeier)
 
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
-  group_by = ox_nemaline_shortcut("ClusterCategory"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
+  group_by = ox_legacy_nemaline_shortcut("ClusterCategory"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -90,13 +90,13 @@ split by group label across all successful targets.
 
 ```r
 library(oxfordiar)
-library(oxfordiar.data.nemaline)
+library(oxfordiar.data.legacynemaline)
 library(oxfordiar.stat.kaplanmeier)
 
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
-  group_by = ox_nemaline_shortcut("ClusterCategory"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
+  group_by = ox_legacy_nemaline_shortcut("ClusterCategory"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -110,8 +110,8 @@ result$grouped
 
 ```r
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl")
   )
@@ -149,9 +149,9 @@ result$data
 
 ```r
 result <- ox_kaplan_meier(
-  time = ox_nemaline_shortcut("KaplanMeierTime"),
-  event = ox_nemaline_shortcut("KaplanMeierEvent"),
-  group_by = ox_nemaline_shortcut("ClusterCategory"),
+  time = ox_legacy_nemaline_shortcut("KaplanMeierTime"),
+  event = ox_legacy_nemaline_shortcut("KaplanMeierEvent"),
+  group_by = ox_legacy_nemaline_shortcut("ClusterCategory"),
   targets = ox_targets(
     ox_target("site_a", "https://pod.example.org/alice/data.ttl"),
     ox_target("site_b", "https://pod.example.org/bob/data.ttl")

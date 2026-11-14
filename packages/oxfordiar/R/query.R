@@ -117,6 +117,8 @@ ox_query <- function(
     list(
       data = data,
       by_target = by_target,
+      # Every target's rows stacked, with the target name in `target`.
+      per_site = ox_bind_rows_fill(unname(by_target)),
       errors = error_df,
       responses = Filter(
         Negate(is.null),

@@ -9,6 +9,7 @@ statp:StandardDeviationStatisticAccessRuleShape {
 
 statp:StandardDeviationAllowedPathShape {
   statp:graphPath @statp:GraphPathShape ;
+  statp:groupByGraphPath @statp:GraphPathShape * ;
   statp:minCount xsd:integer ;
   statp:minDistinctValues xsd:integer ;
 }

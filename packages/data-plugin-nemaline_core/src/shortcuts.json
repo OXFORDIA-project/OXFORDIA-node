@@ -1,4 +1,9 @@
 {
+  "Participant": {
+    "name": "Participant",
+    "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},
+    "steps": []
+  },
   "BaselineAge": {
     "name": "BaselineAge",
     "start": {"predicates": [{"predicate": {"@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"}, "some": {"node": {"iri": ["https://w3id.org/semanticarts/ns/ontology/gist/Person"]}}}]},

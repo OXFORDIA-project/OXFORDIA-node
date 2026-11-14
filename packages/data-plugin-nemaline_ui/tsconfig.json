@@ -32,6 +32,12 @@
     },
     {
       "path": "../data-plugin-nemaline_core"
+    },
+    {
+      "path": "../stat-plugin-count_core"
+    },
+    {
+      "path": "../stat-plugin-standard-deviation_core"
     }
   ]
 }

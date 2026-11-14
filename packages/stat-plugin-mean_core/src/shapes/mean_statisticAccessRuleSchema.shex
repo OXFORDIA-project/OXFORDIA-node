@@ -9,6 +9,7 @@ statp:MeanStatisticAccessRuleShape {
 
 statp:MeanAllowedPathShape {
   statp:graphPath @statp:GraphPathShape ;
+  statp:groupByGraphPath @statp:GraphPathShape * ;
   statp:minCount xsd:integer ;
 }
 

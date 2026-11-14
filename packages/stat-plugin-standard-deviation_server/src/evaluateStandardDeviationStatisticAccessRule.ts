@@ -4,11 +4,27 @@ import type {
   StandardDeviationAllowedPath,
 } from "@oxfordia/stat-plugin-standard-deviation_core";
 import {
-  findMatchingAllowedPath,
+  evaluateGroupedAllowedPath,
   readProperty,
+  suppressGroups,
   toCollectionArray,
   toRecord,
+  type StatisticGroup,
+  type StatisticPostQueryResult,
 } from "@oxfordia/stat-plugin_server";
+
+export interface StandardDeviationSummary {
+  /** Sample (n - 1) standard deviation; null when fewer than two values. */
+  standardDeviation: number | null;
+  mean: number;
+  count: number;
+  distinctCount: number;
+}
+
+/** Ungrouped results are a summary; grouped results carry `groups` only. */
+export type StandardDeviationResult =
+  | StandardDeviationSummary
+  | { groups: StatisticGroup<StandardDeviationSummary>[] };
 
 const STATP_MIN_COUNT_KEY = "https://oxfordia.setmeld.com/statistics#minCount";
 const STATP_MIN_DISTINCT_VALUES_KEY =
@@ -38,20 +54,33 @@ function readAllowedPathThreshold(
 export function evaluateStandardDeviationStatisticAccessRule(
   queryGraphPath: GraphPath,
   statisticAccessRule: StandardDeviationStatisticAccessRule,
+  groupByPaths: GraphPath[] = [],
 ): true | Error {
-  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
-  if (allowedPaths.length === 0) {
-    return new Error(
-      "No allowed graph paths are configured for standard deviation.",
-    );
+  const match = evaluateGroupedAllowedPath(
+    "standard deviation",
+    queryGraphPath,
+    groupByPaths,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  return match instanceof Error ? match : true;
+}
+
+/** Reason a summary fails disclosure control, or undefined if releasable. */
+function summaryFailure(
+  summary: { count: number; distinctCount: number },
+  minCount: number,
+  minDistinctValues: number,
+): string | undefined {
+  if (summary.count < minCount) {
+    return `Sample count (${summary.count}) is below the policy minimum (${minCount}) for this standard deviation statistic.`;
   }
-  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
-  if (!match) {
-    return new Error(
-      "Requested graphPath is not allowed by standard deviation statistic policy.",
-    );
+  if (summary.count < MIN_VALUES_FOR_STANDARD_DEVIATION) {
+    return `Sample count (${summary.count}) is below ${MIN_VALUES_FOR_STANDARD_DEVIATION}; a sample standard deviation is undefined.`;
   }
-  return true;
+  if (summary.distinctCount < minDistinctValues) {
+    return `Distinct value count (${summary.distinctCount}) is below the policy minimum (${minDistinctValues}) for this standard deviation statistic.`;
+  }
+  return undefined;
 }
 
 /**
@@ -61,19 +90,22 @@ export function evaluateStandardDeviationStatisticAccessRule(
  *   reveal both values exactly.
  * - minDistinctValues guards against low-diversity samples, e.g. an SD of 0
  *   reveals that every individual has the value of the mean.
+ * For a grouped result the thresholds apply to each cell, and failing cells
+ * are suppressed.
  */
 export function evaluateStandardDeviationStatisticAccessRulePostQuery(
   queryGraphPath: GraphPath,
   statisticAccessRule: StandardDeviationStatisticAccessRule,
-  output: { count: number; distinctCount: number },
-): true | Error {
-  const allowedPaths = toCollectionArray(statisticAccessRule.allowedPath);
-  const match = findMatchingAllowedPath(queryGraphPath, allowedPaths);
-  if (!match) {
-    return new Error(
-      "Requested graphPath is not allowed by standard deviation statistic policy.",
-    );
-  }
+  output: StandardDeviationResult | { count: number; distinctCount: number },
+  groupByPaths: GraphPath[] = [],
+): StatisticPostQueryResult<StandardDeviationResult> {
+  const match = evaluateGroupedAllowedPath(
+    "standard deviation",
+    queryGraphPath,
+    groupByPaths,
+    toCollectionArray(statisticAccessRule.allowedPath),
+  );
+  if (match instanceof Error) return match;
   const minCount = readAllowedPathThreshold(
     match,
     "minCount",
@@ -94,20 +126,16 @@ export function evaluateStandardDeviationStatisticAccessRulePostQuery(
       "Standard deviation statistic policy is missing a valid minDistinctValues for the matched allowed path.",
     );
   }
-  if (output.count < minCount) {
-    return new Error(
-      `Sample count (${output.count}) is below the policy minimum (${minCount}) for this standard deviation statistic.`,
-    );
+  if ("groups" in output) {
+    return {
+      release: {
+        groups: suppressGroups(
+          output.groups,
+          (group) => summaryFailure(group, minCount, minDistinctValues) === undefined,
+        ),
+      },
+    };
   }
-  if (output.count < MIN_VALUES_FOR_STANDARD_DEVIATION) {
-    return new Error(
-      `Sample count (${output.count}) is below ${MIN_VALUES_FOR_STANDARD_DEVIATION}; a sample standard deviation is undefined.`,
-    );
-  }
-  if (output.distinctCount < minDistinctValues) {
-    return new Error(
-      `Distinct value count (${output.distinctCount}) is below the policy minimum (${minDistinctValues}) for this standard deviation statistic.`,
-    );
-  }
-  return true;
+  const failure = summaryFailure(output, minCount, minDistinctValues);
+  return failure ? new Error(failure) : true;
 }
