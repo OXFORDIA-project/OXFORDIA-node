@@ -11,26 +11,13 @@
 # per group; a site withholds any cell below its minimum count, and
 # `suppressed_sites` says how many sites did so for each combined cell.
 
-script_path <- sub(
-  "^--file=",
-  "",
-  grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)[[1]]
-)
-package_root <- normalizePath(
-  file.path(dirname(script_path), ".."),
-  mustWork = TRUE
-)
-workspace_root <- normalizePath(
-  file.path(package_root, "..", ".."),
-  mustWork = TRUE
-)
-env_file <- Sys.getenv("OX_ENV_FILE", unset = file.path(package_root, ".env"))
-if (file.exists(env_file)) {
-  readRenviron(env_file)
-}
+# Runs either from a checkout of the OXFORDIA-node repo (loads the package
+# sources there, so it reflects the current code) or standalone after
+# installing the packages from the Oxfordia R repository; see "Running the
+# smoke test without a clone" in packages/oxfordiar/README.md. Set
+# OX_USE_INSTALLED=1 to use the installed packages even inside a checkout.
 
-# Load local package sources so the smoke test reflects the current checkout.
-for (package_name in c(
+packages <- c(
   "solidauthr",
   "oxfordiar",
   "oxfordiar.data.nemaline",
@@ -38,13 +25,66 @@ for (package_name in c(
   "oxfordiar.stat.mean",
   "oxfordiar.stat.standarddeviation",
   "oxfordiar.stat.kaplanmeier"
-)) {
-  pkgload::load_all(
-    file.path(workspace_root, "packages", package_name),
-    export_all = FALSE,
-    helpers = FALSE,
-    quiet = TRUE
-  )
+)
+
+file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+script_dir <- if (length(file_arg) > 0) {
+  dirname(normalizePath(sub("^--file=", "", file_arg[[1]]), mustWork = TRUE))
+} else {
+  getwd()
+}
+workspace_root <- file.path(script_dir, "..", "..", "..")
+use_checkout <- file.exists(
+  file.path(workspace_root, "packages", "oxfordiar", "DESCRIPTION")
+) &&
+  !tolower(Sys.getenv("OX_USE_INSTALLED", unset = "")) %in%
+    c("1", "true", "yes", "y", "on")
+
+# Inside a checkout the env file is packages/oxfordiar/.env, shared with
+# smoke-test.R; standalone it sits next to this script.
+env_file <- Sys.getenv(
+  "OX_ENV_FILE",
+  unset = if (use_checkout) {
+    file.path(script_dir, "..", ".env")
+  } else {
+    file.path(script_dir, ".env")
+  }
+)
+if (file.exists(env_file)) {
+  readRenviron(env_file)
+}
+
+if (use_checkout) {
+  for (package_name in packages) {
+    pkgload::load_all(
+      file.path(workspace_root, "packages", package_name),
+      export_all = FALSE,
+      helpers = FALSE,
+      quiet = TRUE
+    )
+  }
+} else {
+  missing_packages <- packages[
+    !vapply(packages, requireNamespace, logical(1), quietly = TRUE)
+  ]
+  if (length(missing_packages) > 0) {
+    stop(
+      "Missing packages: ",
+      paste(missing_packages, collapse = ", "),
+      "\nInstall them with:\n",
+      "  install.packages(c(",
+      paste0("\"", missing_packages, "\"", collapse = ", "),
+      "), repos = c(",
+      "oxfordia = \"https://oxfordia-project.github.io/OXFORDIA-node/r\", ",
+      "CRAN = \"https://cloud.r-project.org\"))",
+      call. = FALSE
+    )
+  }
+  for (package_name in packages) {
+    suppressPackageStartupMessages(
+      library(package_name, character.only = TRUE)
+    )
+  }
 }
 
 debug_enabled <- tolower(Sys.getenv("OX_DEBUG", unset = "")) %in%

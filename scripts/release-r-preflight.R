@@ -17,6 +17,7 @@ package_dirs <- file.path(
   root_dir,
   "packages",
   c(
+    "solidauthr",
     "oxfordiar",
     "oxfordiar.data.nemaline",
     "oxfordiar.data.legacynemaline",

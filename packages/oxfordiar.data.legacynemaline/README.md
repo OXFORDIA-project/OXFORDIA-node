@@ -10,11 +10,20 @@ objects. Those shortcuts can be passed directly to statistic packages such as
 
 ## Install
 
-The Oxfordia R packages are not on CRAN yet. See the
-[`oxfordiar` install instructions](../oxfordiar/README.md#install) for
-installing from GitHub or from a local clone. They install this package along
-with `solidauthr`, `oxfordiar` and the other Oxfordia packages, in the right
-order.
+Install from the Oxfordia R repository (not CRAN; no clone needed):
+
+```r
+install.packages(
+  c("solidauthr", "oxfordiar", "oxfordiar.data.legacynemaline"),
+  repos = c(
+    oxfordia = "https://oxfordia-project.github.io/OXFORDIA-node/r",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+```
+
+See the [`oxfordiar` install instructions](../oxfordiar/README.md#install) for
+the full package set, release tarballs and installing from a local clone.
 
 ## Quick Start
 

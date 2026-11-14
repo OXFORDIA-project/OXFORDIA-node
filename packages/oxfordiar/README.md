@@ -16,52 +16,126 @@ Use statistic-specific packages for actual analyses:
 - [`oxfordiar.data.legacynemaline`](../oxfordiar.data.legacynemaline/README.md) for the original nemaline shortcuts
 - [`oxfordiar.stat.mean`](../oxfordiar.stat.mean/README.md) for mean queries
 - [`oxfordiar.stat.kaplanmeier`](../oxfordiar.stat.kaplanmeier/README.md) for Kaplan-Meier queries
+- [`oxfordiar.stat.count`](../oxfordiar.stat.count/README.md) for count queries
+- [`oxfordiar.stat.standarddeviation`](../oxfordiar.stat.standarddeviation/README.md) for standard deviation queries
 
 ## Package Usage
 
 ### Install
 
-The Oxfordia R packages are not on CRAN yet. Install them from GitHub, either
-directly or from a local clone. Either way, install them in dependency order:
-`oxfordiar` depends on `solidauthr`, and the data and statistic packages depend
-on `oxfordiar`.
+The Oxfordia R packages are published to the Oxfordia R repository, a
+CRAN-style repository hosted on GitHub Pages. They are not on CRAN. You do not
+need a clone of this repo, Node, or GitHub credentials; plain
+`install.packages()` works.
 
-#### From GitHub (recommended)
+#### From the Oxfordia R repository (recommended)
 
-No clone is needed. `remotes` installs each package from its folder in the
-monorepo:
+Requires R 4.1 or newer. Add the Oxfordia repository alongside CRAN, which
+supplies the third-party dependencies (`httr2`, `jose`, `jsonlite`):
 
 ```r
-install.packages("remotes", repos = "https://cloud.r-project.org")
+install.packages(
+  c(
+    "solidauthr",
+    "oxfordiar",
+    "oxfordiar.data.nemaline",
+    "oxfordiar.stat.count",
+    "oxfordiar.stat.mean",
+    "oxfordiar.stat.standarddeviation",
+    "oxfordiar.stat.kaplanmeier"
+  ),
+  repos = c(
+    oxfordia = "https://oxfordia-project.github.io/OXFORDIA-node/r",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+```
 
-repo <- "OXFORDIA-project/OXFORDIA-node"
+This is the full set used by `smoke-test-next.R`. Leave out any statistic
+package you don't need, or add `oxfordiar.data.legacynemaline` for the original
+nemaline shortcuts. List `solidauthr` and `oxfordiar` explicitly as above:
+`install.packages()` only upgrades the packages you name, so leaving them out
+can keep an older copy of the runtime.
+
+To upgrade later, run the same command again.
+
+On macOS and Windows you will see a warning like
+`unable to access index for repository .../bin/macosx/...`. This is expected:
+the Oxfordia packages are pure R and published as source only, so R falls back
+to the source packages. They need no compiler.
+
+To use the repository in every session without repeating `repos`, add it to
+your `~/.Rprofile`:
+
+```r
+local({
+  repos <- getOption("repos")
+  repos["oxfordia"] <- "https://oxfordia-project.github.io/OXFORDIA-node/r"
+  options(repos = repos)
+})
+```
+
+Then `install.packages("oxfordiar.stat.mean")` and `update.packages()` work as
+for any CRAN package.
+
+#### Versions and the `next` channel
+
+The R packages are published by the same GitHub Actions workflows as the pod,
+so every pod release has a matching set of R packages. R versions can only
+contain numbers, so the R version is the pod version without its pre-release
+label, plus a build number: pod release `v0.0.1-alpha.8` publishes, for
+example, R packages `0.0.1.42`. Each release's notes on GitHub list the exact
+R version, and its assets include the R tarballs. The build number always
+increases, so a newer release is always a newer R version.
+
+Every push to the `next` branch publishes a pre-release build to a separate
+repository. Use it only to try changes before they are released:
+
+```r
+repos = c(
+  oxfordia = "https://oxfordia-project.github.io/OXFORDIA-node/r-next",
+  CRAN = "https://cloud.r-project.org"
+)
+```
+
+`r-next` keeps only the newest build. Its build numbers are counted separately
+from releases, so when switching between `r` and `r-next`, reinstall the
+packages rather than relying on `update.packages()`.
+
+#### From release tarballs (offline or pinned)
+
+Every pod release on the
+[releases page](https://github.com/OXFORDIA-project/OXFORDIA-node/releases)
+has one `.tar.gz` per R package among its assets, named
+`<package>_<r-version>.tar.gz`. Download the ones you need and install them in
+dependency order, `solidauthr` first, then `oxfordiar`, then the data and
+statistic packages:
+
+```r
+install.packages(c("httr2", "jose", "jsonlite"))  # dependencies, from CRAN
+
+version <- "0.0.1.42" # the R version from the release's assets
 for (pkg in c(
   "solidauthr",
   "oxfordiar",
   "oxfordiar.data.nemaline",
+  "oxfordiar.stat.count",
   "oxfordiar.stat.mean",
+  "oxfordiar.stat.standarddeviation",
   "oxfordiar.stat.kaplanmeier"
 )) {
-  remotes::install_github(
-    repo,
-    subdir = file.path("packages", pkg),
-    ref = "main"
-  )
+  install.packages(sprintf("%s_%s.tar.gz", pkg, version), repos = NULL)
 }
 ```
 
-To pin a specific version, set `ref` to a release tag instead of `main`. You
-can leave out `oxfordiar.stat.mean` or `oxfordiar.stat.kaplanmeier` if you only
-need one statistic.
-
-If the repository is private, set a GitHub personal access token first, for
-example with `Sys.setenv(GITHUB_PAT = "<your token>")` or `gitcreds::gitcreds_set()`.
+To pin an exact version from the repository instead, use
+`remotes::install_version("oxfordiar", "0.0.1.42", repos = ...)`. Older
+release versions stay available under `src/contrib/Archive/`.
 
 #### From a local clone
 
-Use this if you want to edit the packages, or if your environment cannot reach
-GitHub from R (copy the cloned folder in instead). Only R is required; Node and
-the rest of the monorepo are not needed.
+Use this if you want to edit the packages. Only R is required; Node and the
+rest of the monorepo are not needed.
 
 ```sh
 git clone https://github.com/OXFORDIA-project/OXFORDIA-node.git
@@ -69,19 +143,42 @@ cd OXFORDIA-node
 Rscript packages/oxfordiar/scripts/install-deps.R
 ```
 
-The script installs all five packages from the checkout in dependency order.
+The script installs every Oxfordia R package from the checkout in dependency
+order.
 
-#### From CRAN (once released)
+### Running the smoke test without a clone
 
-After the packages are published to CRAN, install the runtime plus whichever
-data and statistic packages you want to use:
+`smoke-test-next.R` runs the nemaline pilot analysis (federation summary,
+baseline table, statistical comparison and a Kaplan-Meier curve) against one to
+three pods. To run it outside this repo:
 
-```r
-install.packages(
-  c("oxfordiar", "oxfordiar.data.nemaline", "oxfordiar.stat.mean"),
-  repos = "https://cloud.r-project.org"
-)
-```
+1. Install the packages from the Oxfordia R repository as shown above.
+2. Download `smoke-test-next.R` and `smoke-test.env.example` from the latest
+   release into the same folder:
+
+   ```sh
+   curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/smoke-test-next.R
+   curl -LO https://github.com/OXFORDIA-project/OXFORDIA-node/releases/latest/download/smoke-test.env.example
+   ```
+
+   For a `next` pre-release, download them from that pre-release's assets
+   instead.
+3. Rename `smoke-test.env.example` to `.env` and fill in your Solid client
+   credentials (`OX_SOLID_*`) and one to three targets (`OX_TARGET_n_*`).
+4. Run it from that folder:
+
+   ```sh
+   Rscript smoke-test-next.R
+   ```
+
+   or, in RStudio, set the working directory to that folder and
+   `source("smoke-test-next.R")`.
+
+The script reads `.env` from its own folder; set `OX_ENV_FILE=/path/to/file`
+to use another file. If a package is missing it stops and prints the
+`install.packages()` command to fix it. Set `OX_DEBUG=1` to print request and
+response details. `OX_KM_GENES` (default `NEB,ACTA1`) picks the genes kept for
+the Kaplan-Meier table.
 
 ### Quick Start
 
@@ -356,13 +453,8 @@ Then install the local Oxfordia R packages in dependency order:
 Rscript packages/oxfordiar/scripts/install-deps.R
 ```
 
-That script installs:
-
-1. `solidauthr`
-2. `oxfordiar`
-3. `oxfordiar.data.nemaline`
-4. `oxfordiar.stat.mean`
-5. `oxfordiar.stat.kaplanmeier`
+That script installs every Oxfordia R package (`solidauthr`, `oxfordiar`, the
+data packages and the statistic packages) in dependency order.
 
 ### Smoke Test
 
@@ -397,6 +489,18 @@ shortcuts with:
 - `OX_KAPLAN_MEIER_TIME_SHORTCUT`
 - `OX_KAPLAN_MEIER_EVENT_SHORTCUT`
 - `OX_KAPLAN_MEIER_GROUP_SHORTCUT`
+
+`smoke-test-next.R` uses the same env file and runs the nemaline pilot
+analysis:
+
+```sh
+Rscript packages/oxfordiar/scripts/smoke-test-next.R
+```
+
+Inside a checkout it loads the package sources with `pkgload::load_all()`, so
+it always tests the current code; set `OX_USE_INSTALLED=1` to use the installed
+packages instead. Outside a checkout it uses the installed packages (see
+[Running the smoke test without a clone](#running-the-smoke-test-without-a-clone)).
 
 See [packages/oxfordiar/.env.example](./.env.example) for the full env layout.
 The script reads these target variables directly:
@@ -444,83 +548,67 @@ npx nx run oxfordiar:build
 
 ### Publish
 
-Recommended release order:
+There is nothing to run locally. The R packages are published by the same
+workflows as the pod:
 
-1. `solidauthr`
-2. `oxfordiar`
-3. `oxfordiar.data.nemaline`
-4. `oxfordiar.stat.mean`
-5. `oxfordiar.stat.kaplanmeier`
+- **Cutting a GitHub release** (see [Release Process](../../README.md#release-process))
+  publishes to `https://oxfordia-project.github.io/OXFORDIA-node/r` and
+  attaches the R tarballs, `smoke-test-next.R` and `smoke-test.env.example` to
+  that release.
+- **Pushing to `next`** publishes to
+  `https://oxfordia-project.github.io/OXFORDIA-node/r-next` and attaches the
+  same files to the automated pre-release.
 
-Recommended release workflow:
+Both call
+[`.github/workflows/publish-r-packages.yml`](../../.github/workflows/publish-r-packages.yml),
+which:
 
-1. Decide the release type and create a release checklist issue for each R package:
+1. derives the R version (`<major.minor.patch>.<run number>`, see
+   [Versions and the `next` channel](#versions-and-the-next-channel)) and
+   stamps it into every `DESCRIPTION` with `scripts/release-r.sh set`
+2. builds all packages into the repository on the `gh-pages` branch (`r/` or
+   `r-next/`); `r/` moves previous versions to `Archive/`, `r-next/` deletes
+   them
+3. installs them from that repository in a clean library to check they load
+4. pushes to `gh-pages` and waits until GitHub Pages serves the new version
+5. hands the tarballs to the release job, which attaches them to the release
 
-```sh
-Rscript scripts/release-r-checklist.R 0.1.0
-```
+The `DESCRIPTION` files in the repo stay at their development version
+(`0.0.0.9000`); only the published packages carry the release version.
+Re-running a failed release reuses R packages that were already published.
 
-2. Freshen package metadata and docs, especially `README.md`, `DESCRIPTION`, and `cran-comments.md`.
-
-3. Run the local preflight checks across all Oxfordia R packages:
+Before a release, run the checks:
 
 ```sh
 Rscript scripts/release-r-preflight.R
 npm run lint:r
 ```
 
-4. Run remote Windows checks:
+To try the repository locally:
 
 ```sh
-Rscript scripts/release-r-winbuilder.R
+Rscript scripts/build-r-repo.R /tmp/oxfordia-r
 ```
 
-5. When you are ready to submit, update all package versions together:
-
-```sh
-bash scripts/release-r.sh set 0.1.0
+```r
+install.packages("oxfordiar.stat.mean", repos = c(
+  oxfordia = "file:///tmp/oxfordia-r",
+  CRAN = "https://cloud.r-project.org"
+), type = "source")
 ```
 
-6. Regenerate Rd docs and `NAMESPACE` with `roxygen2::roxygenise()`, then re-run the local and remote checks if needed.
+`scripts/release-r.sh set <version>` sets every `DESCRIPTION` version and
+rewrites the inter-package imports to `oxfordiar (>= <version>)` and
+`solidauthr (>= <version>)`. CI uses it; you only need it locally to test a
+specific version.
 
-7. Submit the packages to CRAN in dependency order with `devtools::submit_cran()` from each package directory.
+These packages are released together, with one shared version:
 
-8. After CRAN acceptance, create the shared git tag:
-
-```sh
-bash scripts/release-r.sh tag
-```
-
-9. Prepare for the next development cycle:
-
-```sh
-bash scripts/release-r.sh bump dev
-```
-
-To update and tag all Oxfordia R package versions together, use:
-
-```sh
-bash scripts/release-r.sh get
-bash scripts/release-r.sh set 0.1.0
-bash scripts/release-r.sh tag
-```
-
-Or do the version update and tag creation in one step:
-
-```sh
-bash scripts/release-r.sh release 0.1.0
-```
-
-The script treats these packages as one release unit:
-
+- `solidauthr`
 - `oxfordiar`
 - `oxfordiar.data.nemaline`
+- `oxfordiar.data.legacynemaline`
 - `oxfordiar.stat.mean`
 - `oxfordiar.stat.kaplanmeier`
-
-It updates every `DESCRIPTION` version, rewrites dependent package imports to
-`oxfordiar (>= <version>)`, and creates an annotated git tag named
-`r-v<version>`.
-
-This release flow is based on the process described in the R Packages release
-chapter: https://r-pkgs.org/release.html
+- `oxfordiar.stat.count`
+- `oxfordiar.stat.standarddeviation`

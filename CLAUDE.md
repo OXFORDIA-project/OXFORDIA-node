@@ -375,4 +375,4 @@ Chart in `deploy/helm/pod-server` publishes via GitHub Pages. Configure storage,
 - **Build Output**: Each package compiles to `dist/`. Nx caches builds automatically.
 - **Adding a Statistic Plugin**: See statistics-architecture.mdc checklist in `.cursor/rules/`.
 - **UI Component System**: Linked Data Browser exports a full component library for custom resource views.
-- **R Package Release**: `npm run release:r` orchestrates R package checks, building, and publishing.
+- **R Package Release**: R packages are not on CRAN and have no separate release step. The pod release and pre-release workflows call `.github/workflows/publish-r-packages.yml`, which stamps the R version (`<major.minor.patch>.<run number>`) and publishes to the CRAN-style repositories on gh-pages (`https://oxfordia-project.github.io/OXFORDIA-node/r` for releases, `/r-next` for pushes to `next`), attaching the tarballs to the GitHub release. `DESCRIPTION` files stay at `0.0.0.9000` in the repo. Install docs: `packages/oxfordiar/README.md#install`.

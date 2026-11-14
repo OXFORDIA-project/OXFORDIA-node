@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 PACKAGES=(
+  "packages/solidauthr"
   "packages/oxfordiar"
   "packages/oxfordiar.data.nemaline"
   "packages/oxfordiar.data.legacynemaline"
@@ -22,18 +23,17 @@ DEPENDENT_PACKAGES=(
   "packages/oxfordiar.stat.standarddeviation"
 )
 
-TAG_PREFIX="r-v"
-
 usage() {
   cat <<'EOF'
-Usage: scripts/release-r.sh [get|set <version>|bump <major|minor|patch|dev>|tag [version]|release <version>]
+Usage: scripts/release-r.sh [get|set <version>|bump <major|minor|patch|dev>]
 
 Commands:
   get                     Print the current shared R package version
   set <version>           Update all R package versions to <version>
   bump <type>             Bump the current version (major|minor|patch|dev)
-  tag [version]           Create annotated git tag r-v<version>
-  release <version>       Update all versions and create annotated git tag r-v<version>
+
+Releases do not need this script locally: the publish workflows run
+`set <version>` in CI before building (see .github/workflows/publish-r-packages.yml).
 EOF
 }
 
@@ -42,7 +42,7 @@ description_path() {
 }
 
 current_version() {
-  sed -n 's/^Version:[[:space:]]*//p' "$(description_path "${PACKAGES[0]}")" | head -n 1
+  sed -n 's/^Version:[[:space:]]*//p' "$(description_path "packages/oxfordiar")" | head -n 1
 }
 
 validate_version() {
@@ -59,11 +59,15 @@ set_description_version() {
   perl -0pi -e "s/^Version:\\s*.*/Version: $version/m" "$path"
 }
 
-set_oxfordiar_import_version() {
+# Pins the dependency on <name> to (>= <version>). Dependencies sit on their
+# own indented line under Imports:, which keeps the match away from the
+# Package: line of e.g. oxfordiar.data.nemaline.
+set_import_version() {
   local path="$1"
-  local version="$2"
-  perl -0pi -e \
-    "s/oxfordiar(?:\\s*\\(>=\\s*[^)]+\\))?/oxfordiar (>= $version)/g" \
+  local name="$2"
+  local version="$3"
+  perl -pi -e \
+    "s/^(\\s+)\\Q$name\\E(?:\\s*\\(>=\\s*[^)]+\\))?(?=,?\\s*\$)/\\1$name (>= $version)/" \
     "$path"
 }
 
@@ -75,8 +79,9 @@ set_version() {
     set_description_version "$(description_path "$package")" "$version"
   done
 
+  set_import_version "$(description_path packages/oxfordiar)" solidauthr "$version"
   for package in "${DEPENDENT_PACKAGES[@]}"; do
-    set_oxfordiar_import_version "$(description_path "$package")" "$version"
+    set_import_version "$(description_path "$package")" oxfordiar "$version"
   done
 
   echo "Updated Oxfordia R packages to version $version"
@@ -122,19 +127,6 @@ bump_version() {
   esac
 }
 
-create_tag() {
-  local version="$1"
-  local tag="${TAG_PREFIX}${version}"
-
-  if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-    echo "Tag already exists: $tag" >&2
-    exit 1
-  fi
-
-  git tag -a "$tag" -m "Oxfordia R release $version"
-  echo "Created tag $tag"
-}
-
 command="${1:-get}"
 
 case "$command" in
@@ -150,22 +142,6 @@ case "$command" in
     new_version="$(bump_version "$(current_version)" "$2")"
     set_version "$new_version"
     echo "$new_version"
-    ;;
-  tag)
-    if [[ $# -eq 2 ]]; then
-      validate_version "$2"
-      create_tag "$2"
-    elif [[ $# -eq 1 ]]; then
-      create_tag "$(current_version)"
-    else
-      usage
-      exit 1
-    fi
-    ;;
-  release)
-    [[ $# -eq 2 ]] || { usage; exit 1; }
-    set_version "$2"
-    create_tag "$2"
     ;;
   *)
     usage

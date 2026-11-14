@@ -172,7 +172,7 @@ sudo bash oxfordia-pod-idp-init.sh
 - `packages/stat-plugin-kaplan-meier_*`: Kaplan-Meier statistic core/server/ui packages
 - `packages/stat-plugin-count_*`: count statistic core/server/ui packages
 - `packages/stat-plugin-standard-deviation_*`: standard deviation statistic core/server/ui packages
-- `packages/oxfordia-client`: R client for federated statistic queries using registered data/statistic plugins
+- `packages/solidauthr`, `packages/oxfordiar*`: R client for federated statistic queries; install with `install.packages()` from the Oxfordia R repository (see [packages/oxfordiar/README.md](packages/oxfordiar/README.md#install))
 - `packages/pod-server-core`: generic server wrapper that accepts injected plugins
 - `packages/pod-server`: default server bundle with nemaline, legacy nemaline, mean, Kaplan-Meier, count, and standard deviation
 - `packages/pod-ui-core`: generic UI wrapper that accepts injected plugin UIs
@@ -300,6 +300,7 @@ Releases are built entirely by GitHub Actions from a GitHub release. You never e
    - builds the four `.deb` packages and the multi-arch Docker image (smoke-tested before tagging)
    - attaches the `.deb`s, their unversioned copies, the init scripts and the Helm chart to the release
    - publishes the Helm index to `gh-pages` and checks that `helm pull` works
+   - publishes the R packages to the R repository on `gh-pages` and attaches their tarballs (see [packages/oxfordiar/README.md](packages/oxfordiar/README.md#publish))
    - commits the new version to `package.json`, `package-lock.json` and `Chart.yaml` on `main`
 9. Pull `main` afterwards to pick up the version commit.
 
@@ -328,8 +329,9 @@ Publishing a GitHub release runs `.github/workflows/publish-release.yml` and pub
 - init script: `oxfordia-pod-init.sh`
 - idp init script: `oxfordia-pod-idp-init.sh`
 - Helm chart `pod-server-<version>.tgz`, indexed in the Helm repository at `https://oxfordia-project.github.io/OXFORDIA-node` (`index.yaml` on the `gh-pages` branch)
+- R packages: one `<package>_<r-version>.tar.gz` per package, published to the R repository at `https://oxfordia-project.github.io/OXFORDIA-node/r`, plus `smoke-test-next.R` and `smoke-test.env.example`. The R version is the release version without its pre-release label plus a build number (e.g. `0.0.1.42`), since R versions must be numeric. Install instructions: [packages/oxfordiar/README.md](packages/oxfordiar/README.md#install)
 
-Pushes to `next` publish the same set as a pre-release, plus the `next` image tag.
+Pushes to `next` publish the same set as a pre-release, plus the `next` image tag; the R packages go to `https://oxfordia-project.github.io/OXFORDIA-node/r-next`.
 
 To republish an image for an existing release tag, run the **Publish Docker Image** workflow manually from the Actions tab.
 

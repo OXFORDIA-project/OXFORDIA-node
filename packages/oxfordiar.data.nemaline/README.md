@@ -15,9 +15,20 @@ monorepo fails if the two drift apart.
 
 ## Install
 
-The Oxfordia R packages are not on CRAN yet. See the
-[`oxfordiar` install instructions](../oxfordiar/README.md#install) for
-installing from GitHub or from a local clone.
+Install from the Oxfordia R repository (not CRAN; no clone needed):
+
+```r
+install.packages(
+  c("solidauthr", "oxfordiar", "oxfordiar.data.nemaline"),
+  repos = c(
+    oxfordia = "https://oxfordia-project.github.io/OXFORDIA-node/r",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+```
+
+See the [`oxfordiar` install instructions](../oxfordiar/README.md#install) for
+the full package set, release tarballs and installing from a local clone.
 
 ## API
 
