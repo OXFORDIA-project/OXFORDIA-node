@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  pod-server:
+  - apiVersion: v2
+    appVersion: 0.0.1-alpha.8
+    created: "2026-11-15T17:35:40.036382908Z"
+    description: Oxfordia Pod Server built on Community Solid Server
+    digest: 19088b9c45e8aea68cccfac28b0c327911758a0ebe31c65100259ed4315747f1
+    name: pod-server
+    type: application
+    urls:
+    - https://github.com/OXFORDIA-project/OXFORDIA-node/releases/download/v0.0.1-alpha.8/pod-server-0.0.1-alpha.8.tgz
+    version: 0.0.1-alpha.8
+generated: "2026-11-15T17:35:40.035930634Z"
