@@ -8,7 +8,6 @@ COPY package.json package-lock.json tsconfig.json tsconfig.base.json ./
 COPY packages ./packages
 COPY docker ./docker
 COPY deploy ./deploy
-COPY patches ./patches
 
 RUN npm ci
 RUN npm run build:server
