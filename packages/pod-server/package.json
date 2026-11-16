@@ -14,7 +14,7 @@
     "dev:components": "nodemon --watch src --watch .componentsignore --ext ts,json --on-change-only --exec \"npm run build:components\""
   },
   "dependencies": {
-    "@ldo/ldo": "^1.0.0-alpha.51",
+    "@ldo/ldo": "^1.0.0-alpha.53",
     "@oxfordia/data-plugin-legacy-nemaline_core": "*",
     "@oxfordia/data-plugin-nemaline_core": "*",
     "@oxfordia/pod-server-core": "*",
