@@ -1,69 +1,69 @@
 Package: oxfordiar
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
 Imports: httr2, jsonlite, solidauthr (>= 0.1.2)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: c9618cea3ea4e6726179daf6f6bc9348
+MD5sum: 86eefbfdf90ba1a273a6a08cff68f26a
 NeedsCompilation: no
-File: oxfordiar_0.0.1.5.tar.gz
+File: oxfordiar_0.0.1.6.tar.gz
 
 Package: oxfordiar.data.legacynemaline
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
-Imports: jsonlite, oxfordiar (>= 0.0.1.5)
+Imports: jsonlite, oxfordiar (>= 0.0.1.6)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: de4de77a46d7ac0c62582421f9d1c5c0
+MD5sum: 995de0f3b313ec3cb13930ddd759cdb5
 NeedsCompilation: no
-File: oxfordiar.data.legacynemaline_0.0.1.5.tar.gz
+File: oxfordiar.data.legacynemaline_0.0.1.6.tar.gz
 
 Package: oxfordiar.data.nemaline
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
-Imports: jsonlite, oxfordiar (>= 0.0.1.5)
+Imports: jsonlite, oxfordiar (>= 0.0.1.6)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: 11ac41832c581fcfaeff9a58434bd8f0
+MD5sum: 6a4dd6e5f06b97e287f91b8a21c53c78
 NeedsCompilation: no
-File: oxfordiar.data.nemaline_0.0.1.5.tar.gz
+File: oxfordiar.data.nemaline_0.0.1.6.tar.gz
 
 Package: oxfordiar.stat.count
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
-Imports: oxfordiar (>= 0.0.1.5)
+Imports: oxfordiar (>= 0.0.1.6)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: 5c0df75339effdf1e571c43dc343039a
+MD5sum: 2b0427da3d373075b6f9fc91bcb90abf
 NeedsCompilation: no
-File: oxfordiar.stat.count_0.0.1.5.tar.gz
+File: oxfordiar.stat.count_0.0.1.6.tar.gz
 
 Package: oxfordiar.stat.kaplanmeier
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
-Imports: oxfordiar (>= 0.0.1.5)
+Imports: oxfordiar (>= 0.0.1.6)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: aa332e7ee44d4179c1b9b3c37479d287
+MD5sum: 773787083666484fb1ac851f054a1e96
 NeedsCompilation: no
-File: oxfordiar.stat.kaplanmeier_0.0.1.5.tar.gz
+File: oxfordiar.stat.kaplanmeier_0.0.1.6.tar.gz
 
 Package: oxfordiar.stat.mean
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
-Imports: oxfordiar (>= 0.0.1.5)
+Imports: oxfordiar (>= 0.0.1.6)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: eda7e31cc770372448bfad473c34ad9b
+MD5sum: 3af30570d93f55c36deb5f6e7fe934a7
 NeedsCompilation: no
-File: oxfordiar.stat.mean_0.0.1.5.tar.gz
+File: oxfordiar.stat.mean_0.0.1.6.tar.gz
 
 Package: oxfordiar.stat.standarddeviation
-Version: 0.0.1.5
+Version: 0.0.1.6
 Depends: R (>= 4.1.0)
-Imports: oxfordiar (>= 0.0.1.5)
+Imports: oxfordiar (>= 0.0.1.6)
 Suggests: testthat (>= 3.0.0)
 License: MIT
-MD5sum: 5b31f36fa44908e8eaec032fd6da5386
+MD5sum: 5f3b36c37a2c41658dfd822b99b763ba
 NeedsCompilation: no
-File: oxfordiar.stat.standarddeviation_0.0.1.5.tar.gz
+File: oxfordiar.stat.standarddeviation_0.0.1.6.tar.gz
