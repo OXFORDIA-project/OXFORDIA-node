@@ -61,7 +61,7 @@
   },
   "homepage": "https://github.com/OXFORDIA-project/OXFORDIA-node#readme",
   "devDependencies": {
-    "@ldo/cli": "^1.0.0-alpha.38",
+    "@ldo/cli": "^1.0.0-alpha.53",
     "@tsconfig/node18": "^18.2.4",
     "@types/express": "^5.0.1",
     "@types/json-schema": "^7.0.15",
